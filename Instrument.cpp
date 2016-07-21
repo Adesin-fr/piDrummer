@@ -14,7 +14,7 @@ Instrument::Instrument() {
 
 	m_controllerValue=127;
 	m_currentPlayingSample=0;
-
+	loaded=false;
 
 }
 
@@ -119,4 +119,48 @@ bool Instrument::loadInstrumentFromConfig(std::string configFileName){
 
     return true;
 
+}
+
+bool Instrument::isLoaded() const {
+	return loaded;
+}
+
+unsigned int Instrument::getControllerValue() const {
+	return m_controllerValue;
+}
+
+void Instrument::setControllerValue(unsigned int controllerValue) {
+	m_controllerValue = controllerValue;
+}
+
+const std::vector<ControllerLayer*>& Instrument::getCtlLayers() const {
+	return m_ctlLayers;
+}
+
+void Instrument::setCtlLayers(const std::vector<ControllerLayer*>& ctlLayers) {
+	m_ctlLayers = ctlLayers;
+}
+
+unsigned int Instrument::getCurrentPlayingSample() const {
+	return m_currentPlayingSample;
+}
+
+void Instrument::setCurrentPlayingSample(unsigned int currentPlayingSample) {
+	m_currentPlayingSample = currentPlayingSample;
+}
+
+const std::string& Instrument::getInstrumentName() const {
+	return m_instrumentName;
+}
+
+void Instrument::setInstrumentName(const std::string& instrumentName) {
+	m_instrumentName = instrumentName;
+}
+
+void Instrument::loadInstrumentSamples(){
+	//TODO : load samples
+	for (unsigned int i=0; i<m_ctlLayers.size(); i++){
+		m_ctlLayers[i]->loadSamples();
+	}
+	loaded=true;
 }

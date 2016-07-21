@@ -26,3 +26,8 @@ bool Layer::LoadSample(){
 
 	return true;
 }
+
+void Layer::UnloadSample(){
+	wavSample= NULL;
+}
+

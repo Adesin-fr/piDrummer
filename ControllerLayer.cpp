@@ -33,3 +33,9 @@ Layer* ControllerLayer::getLayerFromVelocity(unsigned char &velocity){
 	};
 	return NULL;
 }
+
+void ControllerLayer::loadSamples(){
+	for (unsigned int i=0; i<m_layers.size(); i++){
+		m_layers[i]->LoadSample();
+	}
+}

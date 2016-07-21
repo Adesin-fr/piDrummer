@@ -46,6 +46,8 @@ class ControllerLayer {
 		m_layers.push_back(newLayer);
 	}
 
+	void loadSamples();
+
 	private:
         unsigned int m_minControllerValue;
         unsigned int m_maxControllerValue;

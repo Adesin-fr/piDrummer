@@ -50,6 +50,8 @@ class Layer {
 	}
 
 
+	void UnloadSample();
+
 	SoLoud::Wav& getWavSample() {
 		return wavSample;
 	}
