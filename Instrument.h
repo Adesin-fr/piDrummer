@@ -21,25 +21,21 @@ class Instrument {
 	public:
 		Instrument();
 		virtual ~Instrument();
-		SoLoud::Wav& getSampleForVelocity(unsigned char &velocity);
+		SoLoud::Wav* getSampleForVelocity(unsigned char &velocity);
+		bool loadInstrumentFromConfig(std::string configFileName);
 
+		void loadInstrumentSamples();
+		void unloadInstrumentSamples();
 
-
-
-	bool loadInstrumentFromConfig(std::string configFileName);
-
-	void loadInstrumentSamples();
-	void unloadInstrumentSamples();
-
-	bool isLoaded() const;
-	unsigned int getControllerValue() const;
-	void setControllerValue(unsigned int controllerValue);
-	const std::vector<ControllerLayer*>& getCtlLayers() const;
-	void setCtlLayers(const std::vector<ControllerLayer*>& ctlLayers);
-	unsigned int getCurrentPlayingSample() const;
-	void setCurrentPlayingSample(unsigned int currentPlayingSample);
-	const std::string& getInstrumentName() const;
-	void setInstrumentName(const std::string& instrumentName);
+		bool isLoaded() const;
+		unsigned int getControllerValue() const;
+		void setControllerValue(unsigned int controllerValue);
+		const std::vector<ControllerLayer*>& getCtlLayers() const;
+		void setCtlLayers(const std::vector<ControllerLayer*>& ctlLayers);
+		unsigned int getCurrentPlayingSample() const;
+		void setCurrentPlayingSample(unsigned int currentPlayingSample);
+		const std::string& getInstrumentName() const;
+		void setInstrumentName(const std::string& instrumentName);
 
 	private:
 		std::string m_instrumentName;

@@ -47,6 +47,7 @@ class ControllerLayer {
 	}
 
 	void loadSamples();
+	void unloadSamples();
 
 	private:
         unsigned int m_minControllerValue;

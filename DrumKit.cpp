@@ -81,7 +81,7 @@ void DrumKit::playInstrumentForTriggerInput(unsigned char TriggerNumber, unsigne
 	unsigned char newVelocity;
 	Trigger *tmpTrigger;
 	Instrument *tmpInst;
-	SoLoud::Wav tmpWave;
+	SoLoud::Wav *tmpWave;
 	int playingSampleID;
 	float soVolume;
 
@@ -109,7 +109,7 @@ void DrumKit::playInstrumentForTriggerInput(unsigned char TriggerNumber, unsigne
 			tmpWave = tmpInst->getSampleForVelocity(newVelocity);
 			// Don't forget to apply to it the panning, volume, pitch, etc...
 
-			playingSampleID= m_audioEngine->play(tmpWave,soVolume, m_DKComponentList[i]->getBalance() );
+			playingSampleID= m_audioEngine->play(*tmpWave,soVolume, m_DKComponentList[i]->getBalance() );
 
 			tmpInst->setCurrentPlayingSample(playingSampleID);
 
@@ -176,3 +176,6 @@ unsigned int DrumKit::getLastHitVelocity() const {
 	return m_lastHitVelocity;
 }
 
+std::vector<DrumKitComponent*> DrumKit::getDkComponentList() {
+	return m_DKComponentList;
+}

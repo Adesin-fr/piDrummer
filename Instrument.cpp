@@ -22,7 +22,7 @@ Instrument::~Instrument() {
 	// TODO Auto-generated destructor stub
 }
 
- SoLoud::Wav& Instrument::getSampleForVelocity(unsigned char &velocity){
+ SoLoud::Wav* Instrument::getSampleForVelocity(unsigned char &velocity){
 	// Call to the ControllerLayer to get the Layer from the current controller Value:
 	ControllerLayer *tmpCtl = this->getControllerLayerFromVelocity(m_controllerValue);
 
@@ -163,4 +163,12 @@ void Instrument::loadInstrumentSamples(){
 		m_ctlLayers[i]->loadSamples();
 	}
 	loaded=true;
+}
+
+void Instrument::unloadInstrumentSamples(){
+	//TODO : load samples
+	for (unsigned int i=0; i<m_ctlLayers.size(); i++){
+		m_ctlLayers[i]->unloadSamples();
+	}
+	loaded=false;
 }

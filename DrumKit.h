@@ -25,7 +25,6 @@ class DrumKit {
 		virtual ~DrumKit();
 
 		void addComponent(DrumKitComponent* drumKitComponent);
-
 		void addComponent(Instrument* instrument, Trigger* trigger);
 
 	const std::string getKitName() const {
@@ -57,6 +56,7 @@ class DrumKit {
 
 	unsigned int getLastHitVelocity() const;
 	void setAudioEngine(SoLoud::Soloud* audioEngine);
+	std::vector<DrumKitComponent*> getDkComponentList();
 
 	private:
 		std::vector<DrumKitComponent*> m_DKComponentList;

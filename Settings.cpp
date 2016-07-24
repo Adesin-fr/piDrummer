@@ -398,8 +398,42 @@ void Settings::loadInstrumentList(){
 
 
 bool Settings::loadDrumKit(DrumKit *drumKit){
-	// TODO : load drum kit instruments, and clean unused instrument from memory !!
+
+	std::vector<DrumKitComponent*> newDKCL, oldDKCL;
+	bool instrFound;
+	DrumKitComponent *oDK, *nDK;
+
+	oldDKCL=drumKit->getDkComponentList();
+	newDKCL=m_currentDrumKit->getDkComponentList();
+
+	// First ,  Scan the current drumkit for instruments that are not needed anymore (not included in current drumkit)
+	for (unsigned int o=0; o<oldDKCL.size();o++){
+		instrFound=false;
+		oDK=oldDKCL[o];
+		for (unsigned int n=0; n<newDKCL.size();n++){
+			nDK=newDKCL[n];
+			if (oDK->getChoosenInstrument()==nDK->getChoosenInstrument()){
+				instrFound=true;
+				break;
+			}
+		}
+		if (!instrFound){
+			// Instr was in the previous drumkit but not the new one, no more needed !
+			oDK->getChoosenInstrument()->unloadInstrumentSamples();
+		}
+	}
+	// Then load missing instruments :
+	for (unsigned int n=0; n<newDKCL.size();n++){
+		// Get a pointer to the DrumKitComponent :
+		nDK=newDKCL[n];
+		if (!nDK->getChoosenInstrument()->isLoaded()){
+			// Load only if the instrument is not already loaded !
+			nDK->getChoosenInstrument()->loadInstrumentSamples();
+		}
+	}
+
 	m_currentDrumKit=drumKit;
+
 	return true;
 }
 

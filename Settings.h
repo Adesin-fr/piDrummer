@@ -153,6 +153,10 @@ private:
 
 	std::vector<Instrument*> m_instrumentList;
 	std::vector<DrumKit*> m_drumKitList;
+	// This list is kept up-to-date with loaded instruments.
+	// So, when we load a drumkit, we can ask unloaded instruments to load samples,
+	// and unload loaded ones that are not needed anymore!
+	std::vector<Instrument*> m_LoadedinstrumentList;
 
 	DrumKit *m_currentDrumKit;
 

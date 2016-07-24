@@ -36,6 +36,12 @@ Layer* ControllerLayer::getLayerFromVelocity(unsigned char &velocity){
 
 void ControllerLayer::loadSamples(){
 	for (unsigned int i=0; i<m_layers.size(); i++){
-		m_layers[i]->LoadSample();
+		m_layers[i]->loadSample();
+	}
+}
+
+void ControllerLayer::unloadSamples(){
+	for (unsigned int i=0; i<m_layers.size(); i++){
+		m_layers[i]->UnloadSample();
 	}
 }

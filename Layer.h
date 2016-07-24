@@ -19,48 +19,22 @@ class Layer {
 		virtual ~Layer();
 		bool LoadSample();
 
-	const std::string& getFileName() const {
-		return m_fileName;
-	}
-
-	void setFileName(const std::string& fileName) {
-		m_fileName = fileName;
-	}
-
-
-	unsigned int getMaxVelocity() const {
-		return m_maxVelocity;
-	}
-
-	void setMaxVelocity(unsigned int maxVelocity) {
-		m_maxVelocity = maxVelocity;
-	}
-
-	unsigned int getMinVelocity() const {
-		return m_minVelocity;
-	}
-
-	void setMinVelocity(unsigned int minVelocity) {
-		m_minVelocity = minVelocity;
-	}
-
-	void loadSample() {
-		std::cerr << "Going to load sample file " << m_fileName << std::endl;
-		wavSample.load(m_fileName.c_str());
-	}
-
-
+	const std::string& getFileName() const;
+	void setFileName(const std::string& fileName);
+	unsigned int getMaxVelocity() const;
+	void setMaxVelocity(unsigned int maxVelocity);
+	unsigned int getMinVelocity() const;
+	void setMinVelocity(unsigned int minVelocity);
+	void loadSample();
 	void UnloadSample();
+	SoLoud::Wav  *getWavSample();
 
-	SoLoud::Wav& getWavSample() {
-		return wavSample;
-	}
 
 	private:
 		unsigned int m_minVelocity;
 		unsigned int m_maxVelocity;
         std::string m_fileName;
-        SoLoud::Wav wavSample;
+        SoLoud::Wav *wavSample;
 
 };
 
