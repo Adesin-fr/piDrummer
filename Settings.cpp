@@ -27,9 +27,19 @@ Settings::Settings() {
 }
 
 Settings::~Settings() {
-	// TODO Auto-generated destructor stub
 }
 
+bool Settings::checkIfFileExists(const std::string& filePath){
+	 struct stat buffer;
+	 std::string compFile=getUserDirectory() + "/.urDrummer/" + filePath;
+	 if (stat (compFile.c_str(), &buffer) != 0){
+		 // relative path doesnt exist, Test for absolute path :
+		 return (stat (filePath.c_str(), &buffer) == 0);
+	 }else{
+		 return true;
+	 }
+
+}
 
 bool Settings::LoadSettings(){
 

@@ -68,7 +68,7 @@ void ScreenDrawing::DrawSplashScreen(){
 	DrawLabel("v0.1a", 10,  290, 225);
 
 	// Draw the logo
-	DrawIcon(myGlobalSettings->getUserDirectory() + "/.urDrummer/res/urdrummer_logo.gif", 140, 30, false);
+   	DrawIcon(myGlobalSettings->getUserDirectory() + "/.urDrummer/res/urdrummer_logo.gif", 140, 30, false);
 
 
     SDL_Flip(myScreenReference);
@@ -78,6 +78,12 @@ void ScreenDrawing::DrawSplashScreen(){
 void ScreenDrawing::DrawIcon(const string iconPath, int posX, int posY,  bool selected){
 	SDL_Surface *icon = NULL;
 	SDL_Rect  positionIcon;
+
+    if (!myGlobalSettings->checkIfFileExists(iconPath)){
+//        cerr << "ERROR : icon file  " << iconPath << " missing " << endl;
+    	return;
+    }
+
 
 	positionIcon.x=posX;
 	positionIcon.y=posY;
@@ -94,7 +100,7 @@ void ScreenDrawing::DrawLabel( std::string labelText, int fontSize, int posX, in
 	DrawLabel(labelText, fontSize, posX, posY,  white, false);
 }
 
-void ScreenDrawing::DrawLabel( std::string labelText, int fontSize, int posX, int posY, bool selected=false){
+void ScreenDrawing::DrawLabel( std::string labelText, int fontSize, int posX, int posY, bool selected){
 	SDL_Color white={255,255,255};
 
 	DrawLabel(labelText, fontSize, posX, posY, white, selected);
@@ -107,7 +113,7 @@ void ScreenDrawing::DrawLabel( std::string labelText, int fontSize, int posX, in
 }
 
 
-void ScreenDrawing::DrawLabel( std::string labelText, int fontSize, int posX, int posY, SDL_Color color, bool selected=false){
+void ScreenDrawing::DrawLabel( std::string labelText, int fontSize, int posX, int posY, SDL_Color color, bool selected){
 	SDL_Rect position;
 	SDL_Color invertColor;
 
@@ -217,6 +223,7 @@ void ScreenDrawing::handleKeyPress(unsigned int keyEvent){
 	}
 
 	cerr << "Received key event num " << keyEvent << endl;
+
 	switch (keyEvent){
 	case 112:
 		// Handle play/pause action whenever we are..
@@ -235,7 +242,7 @@ void ScreenDrawing::handleKeyPress(unsigned int keyEvent){
 				switch (currentSelectedItem){
 				case 0:	// Kit Select
 					myCurrentMenuPath.push_back("KitSelect");
-					refreshFunction=&ScreenDrawing::DrawKitKitSelect;
+					refreshFunction=&ScreenDrawing::DrawKitSelect;
 					break;
 				case 1: // Metronome
 					myCurrentMenuPath.push_back("Metronome");
@@ -302,6 +309,8 @@ void ScreenDrawing::handleKeyPress(unsigned int keyEvent){
 			}else if (currentScreen=="MainMenu"){
 				// Save the function name to call it later if needed !
 				refreshFunction=&ScreenDrawing::DrawMainMenu;
+				maxSelectedMenuItem=5;
+
 			}
 
 		}
@@ -466,7 +475,7 @@ void ScreenDrawing::DrawMainMenu(){
 }
 
 
-void ScreenDrawing::DrawKitKitSelect(){
+void ScreenDrawing::DrawKitSelect(){
 
 	std::vector<std::string> ListOfKits;
 	unsigned int selItem;
@@ -477,20 +486,22 @@ void ScreenDrawing::DrawKitKitSelect(){
 	DrawLabel("Kit Select" , 18, 110, 0, false);
 	line(myScreenReference, 0, 20, 319, 20, SDL_MapRGB(myScreenReference->format, 255, 255, 255));
 
-	maxSelectedMenuItem= myGlobalSettings->getDrumKitList().size()-1;
+	if (myGlobalSettings->getDrumKitList().size()>0){
+		maxSelectedMenuItem= myGlobalSettings->getDrumKitList().size()-1;
 
-	// Draw the list of available drumkits :
-	for(unsigned int i=0;i <= maxSelectedMenuItem;i++){
-		ListOfKits.push_back(myGlobalSettings->getDrumKitList()[i]->getKitName());
+		// Draw the list of available drumkits :
+		for(unsigned int i=0;i <= maxSelectedMenuItem;i++){
+			ListOfKits.push_back(myGlobalSettings->getDrumKitList()[i]->getKitName());
+		}
+
+		if (myCurrentSelectedMenuItem.size()>0){
+			selItem=myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-1];
+		}else{
+			selItem=0;
+		}
+
+		DrawList(ListOfKits, 0, 21, 320, 219, selItem);
 	}
-
-	if (myCurrentSelectedMenuItem.size()>0){
-		selItem=myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-1];
-	}else{
-		selItem=0;
-	}
-
-	DrawList(ListOfKits, 0, 21, 320, 219, selItem);
 
 
     // finally, update the screen :)

@@ -19,6 +19,7 @@
 #include "sys/types.h"
 #include "pwd.h"
 #include <vector>
+#include <sys/stat.h>
 
 #include "soloud.h"
 #include "soloud_echofilter.h"
@@ -75,6 +76,7 @@ public:
 	bool loadDrumKit(DrumKit *drumKit);
 	bool loadDrumKitFromName(std::string drumKitName);
 
+	bool checkIfFileExists(const std::string& filePath);
 
 	std::string getUserDirectory();
 	const std::vector<Instrument*>& getInstrumentList() const;

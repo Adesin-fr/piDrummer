@@ -8,14 +8,24 @@
 #include "ControllerLayer.h"
 
 ControllerLayer::ControllerLayer() {
-	// TODO Auto-generated constructor stub
+
 	m_minControllerValue=0;
 	m_maxControllerValue=127;
 
 }
 
 ControllerLayer::~ControllerLayer() {
-	// TODO Auto-generated destructor stub
+	// Delete layer objects :
+
+	for(unsigned int i(0);i<m_layers.size();i++) {
+
+		Layer *tmpLayer;
+
+		tmpLayer=m_layers[i];
+
+		delete tmpLayer;
+	}
+
 }
 
 Layer* ControllerLayer::getLayerFromVelocity(unsigned char &velocity){
@@ -30,7 +40,8 @@ Layer* ControllerLayer::getLayerFromVelocity(unsigned char &velocity){
 
 			return tmpLayer;
 		}
-	};
+	}
+
 	return NULL;
 }
 

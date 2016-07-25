@@ -14,6 +14,8 @@ Layer::Layer() {
 }
 
 Layer::~Layer() {
+	delete wavSample;
+	wavSample = NULL;
 }
 
 
@@ -52,6 +54,7 @@ void Layer::loadSample() {
 
 
 void Layer::UnloadSample(){
+	delete wavSample;
 	wavSample = NULL;
 }
 

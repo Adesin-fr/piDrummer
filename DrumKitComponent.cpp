@@ -8,7 +8,7 @@
 #include "DrumKitComponent.h"
 
 DrumKitComponent::DrumKitComponent() {
-	// TODO Auto-generated constructor stub
+
 	m_associatedTrigger=NULL;
 	m_choosenInstrument=NULL;
 	m_balance=0;
@@ -18,6 +18,6 @@ DrumKitComponent::DrumKitComponent() {
 }
 
 DrumKitComponent::~DrumKitComponent() {
-	// TODO Auto-generated destructor stub
+
 }
 
