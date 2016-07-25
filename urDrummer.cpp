@@ -223,7 +223,7 @@ int main ( int argc, char** argv )
         if (myglobalSettings.getAutoPowerOffDelay() > 0){
         	if (SDL_GetTicks() > (lastTimeEvent+myglobalSettings.getAutoPowerOffDelay())){
         		cerr << "The power-off delay is over !" << endl;
-        		// POWER OFF NOW
+        		// TODO : POWER OFF ?
         	}
         }
 
