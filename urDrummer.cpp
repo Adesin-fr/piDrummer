@@ -131,6 +131,11 @@ int main ( int argc, char** argv )
     // Pass the screen reference to the drawer class:
     myScreenDrawer.setScreenReference(screen);
 
+    if (!myglobalSettings.checkIfFileExists("res/arial.ttf")){
+        cerr << "ERROR : Font file arial.ttf missing in .urDrummer/res folder." << endl;
+    	return 1;
+    }
+
     // Draw the splash screen while we continue loading stuffs...
     myScreenDrawer.DrawSplashScreen();
 

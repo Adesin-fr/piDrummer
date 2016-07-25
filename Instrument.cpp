@@ -19,7 +19,11 @@ Instrument::Instrument() {
 }
 
 Instrument::~Instrument() {
-	// TODO Auto-generated destructor stub
+	ControllerLayer *tmpCtl;
+	for(unsigned int i(0);i<m_ctlLayers.size();i++) {
+		tmpCtl=m_ctlLayers[i];
+		delete tmpCtl;
+	};
 }
 
  SoLoud::Wav* Instrument::getSampleForVelocity(unsigned char &velocity){
@@ -43,9 +47,9 @@ Instrument::~Instrument() {
 
 ControllerLayer* Instrument::getControllerLayerFromVelocity(unsigned int &velocity){
 
-	for(unsigned int i(0);i<m_ctlLayers.size();i++) {
+	ControllerLayer *tmpCtl;
 
-		ControllerLayer *tmpCtl;
+	for(unsigned int i(0);i<m_ctlLayers.size();i++) {
 
 		tmpCtl=m_ctlLayers[i];
 
@@ -53,7 +57,8 @@ ControllerLayer* Instrument::getControllerLayerFromVelocity(unsigned int &veloci
 
 			return tmpCtl;
 		}
-	};
+	}
+
 	return NULL;
 }
 
