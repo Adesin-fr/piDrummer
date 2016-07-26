@@ -35,7 +35,7 @@ public:
 
 	void DrawMainScreen();
 	void DrawMainMenu();
-	void DrawKitKitSelect();
+	void DrawKitSelect();
 	void DrawMetronomeSetup();
 	void DrawAudioPlayer();
 	void DrawTrainingMenu();

@@ -55,7 +55,7 @@ SignalCurve::SignalCurve(unsigned int curveType) {
 
 
 SignalCurve::~SignalCurve() {
-	// TODO Auto-generated destructor stub
+	m_curvePoints.clear();
 }
 
 void SignalCurve::setValueAt(unsigned int x, unsigned int value){

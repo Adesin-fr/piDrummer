@@ -8,7 +8,6 @@
 #include "Trigger.h"
 
 Trigger::Trigger() {
-	// TODO Auto-generated constructor stub
 	m_ControllerResolution=16;
 	m_InputNumber=0;
 	m_dynamicTriggerPercent=20;
@@ -22,11 +21,9 @@ Trigger::Trigger() {
 	m_retriggerDelay=10;
 	m_muteGroup=0;
 	m_lastVelocity=0;
-
 }
 
 Trigger::~Trigger() {
-	// TODO Auto-generated destructor stub
 }
 
 unsigned int Trigger::getInputNumber() const {

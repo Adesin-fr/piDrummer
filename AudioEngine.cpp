@@ -8,8 +8,6 @@
 #include "AudioEngine.h"
 
 AudioEngine::AudioEngine() {
-	// TODO Auto-generated constructor stub
-
     // Initialize the audio engine :
     slaEngine.init();  // SoLoud engine core
 
@@ -17,6 +15,6 @@ AudioEngine::AudioEngine() {
 }
 
 AudioEngine::~AudioEngine() {
-	// TODO Auto-generated destructor stub
+
 }
 

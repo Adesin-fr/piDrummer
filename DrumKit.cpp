@@ -11,7 +11,6 @@ using namespace libconfig;
 using namespace std;
 
 DrumKit::DrumKit() {
-	// TODO Auto-generated constructor stub
 	m_reverbDelay=0;
 	m_lastTriggerHit=NULL;
 	m_numTriggerInput=0;
@@ -20,7 +19,7 @@ DrumKit::DrumKit() {
 }
 
 DrumKit::~DrumKit() {
-	// TODO Auto-generated destructor stub
+
 }
 
 bool DrumKit::loadDrumKitFromConfigFile(std::string configFileName){
@@ -165,8 +164,7 @@ void DrumKit::setAfterTouchValue(unsigned char TriggerNumber, unsigned char Trig
 			tmpInst = m_DKComponentList[i]->getChoosenInstrument();
 			tmpInst->setControllerValue(TriggerPosition);
 
-			// TODO : should we do something better than this ??
-			// TODO : we should allow to change the fadeout time ?
+			// TODO : we should allow to change the fadeout time in advanced settings.
 			m_audioEngine->fadeVolume(tmpInst->getCurrentPlayingSample(), 0, (float)0.5);
 		}
 	}

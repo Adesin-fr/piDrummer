@@ -33,7 +33,8 @@ SerialHandle::SerialHandle(std::string serialDevice="", int baudRate=115200) {
 }
 
 SerialHandle::~SerialHandle() {
-	// TODO Auto-generated destructor stub
+	// Close the serial port cleanly !
+	close(m_serPort);
 }
 
 bool SerialHandle::initSerial(){
