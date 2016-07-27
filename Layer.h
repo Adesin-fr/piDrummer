@@ -17,17 +17,16 @@ class Layer {
 	public:
 		Layer();
 		virtual ~Layer();
-		bool LoadSample();
 
-	const std::string& getFileName() const;
-	void setFileName(const std::string& fileName);
-	unsigned int getMaxVelocity() const;
-	void setMaxVelocity(unsigned int maxVelocity);
-	unsigned int getMinVelocity() const;
-	void setMinVelocity(unsigned int minVelocity);
-	void loadSample();
-	void UnloadSample();
-	SoLoud::Wav  *getWavSample();
+		const std::string& getFileName() const;
+		void setFileName(const std::string& fileName);
+		unsigned int getMaxVelocity() const;
+		void setMaxVelocity(unsigned int maxVelocity);
+		unsigned int getMinVelocity() const;
+		void setMinVelocity(unsigned int minVelocity);
+		void loadSample();
+		void unloadSample();
+		SoLoud::Wav *getWavSample();
 
 
 	private:

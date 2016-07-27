@@ -51,4 +51,6 @@ void disc(SDL_Surface *surface, int cx, int cy, int rayon, int color);
 
 
 
+
+
 #endif /* DRAW_H_ */

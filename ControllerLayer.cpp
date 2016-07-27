@@ -53,6 +53,6 @@ void ControllerLayer::loadSamples(){
 
 void ControllerLayer::unloadSamples(){
 	for (unsigned int i=0; i<m_layers.size(); i++){
-		m_layers[i]->UnloadSample();
+		m_layers[i]->unloadSample();
 	}
 }

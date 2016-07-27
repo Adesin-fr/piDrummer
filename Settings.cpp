@@ -280,8 +280,8 @@ void Settings::setReverbDelay(int reverbDelay) {
 
 	m_ReverbDelay = reverbDelay;
 	if (reverbDelay>0){
-		m_Echofilter.setParams(tmpDelay , 0.1f);
-		m_AudioEngine->setGlobalFilter(0, &m_Echofilter);
+		m_Echofilter->setParams(tmpDelay , 0.1f);
+		m_AudioEngine->setGlobalFilter(0, m_Echofilter);
 	}else{
 		m_AudioEngine->setGlobalFilter(0, NULL);
 	}

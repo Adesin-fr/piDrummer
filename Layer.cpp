@@ -53,7 +53,7 @@ void Layer::loadSample() {
 }
 
 
-void Layer::UnloadSample(){
+void Layer::unloadSample(){
 	delete wavSample;
 	wavSample = NULL;
 }

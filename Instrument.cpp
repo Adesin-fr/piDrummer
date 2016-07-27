@@ -163,7 +163,6 @@ void Instrument::setInstrumentName(const std::string& instrumentName) {
 }
 
 void Instrument::loadInstrumentSamples(){
-	//TODO : load samples
 	for (unsigned int i=0; i<m_ctlLayers.size(); i++){
 		m_ctlLayers[i]->loadSamples();
 	}
@@ -171,7 +170,6 @@ void Instrument::loadInstrumentSamples(){
 }
 
 void Instrument::unloadInstrumentSamples(){
-	//TODO : load samples
 	for (unsigned int i=0; i<m_ctlLayers.size(); i++){
 		m_ctlLayers[i]->unloadSamples();
 	}

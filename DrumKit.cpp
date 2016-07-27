@@ -47,6 +47,23 @@ bool DrumKit::loadDrumKitFromConfigFile(std::string configFileName){
 }
 
 
+
+const std::string DrumKit::getKitName() const {
+	return m_kitName;
+}
+
+void DrumKit::setKitName(const std::string kitName) {
+	m_kitName = kitName;
+}
+
+unsigned int DrumKit::getReverbDelay() const {
+	return m_reverbDelay;
+}
+
+void DrumKit::setReverbDelay(unsigned int reverbDelay) {
+	m_reverbDelay = reverbDelay;
+}
+
 int DrumKit::getNumTriggerInput() const {
 	return m_numTriggerInput;
 }
@@ -89,10 +106,12 @@ void DrumKit::playInstrumentForTriggerInput(unsigned char TriggerNumber, unsigne
 		tmpTrigger = m_DKComponentList[i]->getAssociatedTrigger();
 
 		if (tmpTrigger->getInputNumber() == TriggerNumber){
-			// TODO : handle signal curve remapping ...
-			// TODO : add reverb and EQ.
 
-			newVelocity=TriggerVelocity;
+			// Remap signal with curve :
+			newVelocity=tmpTrigger->getSignalCurve()->getValueForX(TriggerVelocity);
+
+
+			// TODO : add reverb and EQ.
 			tmpTrigger->setLastVelocity(newVelocity);
 
 			// Assign our last trigger hit
@@ -132,7 +151,6 @@ void DrumKit::setNewControllerValue(unsigned char TriggerNumber, unsigned char T
 		tmpTrigger = m_DKComponentList[i]->getAssociatedTrigger();
 
 		if (tmpTrigger->getInputNumber() == TriggerNumber){
-			// TODO : handle signal curve remapping ...
 			newPosition=TriggerPosition;
 			tmpTrigger->setLastVelocity(newPosition);
 
@@ -156,7 +174,6 @@ void DrumKit::setAfterTouchValue(unsigned char TriggerNumber, unsigned char Trig
 		tmpTrigger = m_DKComponentList[i]->getAssociatedTrigger();
 
 		if (tmpTrigger->getInputNumber() == TriggerNumber){
-			// TODO : handle signal curve remapping ...
 			newPosition=TriggerPosition;
 			tmpTrigger->setLastVelocity(newPosition);
 

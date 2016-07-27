@@ -131,12 +131,15 @@ public:
 
 private:
 	SoLoud::Soloud *m_AudioEngine;
-	SoLoud::EchoFilter m_Echofilter;
+	SoLoud::EchoFilter *m_Echofilter;
 
-
+	// Current global Volume
 	int m_Volume;
+
+	// Global Delay
 	int m_ReverbDelay;
 
+	// Global Equalizer
 	int m_EQLowFrequency;
 	float m_EQLowGain;
 	int m_EQMidFrequency;
@@ -153,13 +156,18 @@ private:
 	std::string m_SettingsFileName;
 	std::string m_serialPort;
 
+	// This list contains all available instruments (loaded or not)
 	std::vector<Instrument*> m_instrumentList;
+
+	// This list contains all available drumkits
 	std::vector<DrumKit*> m_drumKitList;
+
 	// This list is kept up-to-date with loaded instruments.
 	// So, when we load a drumkit, we can ask unloaded instruments to load samples,
 	// and unload loaded ones that are not needed anymore!
 	std::vector<Instrument*> m_LoadedinstrumentList;
 
+	// Pointer to currently loaded drumkit.
 	DrumKit *m_currentDrumKit;
 
 	unsigned int m_MetronomeBPM;

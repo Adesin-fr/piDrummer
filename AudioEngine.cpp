@@ -11,7 +11,6 @@ AudioEngine::AudioEngine() {
     // Initialize the audio engine :
     slaEngine.init();  // SoLoud engine core
 
-
 }
 
 AudioEngine::~AudioEngine() {

@@ -17,6 +17,7 @@
 #include "soloud_wav.h"
 #include "Trigger.h"
 #include "DrumKitComponent.h"
+#include "SignalCurve.h"
 
 
 class DrumKit {
@@ -27,36 +28,22 @@ class DrumKit {
 		void addComponent(DrumKitComponent* drumKitComponent);
 		void addComponent(Instrument* instrument, Trigger* trigger);
 
-	const std::string getKitName() const {
-		return m_kitName;
-	}
+		const std::string getKitName() const ;
+		void setKitName(const std::string kitName) ;
+		unsigned int getReverbDelay() const ;
+		void setReverbDelay(unsigned int reverbDelay);
+		int getNumTriggerInput() const;
+		void setNumTriggerInput(int numTriggerInput);
 
-	void setKitName(const std::string kitName) {
-		m_kitName = kitName;
-	}
+		bool loadDrumKitFromConfigFile(std::string configFileName);
 
-	unsigned int getReverbDelay() const {
-		return m_reverbDelay;
-	}
+		void playInstrumentForTriggerInput(unsigned char TriggerNumber, unsigned char TriggerVelocity, unsigned char TriggerPosition);
+		void setNewControllerValue(unsigned char TriggerNumber, unsigned char TriggerPosition);
+		void setAfterTouchValue(unsigned char TriggerNumber, unsigned char TriggerPosition);
 
-	void setReverbDelay(unsigned int reverbDelay) {
-		m_reverbDelay = reverbDelay;
-	}
-
-	int getNumTriggerInput() const;
-	void setNumTriggerInput(int numTriggerInput);
-
-
-	bool loadDrumKitFromConfigFile(std::string configFileName);
-
-	void playInstrumentForTriggerInput(unsigned char TriggerNumber, unsigned char TriggerVelocity, unsigned char TriggerPosition);
-	void setNewControllerValue(unsigned char TriggerNumber, unsigned char TriggerPosition);
-	void setAfterTouchValue(unsigned char TriggerNumber, unsigned char TriggerPosition);
-
-
-	unsigned int getLastHitVelocity() const;
-	void setAudioEngine(SoLoud::Soloud* audioEngine);
-	std::vector<DrumKitComponent*> getDkComponentList();
+		unsigned int getLastHitVelocity() const;
+		void setAudioEngine(SoLoud::Soloud* audioEngine);
+		std::vector<DrumKitComponent*> getDkComponentList();
 
 	private:
 		std::vector<DrumKitComponent*> m_DKComponentList;

@@ -9,7 +9,7 @@
 
 SignalCurve::SignalCurve() {
 	// Create a linear curve:
-	SignalCurve(0);
+	SignalCurve((unsigned int)0);
 }
 
 SignalCurve::SignalCurve(unsigned int curveType) {
@@ -75,7 +75,6 @@ unsigned int SignalCurve::getValueForX(unsigned int x){
 	// Calculate the interpolated value for x from current curve :
 	CurvePoint *upPt, *lowPt;
 	unsigned int i=0;
-	float coeff;
 
 	// Search for the segment that contains our value :
 	upPt=m_curvePoints[i];
