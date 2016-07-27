@@ -265,8 +265,6 @@ namespace SoLoud
 
 			// cone
 
-			// (todo) vol *= conev;
-
 			// doppler
 			v->mDopplerValue = doppler(pos, vel, lvel, v->m3dDopplerFactor, m3dSoundSpeed);
 

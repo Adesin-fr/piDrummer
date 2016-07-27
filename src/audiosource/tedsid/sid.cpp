@@ -558,7 +558,7 @@ void SIDsound::calcSamples(short *buf, long accu)
 				unsigned int accPrev = v.accu;
 				// Update accumulator
 				v.accu += v.add;
-				// FIXME Apply ring modulation.
+
 				if (v.sync && !(accPrev & 0x8000000) && (v.accu & 0x8000000)
            			)
 #else

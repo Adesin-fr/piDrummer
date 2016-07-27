@@ -72,7 +72,6 @@ namespace SoLoud
 
 		if (outofs < aSamples)
 		{
-			// TODO: handle looping
 			unsigned int i;
 			for (i = outofs; i < aSamples; i++)
 				aBuffer[i] = aBuffer[i + aSamples] = 0;

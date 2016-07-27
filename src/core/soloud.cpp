@@ -1282,7 +1282,6 @@ namespace SoLoud
 
 	void Soloud::calcActiveVoices()
 	{
-		// TODO: consider whether we need to re-evaluate the active voices all the time.
 		// It is a must when new voices are started, but otherwise we could get away
 		// with postponing it sometimes..
 

@@ -1390,7 +1390,6 @@ static int start_page_no_capturepattern(vorb *f)
    // absolute granule position
    loc0 = get32(f); 
    loc1 = get32(f);
-   // @TODO: validate loc0,loc1 as valid positions?
    // stream serial number -- vorbis doesn't interleave, so discard
    get32(f);
    //if (f->serial != get32(f)) return error(f, VORBIS_incorrect_stream_serial_number);
