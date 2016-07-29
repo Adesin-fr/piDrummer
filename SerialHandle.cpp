@@ -18,7 +18,6 @@ SerialHandle::SerialHandle() {
 	m_SerialPort="";
 	baudrate =115200;
 	SerialHandle(m_SerialPort, baudrate );
-	mySDreference=NULL;
 }
 
 
@@ -29,7 +28,6 @@ SerialHandle::SerialHandle(std::string serialDevice="", int baudRate=115200) {
 
 	m_SerialPort=serialDevice;
 	baudrate = baudRate;
-	mySDreference=NULL;
 }
 
 SerialHandle::~SerialHandle() {
@@ -45,13 +43,16 @@ bool SerialHandle::initSerial(){
 		return false;
 	}
 
+	cerr << "Opening serial port " << m_SerialPort << endl;
+
 	m_serPort = open(m_SerialPort.c_str(), O_RDWR | O_NOCTTY );
 
-	if (m_serPort < 0)
-	{
+	if (m_serPort < 0){
 		cerr << "Error opening serial device " << m_SerialPort << endl;
 		m_serPortOpened=false;
 		return false;
+	}else{
+		cerr << "Serial port opened !" << endl;
 	}
 
 	/* save current serial port settings */
@@ -107,23 +108,45 @@ bool SerialHandle::initSerial(){
 unsigned int SerialHandle::handleEvents(DrumKit *currentDrumKit){
 
 	unsigned char triggerNumber, triggerVelocity, triggerPosition, triggerValue ;
-	char nextData[1];
+
+	char nextData[32];
+	int n;
+
+	fd_set input;
+	struct timeval timeout;
+
+	FD_ZERO(&input);
+	FD_SET(m_serPort, &input);
+
+	// Block for only 50 ms :
+	timeout.tv_sec = 0;
+	timeout.tv_usec = 50000;
+
+	n = select(m_serPort + 1,  &input, NULL, NULL, &timeout ) ;
+
+	if (n<=0){
+		// No data has arrived within timeout...
+		return 0;
+	}
+
+	cerr << "Serial data present ! " << endl;
 
 	while (m_serPortOpened && read(m_serPort, nextData, 1)){
 
-		m_serialDataLine+=nextData;
+		m_serialDataLine+=nextData[0];
 
 		//Is the line over ?
-		if (nextData[0] == '\n'){
+		if (m_serialDataLine[m_serialDataLine.size()-1] == 10){
 			// Yes,  handle it !
+			if (m_serialDataLine.size()<4){
+				return 0;
+			}
+
 			switch(m_serialDataLine[0]){
 			case 1:
 				// "Trigger" Event :
 
 				// Check the message length first !
-				if (m_serialDataLine.size()!=5){
-					break;
-				}
 
 				triggerNumber  = m_serialDataLine[1];
 				triggerVelocity = m_serialDataLine[2];
@@ -137,16 +160,12 @@ unsigned int SerialHandle::handleEvents(DrumKit *currentDrumKit){
 				// Find in the current drumKit if the corresponding trigger is mapped:
 				currentDrumKit->playInstrumentForTriggerInput(triggerNumber, triggerVelocity, triggerPosition);
 
+				m_serialDataLine="";
 				return 1;
 
 				break;
 			case 2:
 				// Controller Change Event:
-
-				// Check the message length first !
-				if (m_serialDataLine.size()!=4){
-					break;
-				}
 
 				triggerNumber  = m_serialDataLine[1];
 				triggerValue = m_serialDataLine[2];
@@ -157,16 +176,13 @@ unsigned int SerialHandle::handleEvents(DrumKit *currentDrumKit){
 
 				currentDrumKit->setNewControllerValue(triggerNumber, triggerValue);
 
+				m_serialDataLine="";
 				return 1;
 
 				break;
 			case 3:
 				// After-Touch, i.e. Cymbal Choke
 
-				// Check the message length first !
-				if (m_serialDataLine.size()!=4){
-					break;
-				}
 
 				triggerNumber  = m_serialDataLine[1];
 				triggerValue = m_serialDataLine[2];
@@ -178,37 +194,30 @@ unsigned int SerialHandle::handleEvents(DrumKit *currentDrumKit){
 
 				currentDrumKit->setAfterTouchValue(triggerNumber, triggerValue);
 
+				m_serialDataLine="";
 				return 1;
 
 				break;
 			case 4:
 				// Key inputs from arduino (rotary, push buttons,...)
-				if (m_serialDataLine.size()!=4){
-					// We wait only 4 bytes :
-					// first is event type (already used up there,
-					// Second is key pushed (MSB)
-					// third is key pushed (LSB)
-					// Fourth is line feed
-					break;
-				}
+				unsigned int keyVal;
+				keyVal=((m_serialDataLine[1]*255) + m_serialDataLine[2]);
+				cerr << "   Received key value : " << keyVal << endl;
 
-				return ((m_serialDataLine[1]*256) + m_serialDataLine[2]);
+				m_serialDataLine="";
+				return keyVal;
 
 				break;
 			}
 			// Reset line so we do not use it again
-			m_serialDataLine="";
 		} // End if line is over
 
 	} // End of While isDataAvailable
 	// No data available, return 0.
+
 	return 0;
 }
 
 void SerialHandle::sendParameter(int TriggerNumber, int ParameterNumber, int ParameterValue){
 
-}
-
-void SerialHandle::setScreenDrawingReference(ScreenDrawing *ScreenDrawerRef){
-	mySDreference=ScreenDrawerRef;
 }

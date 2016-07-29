@@ -14,13 +14,28 @@ DrumKit::DrumKit() {
 	m_reverbDelay=0;
 	m_lastTriggerHit=NULL;
 	m_numTriggerInput=0;
-	m_audioEngine =NULL;
 	m_lastHitVelocity=0;
 }
 
 DrumKit::~DrumKit() {
 
 }
+
+
+void DrumKit::addComponent(DrumKitComponent* drumKitComponent){
+	m_DKComponentList.push_back(drumKitComponent);
+}
+
+void DrumKit::addComponent(Instrument* instrument, Trigger* trigger){
+	DrumKitComponent *newDK;
+
+	newDK=new DrumKitComponent();
+	newDK->setChoosenInstrument(instrument);
+	newDK->setAssociatedTrigger(trigger);
+
+	m_DKComponentList.push_back(newDK);
+}
+
 
 bool DrumKit::loadDrumKitFromConfigFile(std::string configFileName){
 	Config m_cfg;
@@ -72,22 +87,24 @@ void DrumKit::setNumTriggerInput(int numTriggerInput) {
 	m_numTriggerInput = numTriggerInput;
 	Trigger *tmpTrigger;
 	DrumKitComponent *DKComp;
+	std::stringstream triggerName;
 
 	// Generate a list of triggers and add it to the current Trigger List
 	m_DKComponentList.clear();
 	for (unsigned int i=0; i<m_numTriggerInput; i++){
 		DKComp = new DrumKitComponent;
 		tmpTrigger = new Trigger;
+
+		triggerName.str("");
+		triggerName << "Trigger " << (i+1);
+
 		tmpTrigger->setInputNumber(i);
+		tmpTrigger->setTriggerName(triggerName.str());
 
 		DKComp->setAssociatedTrigger(tmpTrigger);
 
 		m_DKComponentList.push_back(DKComp);
 	}
-}
-
-void DrumKit::setAudioEngine(SoLoud::Soloud* audioEngine) {
-	m_audioEngine = audioEngine;
 }
 
 
@@ -110,7 +127,6 @@ void DrumKit::playInstrumentForTriggerInput(unsigned char TriggerNumber, unsigne
 			// Remap signal with curve :
 			newVelocity=tmpTrigger->getSignalCurve()->getValueForX(TriggerVelocity);
 
-
 			// TODO : add reverb and EQ.
 			tmpTrigger->setLastVelocity(newVelocity);
 
@@ -127,7 +143,7 @@ void DrumKit::playInstrumentForTriggerInput(unsigned char TriggerNumber, unsigne
 			tmpWave = tmpInst->getSampleForVelocity(newVelocity);
 			// Don't forget to apply to it the panning, volume, pitch, etc...
 
-			playingSampleID= m_audioEngine->play(*tmpWave,soVolume, m_DKComponentList[i]->getBalance() );
+			playingSampleID= myAudioEngine.play(*tmpWave,soVolume, m_DKComponentList[i]->getBalance() );
 
 			tmpInst->setCurrentPlayingSample(playingSampleID);
 
@@ -182,7 +198,7 @@ void DrumKit::setAfterTouchValue(unsigned char TriggerNumber, unsigned char Trig
 			tmpInst->setControllerValue(TriggerPosition);
 
 			// TODO : we should allow to change the fadeout time in advanced settings.
-			m_audioEngine->fadeVolume(tmpInst->getCurrentPlayingSample(), 0, (float)0.5);
+			myAudioEngine.fadeVolume(tmpInst->getCurrentPlayingSample(), 0, (float)0.5);
 		}
 	}
 }
@@ -193,4 +209,23 @@ unsigned int DrumKit::getLastHitVelocity() const {
 
 std::vector<DrumKitComponent*> DrumKit::getDkComponentList() {
 	return m_DKComponentList;
+}
+
+unsigned int DrumKit::getHowManyTimeInstrumentUsed(Instrument* whichInstrument) {
+
+
+		unsigned int instrFound;
+		DrumKitComponent *DK;
+
+
+		// First ,  Scan the current drumkit for instruments that are not needed anymore (not included in current drumkit)
+		for (unsigned int o=0; o<m_DKComponentList.size();o++){
+			DK=m_DKComponentList[o];
+			if (DK->getChoosenInstrument()==whichInstrument){
+				instrFound++;
+			}
+		}
+
+		return instrFound;
+
 }

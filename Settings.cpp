@@ -22,8 +22,6 @@ Settings::Settings() {
 	m_MetronomeVolume=16;
 	m_MetronomeOn=false;
 
-
-
 }
 
 Settings::~Settings() {
@@ -347,12 +345,15 @@ void Settings::loadDrumKitList(){
 			fileName=ent->d_name;
 			if (fileName!="." && fileName!=".."){
 				loadKit= new DrumKit();
+
+				loadKit->setNumTriggerInput(m_numTriggerInputs);
+
 				if (loadKit->loadDrumKitFromConfigFile(KitDir + fileName)){
-					// add the instrument to the list
+					// add the drumkit to the list
 					m_drumKitList.push_back(loadKit);
 				}
 				else{
-					// Delete the instrument : it is not valid !
+					// Delete the drumkit : it is not valid !
 					delete loadKit;
 				}
 			}
@@ -407,6 +408,42 @@ void Settings::loadInstrumentList(){
 }
 
 
+Instrument* Settings::getNextInstrument(Instrument *currentInstrument){
+	string currentInstrName;
+	if (currentInstrument==NULL){
+		return m_instrumentList[0];
+	}
+	currentInstrName=currentInstrument->getInstrumentName();
+	// Scroll the list from the begining, when we find our current instrument, returns the next one if exist
+	for(unsigned int i=0 ; i<m_instrumentList.size() ; i++){
+		if (m_instrumentList[i]->getInstrumentName() == currentInstrName){
+			if (i<m_instrumentList.size()-1){
+				return m_instrumentList[i+1];
+			}
+		}
+	}
+	return NULL;
+}
+
+Instrument* Settings::getPreviousInstrument(Instrument *currentInstrument){
+	string currentInstrName;
+	if (currentInstrument==NULL){
+		return m_instrumentList[0];
+	}
+	currentInstrName=currentInstrument->getInstrumentName();
+	// Scroll the list from the begining, when we find our current instrument, returns the previous one if exist
+	for(unsigned int i=0 ; i<m_instrumentList.size() ; i++){
+		if (m_instrumentList[i]->getInstrumentName() == currentInstrName){
+			if (i>0){
+				return m_instrumentList[i-1];
+			}
+		}
+	}
+	return NULL;
+
+}
+
+
 bool Settings::loadDrumKit(DrumKit *drumKit){
 
 	std::vector<DrumKitComponent*> newDKCL, oldDKCL;
@@ -451,6 +488,8 @@ bool Settings::loadDrumKit(DrumKit *drumKit){
 bool Settings::loadDrumKitFromName(std::string drumKitName){
 	// search for the drumkit in loaded kits, and assign it to the current one :
 
+
+
 	for (unsigned int i=0; i<m_drumKitList.size(); i++){
 		if (m_drumKitList[i]->getKitName() == drumKitName){
 			m_currentDrumKit=m_drumKitList[i];
@@ -487,4 +526,12 @@ void Settings::setSerialPort(const std::string& serialPort) {
 
 const std::vector<DrumKit*>& Settings::getDrumKitList() const {
 	return m_drumKitList;
+}
+
+Trigger *Settings::getLastHitTrigger(){
+	return m_LastHitTrigger;
+}
+
+void Settings::setLastHitTrigger(Trigger *lastHitTrigger) {
+	m_LastHitTrigger = lastHitTrigger;
 }

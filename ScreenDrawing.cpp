@@ -11,9 +11,9 @@ using namespace std;
 using namespace libconfig;
 
 
+
+
 ScreenDrawing::ScreenDrawing(){
-	myScreenReference=NULL;
-	myGlobalSettings=NULL;
 	m_screenNeedRefresh=false;
 
 	m_lastFontSizeUsed=0;
@@ -26,31 +26,11 @@ ScreenDrawing::ScreenDrawing(){
 	m_tmpFloatValue=0.0;
 	m_tmpIntValue=0;
 	m_tmpStringValue="";
-
+	m_SelectedDK=NULL;
 }
 
 
 ScreenDrawing::~ScreenDrawing(){
-
-}
-
-
-
-
-
-void ScreenDrawing::setScreenReference(SDL_Surface *screenReference){
-	myScreenReference=screenReference;
-}
-
-void ScreenDrawing::setSettingsReference(Settings *globalSettingsReference){
-	myGlobalSettings=globalSettingsReference;
-
-	m_triggerLastHitValues.clear();
-
-	// Init the vector with enough elements for each trigger input :
-	for (unsigned int i=0; i<myGlobalSettings->getNumTriggerInputs();i++){
-		m_triggerLastHitValues.push_back(0);
-	}
 
 }
 
@@ -63,15 +43,15 @@ void ScreenDrawing::DrawSplashScreen(){
 
 	SDL_Color orange={255,162,0};
 
-	DrawLabel("ur", 30,  100, 100 );
-	DrawLabel("Drummer", 30, 128, 100, orange );
-	DrawLabel("v0.1a", 10,  290, 225);
+	DrawLabel("ur", 30,  100, 100, false );
+	DrawLabel("Drummer", 30, 128, 100, orange, false );
+	DrawLabel(urDrummerVersion, 10,  290, 225, false);
 
 	// Draw the logo
-   	DrawIcon(myGlobalSettings->getUserDirectory() + "/.urDrummer/res/urdrummer_logo.gif", 140, 30, false);
+   	DrawIcon(myglobalSettings.getUserDirectory() + "/.urDrummer/res/urdrummer_logo.gif", 140, 30, false);
 
 
-    SDL_Flip(myScreenReference);
+    SDL_Flip(screen);
 
 }
 
@@ -79,7 +59,7 @@ void ScreenDrawing::DrawIcon(const string iconPath, int posX, int posY,  bool se
 	SDL_Surface *icon = NULL;
 	SDL_Rect  positionIcon;
 
-    if (!myGlobalSettings->checkIfFileExists(iconPath)){
+    if (!myglobalSettings.checkIfFileExists(iconPath)){
 //        cerr << "ERROR : icon file  " << iconPath << " missing " << endl;
     	return;
     }
@@ -90,7 +70,7 @@ void ScreenDrawing::DrawIcon(const string iconPath, int posX, int posY,  bool se
 
 	icon = IMG_Load(iconPath.c_str());
 	SDL_SetColorKey(icon, SDL_SRCCOLORKEY, SDL_MapRGB(icon->format, 0, 0, 0));
-	SDL_BlitSurface(icon, NULL, myScreenReference, &positionIcon);
+	SDL_BlitSurface(icon, NULL, screen, &positionIcon);
 
 	delete icon;
 }
@@ -117,7 +97,7 @@ void ScreenDrawing::DrawLabel( std::string labelText, int fontSize, int posX, in
 	SDL_Rect position;
 	SDL_Color invertColor;
 
-	string fontPath = myGlobalSettings->getUserDirectory() + "/.urDrummer/res/arial.ttf";
+	string fontPath = myglobalSettings.getUserDirectory() + "/.urDrummer/res/arial.ttf";
 
 	if (m_lastFontSizeUsed!=fontSize){
 		if (m_lastFontSizeUsed!=0) TTF_CloseFont(myFont);
@@ -144,7 +124,7 @@ void ScreenDrawing::DrawLabel( std::string labelText, int fontSize, int posX, in
 		SDL_Surface *BGSurf;
 		BGSurf=SDL_CreateRGBSurface(SDL_HWSURFACE,texte->w, texte->h, 16,0,0,0,0);
 		SDL_FillRect(BGSurf, NULL, SDL_MapRGB(BGSurf->format, color.r, color.g, color.b));
-		SDL_BlitSurface(BGSurf, NULL, myScreenReference, &position); /* Blit background*/
+		SDL_BlitSurface(BGSurf, NULL, screen, &position); /* Blit background*/
 
 		delete BGSurf;
 
@@ -152,7 +132,7 @@ void ScreenDrawing::DrawLabel( std::string labelText, int fontSize, int posX, in
 		texte = TTF_RenderText_Blended(myFont, labelText.c_str(), color);
 	}
 
-	SDL_BlitSurface(texte, NULL, myScreenReference, &position); /* Blit text */
+	SDL_BlitSurface(texte, NULL, screen, &position); /* Blit text */
 
 	delete texte;
 
@@ -163,7 +143,7 @@ void ScreenDrawing::DrawLabelToList(SDL_Surface *dest, std::string labelText, in
 	SDL_Rect position;
 	SDL_Color invertColor;
 
-	string fontPath = myGlobalSettings->getUserDirectory() + "/.urDrummer/res/arial.ttf";
+	string fontPath = myglobalSettings.getUserDirectory() + "/.urDrummer/res/arial.ttf";
 
 	if (m_lastFontSizeUsed!=fontSize){
 		if (m_lastFontSizeUsed!=0) TTF_CloseFont(myFont);
@@ -206,7 +186,7 @@ void ScreenDrawing::DrawLabelToList(SDL_Surface *dest, std::string labelText, in
 
 
 
-void ScreenDrawing::handleKeyPress(unsigned int keyEvent){
+unsigned int ScreenDrawing::handleKeyPress(unsigned int keyEvent){
 
 	string currentScreen;
 	unsigned int currentSelectedItem;
@@ -225,6 +205,10 @@ void ScreenDrawing::handleKeyPress(unsigned int keyEvent){
 	cerr << "Received key event num " << keyEvent << endl;
 
 	switch (keyEvent){
+	case SDLK_F12:
+		// POWER OFF !
+		return 255;
+		break;
 	case 112:
 		// Handle play/pause action whenever we are..
 		break;
@@ -266,7 +250,7 @@ void ScreenDrawing::handleKeyPress(unsigned int keyEvent){
 					break;
 				}
 		}else if (currentScreen=="KitSelect"){
-			myGlobalSettings->loadDrumKit(myGlobalSettings->getDrumKitList()[currentSelectedItem]);
+			myglobalSettings.loadDrumKit(myglobalSettings.getDrumKitList()[currentSelectedItem]);
 			// and exit to mainscreen (pop 2 times : 1 to go back to main menu, and 1 more to go back to main screen!)
 			myCurrentMenuPath.pop_back();
 			myCurrentSelectedMenuItem.pop_back();
@@ -279,6 +263,23 @@ void ScreenDrawing::handleKeyPress(unsigned int keyEvent){
 			myCurrentMenuPath.push_back("MetronomeVal");
 			myCurrentSelectedMenuItem.push_back(0);
 		}else if (currentScreen=="MetronomeVal"){
+			// Confirm value change
+			myCurrentMenuPath.pop_back();
+			myCurrentSelectedMenuItem.pop_back();
+		}else if (currentScreen=="KitSetup"){
+			// Trigger Selected
+			myCurrentMenuPath.push_back("KitSetup1");
+			myCurrentSelectedMenuItem.push_back(0);
+			// Set selected DK Component :
+			unsigned int SelectedDKIndex = myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-2];
+			m_SelectedDK = myglobalSettings.getCurrentDrumKit()->getDkComponentList()[SelectedDKIndex];
+
+			refreshFunction=&ScreenDrawing::DrawKitSetupTriggerChoosen;
+		}else if(currentScreen=="KitSetup1"){
+			// Manage Trigger value change !
+			myCurrentMenuPath.push_back("KitSetup1Val");
+			myCurrentSelectedMenuItem.push_back(0);
+		}else if (currentScreen=="KitSetup1Val"){
 			// Confirm value change
 			myCurrentMenuPath.pop_back();
 			myCurrentSelectedMenuItem.pop_back();
@@ -310,6 +311,10 @@ void ScreenDrawing::handleKeyPress(unsigned int keyEvent){
 				// Save the function name to call it later if needed !
 				refreshFunction=&ScreenDrawing::DrawMainMenu;
 				maxSelectedMenuItem=5;
+			}else if (currentScreen=="KitSetup"){
+				// Save the function name to call it later if needed !
+				refreshFunction=&ScreenDrawing::DrawKitSetupMenu;
+				maxSelectedMenuItem=5;
 
 			}
 
@@ -319,29 +324,70 @@ void ScreenDrawing::handleKeyPress(unsigned int keyEvent){
 		if (currentScreen=="MainScreen"){
 			// If we are on main screen, then we handle special action (
 			// TODO : handle special action from main screen
-			myGlobalSettings->DecMetronomeBpm(5);
+			myglobalSettings.DecMetronomeBpm(5);
 
 		}else if (currentScreen=="MetronomeVal"){
 				switch(myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-2]){
 					case 0:
-						myGlobalSettings->DecMetronomeBpm(1);
+						myglobalSettings.DecMetronomeBpm(1);
 						break;
 					case 1:
-						m_tmpIntValue=myGlobalSettings->getMetronomeVolume();
+						m_tmpIntValue=myglobalSettings.getMetronomeVolume();
 						if (m_tmpIntValue>1){
-							myGlobalSettings->setMetronomeVolume(--m_tmpIntValue);
+							myglobalSettings.setMetronomeVolume(--m_tmpIntValue);
 						}
 						break;
 					case 2:
-						m_tmpIntValue=myGlobalSettings->getMetronomeBCount();
+						m_tmpIntValue=myglobalSettings.getMetronomeBCount();
 						if (m_tmpIntValue>0){
-							myGlobalSettings->setMetronomeBCount(--m_tmpIntValue);
+							myglobalSettings.setMetronomeBCount(--m_tmpIntValue);
 						}
 						break;
 					case 3:
-						myGlobalSettings->setMetronomeOn(!myGlobalSettings->isMetronomeOn());
+						myglobalSettings.setMetronomeOn(!myglobalSettings.isMetronomeOn());
 						break;
 				}
+			}else if (currentScreen=="KitSetup1Val"){
+				switch(myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-2]){
+					case 0:
+						// Change instrument !
+						// Get next instrument in list
+						Instrument *tmpInstr;
+						tmpInstr=m_SelectedDK->getChoosenInstrument();
+						tmpInstr=myglobalSettings.getPreviousInstrument(m_SelectedDK->getChoosenInstrument());
+						if (tmpInstr!=NULL){
+							// TODO : unload previous instrument and load new one WHEN USER VALIDATE
+							// myglobalSettings.getCurrentDrumKit()->getHowManyTimeInstrumentUsed(previousInstr);
+
+							m_SelectedDK->setChoosenInstrument(tmpInstr);
+						}
+						break;
+					case 1:
+						// Change Pitch
+						m_tmpFloatValue=m_SelectedDK->getPitch();
+						if (m_tmpFloatValue>0.0f){
+							m_tmpFloatValue-=0.05f;
+							m_SelectedDK->setPitch(m_tmpFloatValue);
+						}
+						break;
+					case 2:
+						// Change Gain
+						m_tmpFloatValue=m_SelectedDK->getReplayGain();
+						if (m_tmpFloatValue>0.0f){
+							m_tmpFloatValue-=0.1f;
+							m_SelectedDK->setReplayGain(m_tmpFloatValue);
+						}
+						break;
+					case 3:
+						// Change Balance
+						m_tmpFloatValue=m_SelectedDK->getBalance();
+						if (m_tmpFloatValue>-1.0f){
+							m_tmpFloatValue-=0.1f;
+							m_SelectedDK->setBalance(m_tmpFloatValue);
+						}
+						break;
+				}
+
 			}else{
 				if (currentSelectedItem > 0){
 					myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-1]--;
@@ -353,30 +399,69 @@ void ScreenDrawing::handleKeyPress(unsigned int keyEvent){
 		if (currentScreen=="MainScreen"){
 			// If we are on main screen, then we handle special action (
 			// TODO : handle special action from main screen
-			myGlobalSettings->IncMetronomeBpm(5);
+			myglobalSettings.IncMetronomeBpm(5);
 		}else if (currentScreen=="MetronomeVal"){
 			switch(myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-2]){
 				case 0:
-					myGlobalSettings->IncMetronomeBpm(1);
+					myglobalSettings.IncMetronomeBpm(1);
 					break;
 				case 1:
-					m_tmpIntValue=myGlobalSettings->getMetronomeVolume();
+					m_tmpIntValue=myglobalSettings.getMetronomeVolume();
 					if (m_tmpIntValue<32){
-						myGlobalSettings->setMetronomeVolume(m_tmpIntValue+1);
+						myglobalSettings.setMetronomeVolume(m_tmpIntValue+1);
 					}
 					break;
 				case 2:
-					m_tmpIntValue=myGlobalSettings->getMetronomeBCount();
+					m_tmpIntValue=myglobalSettings.getMetronomeBCount();
 					if (m_tmpIntValue<32){
-						myGlobalSettings->setMetronomeBCount(m_tmpIntValue+1);
+						myglobalSettings.setMetronomeBCount(m_tmpIntValue+1);
 					}
 					break;
 				case 3:
-					myGlobalSettings->setMetronomeOn(!myGlobalSettings->isMetronomeOn());
+					myglobalSettings.setMetronomeOn(!myglobalSettings.isMetronomeOn());
+					break;
+			}
+		}else if (currentScreen=="KitSetup1Val"){
+			switch(myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-2]){
+				case 0:
+					// Change instrument !
+					// Get next instrument in list
+					Instrument *tmpInstr;
+					tmpInstr=m_SelectedDK->getChoosenInstrument();
+					tmpInstr=myglobalSettings.getNextInstrument(tmpInstr);
+					if (tmpInstr!=NULL){
+						// TODO : unload previous instrument and load new one WHEN USER VALIDATE
+						// myglobalSettings.getCurrentDrumKit()->getHowManyTimeInstrumentUsed(previousInstr);
+						m_SelectedDK->setChoosenInstrument(tmpInstr);
+					}
+					break;
+				case 1:
+					// Change Pitch
+					m_tmpFloatValue=m_SelectedDK->getPitch();
+					if (m_tmpFloatValue<2.00f){
+						m_tmpFloatValue+=0.05f;
+						m_SelectedDK->setPitch(m_tmpFloatValue);
+					}
+					break;
+				case 2:
+					// Change Gain
+					m_tmpFloatValue=m_SelectedDK->getReplayGain();
+					if (m_tmpFloatValue<3.00f){
+						m_tmpFloatValue+=0.1f;
+						m_SelectedDK->setReplayGain(m_tmpFloatValue);
+					}
+					break;
+				case 3:
+					// Change Balance
+					m_tmpFloatValue=m_SelectedDK->getBalance();
+					if (m_tmpFloatValue<1.0f){
+						m_tmpFloatValue+=0.1f;
+						m_SelectedDK->setBalance(m_tmpFloatValue);
+					}
 					break;
 			}
 		}
-		else {
+		else  {
 			if (currentSelectedItem < maxSelectedMenuItem){
 				myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-1]++;
 			}
@@ -388,8 +473,7 @@ void ScreenDrawing::handleKeyPress(unsigned int keyEvent){
 	// Call the function to draw the screen :
 	(*this.*refreshFunction)();
 
-	cerr << "Current menu (" << myCurrentMenuPath.size() << ") is " << myCurrentMenuPath[myCurrentMenuPath.size()-1] << endl;
-
+	return 0;
 
 }
 
@@ -406,19 +490,19 @@ void ScreenDrawing::DrawMainScreen(){
 	string Vol;
 
 	// Clean the screen
-	SDL_FillRect(myScreenReference, NULL, SDL_MapRGB(myScreenReference->format, 0, 0, 0));
+	SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));
 
 	// An horizontal line on top and bottom:
-	line(myScreenReference, 0, 20, 319, 20, SDL_MapRGB(myScreenReference->format, 255, 255, 255));
-	line(myScreenReference, 0, 220, 319, 220, SDL_MapRGB(myScreenReference->format, 255, 255, 255));
+	line(screen, 0, 20, 319, 20, SDL_MapRGB(screen->format, 255, 255, 255));
+	line(screen, 0, 220, 319, 220, SDL_MapRGB(screen->format, 255, 255, 255));
 	// An vertical line on top and bottom, to split the zone:
-	line(myScreenReference, 100, 0, 100, 20, SDL_MapRGB(myScreenReference->format, 255, 255, 255));
-	line(myScreenReference, 100, 220, 100, 240, SDL_MapRGB(myScreenReference->format, 255, 255, 255));
+	line(screen, 100, 0, 100, 20, SDL_MapRGB(screen->format, 255, 255, 255));
+	line(screen, 100, 220, 100, 240, SDL_MapRGB(screen->format, 255, 255, 255));
 
 	// Kit Name :
-	if (myGlobalSettings!=NULL && myGlobalSettings->getCurrentDrumKit() != NULL){
+	if (myglobalSettings.getCurrentDrumKit() != NULL){
 		// Kit name in middle of the screen:
-		kitName=myGlobalSettings->getCurrentDrumKit()->getKitName();
+		kitName=myglobalSettings.getCurrentDrumKit()->getKitName();
 	}else{
 		kitName="(no Kit loaded)";
 	}
@@ -427,19 +511,19 @@ void ScreenDrawing::DrawMainScreen(){
 
 	// Metronome BPM : bottom left
 	std::stringstream sbpm;
-	sbpm << "BPM : " << myGlobalSettings->getMetronomeBpm();
+	sbpm << "BPM : " << myglobalSettings.getMetronomeBpm();
 	DrawLabel(sbpm.str(), 18, 2, 220, false );
 
 	// Volume : top left
 	std::stringstream svol;
-	svol<< "Vol : " << myGlobalSettings->getVolume();
+	svol<< "Vol : " << myglobalSettings.getVolume();
 	DrawLabel(svol.str() , 18, 2, 0, false );
 
 	// Last trigger Hits for each input :
 
 
     // finally, update the screen :)
-    SDL_Flip(myScreenReference);
+    SDL_Flip(screen);
 
 }
 
@@ -448,12 +532,12 @@ void ScreenDrawing::DrawMainMenu(){
 	unsigned int currentSel=myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-1];
 
 	// Clean the screen
-	SDL_FillRect(myScreenReference, NULL, SDL_MapRGB(myScreenReference->format, 0, 0, 0));
+	SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));
 
 	// First line of icons
-	DrawIcon(myGlobalSettings->getUserDirectory() + "/.urDrummer/res/kitsel.gif",44, 20, false);
-	DrawIcon(myGlobalSettings->getUserDirectory() + "/.urDrummer/res/metronome.gif",136, 20, false);
-	DrawIcon(myGlobalSettings->getUserDirectory() + "/.urDrummer/res/audioplayer.gif",228, 20, false);
+	DrawIcon(myglobalSettings.getUserDirectory() + "/.urDrummer/res/kitsel.gif",44, 20, false);
+	DrawIcon(myglobalSettings.getUserDirectory() + "/.urDrummer/res/metronome.gif",136, 20, false);
+	DrawIcon(myglobalSettings.getUserDirectory() + "/.urDrummer/res/audioplayer.gif",228, 20, false);
 
 	// Labels
 	DrawLabel("Kit Sel." , 18, 34, 70, (currentSel==0?true:false));
@@ -462,15 +546,15 @@ void ScreenDrawing::DrawMainMenu(){
 
 
 	// Second line of icons
-	DrawIcon(myGlobalSettings->getUserDirectory() + "/.urDrummer/res/training.gif",44, 130, false);
-	DrawIcon(myGlobalSettings->getUserDirectory() + "/.urDrummer/res/kitsetup.gif",136, 130, false);
-	DrawIcon(myGlobalSettings->getUserDirectory() + "/.urDrummer/res/settings.gif",228, 130, false);
+	DrawIcon(myglobalSettings.getUserDirectory() + "/.urDrummer/res/training.gif",44, 130, false);
+	DrawIcon(myglobalSettings.getUserDirectory() + "/.urDrummer/res/kitsetup.gif",136, 130, false);
+	DrawIcon(myglobalSettings.getUserDirectory() + "/.urDrummer/res/settings.gif",228, 130, false);
 	DrawLabel("Trainer" , 18, 34, 180, (currentSel==3?true:false));
 	DrawLabel("Kit Setup" , 18, 126, 180, (currentSel==4?true:false));
 	DrawLabel("Settings" , 18, 223, 180, (currentSel==5?true:false));
 
     // finally, update the screen :)
-    SDL_Flip(myScreenReference);
+    SDL_Flip(screen);
 
 }
 
@@ -481,17 +565,17 @@ void ScreenDrawing::DrawKitSelect(){
 	unsigned int selItem;
 
 	// Clean the screen
-	SDL_FillRect(myScreenReference, NULL, SDL_MapRGB(myScreenReference->format, 0, 0, 0));
+	SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));
 
 	DrawLabel("Kit Select" , 18, 110, 0, false);
-	line(myScreenReference, 0, 20, 319, 20, SDL_MapRGB(myScreenReference->format, 255, 255, 255));
+	line(screen, 0, 20, 319, 20, SDL_MapRGB(screen->format, 255, 255, 255));
 
-	if (myGlobalSettings->getDrumKitList().size()>0){
-		maxSelectedMenuItem= myGlobalSettings->getDrumKitList().size()-1;
+	if (myglobalSettings.getDrumKitList().size()>0){
+		maxSelectedMenuItem= myglobalSettings.getDrumKitList().size()-1;
 
 		// Draw the list of available drumkits :
 		for(unsigned int i=0;i <= maxSelectedMenuItem;i++){
-			ListOfKits.push_back(myGlobalSettings->getDrumKitList()[i]->getKitName());
+			ListOfKits.push_back(myglobalSettings.getDrumKitList()[i]->getKitName());
 		}
 
 		if (myCurrentSelectedMenuItem.size()>0){
@@ -505,16 +589,16 @@ void ScreenDrawing::DrawKitSelect(){
 
 
     // finally, update the screen :)
-    SDL_Flip(myScreenReference);
+    SDL_Flip(screen);
 
 }
 
 void ScreenDrawing::DrawMetronomeSetup(){
-
 	vector<string> settingsList;
 	vector<string> valueList;
 	unsigned int selItem;
 	bool valChange;
+	TextLabel *txtLabel;
 
 	settingsList.push_back("BPM");
 	settingsList.push_back("Volume");
@@ -523,28 +607,28 @@ void ScreenDrawing::DrawMetronomeSetup(){
 
 
 	std::stringstream myItoA;
-	myItoA << myGlobalSettings->getMetronomeBpm();
+	myItoA << myglobalSettings.getMetronomeBpm();
 	valueList.push_back(myItoA.str());
 
 	myItoA.str("");
-	myItoA << myGlobalSettings->getMetronomeVolume();
+	myItoA << myglobalSettings.getMetronomeVolume();
 	valueList.push_back(myItoA.str());
 
 	myItoA.str("");
-	myItoA << myGlobalSettings->getMetronomeBCount();
+	myItoA << myglobalSettings.getMetronomeBCount();
 	valueList.push_back(myItoA.str());
 
-	if (myGlobalSettings->isMetronomeOn()){
+	if (myglobalSettings.isMetronomeOn()){
 		valueList.push_back("On");
 	}else{
 		valueList.push_back("Off");
 	}
 
 	// Clean the screen
-	SDL_FillRect(myScreenReference, NULL, SDL_MapRGB(myScreenReference->format, 0, 0, 0));
+	SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));
 
 	DrawLabel("Metronome" , 18, 110, 0, false);
-	line(myScreenReference, 0, 20, 319, 20, SDL_MapRGB(myScreenReference->format, 255, 255, 255));
+	line(screen, 0, 20, 319, 20, SDL_MapRGB(screen->format, 255, 255, 255));
 
 
 	// Draw the list of available settings :
@@ -558,10 +642,13 @@ void ScreenDrawing::DrawMetronomeSetup(){
 
 	DrawList(settingsList, 0, 21, 100, 219, selItem);
 	// Draw a line at right of the list :
-	line(myScreenReference, 100, 20, 100, 239, SDL_MapRGB(myScreenReference->format, 255, 255, 255));
+	line(screen, 100, 20, 100, 239, SDL_MapRGB(screen->format, 255, 255, 255));
 
 	// Draw the current setting on right :
-	DrawLabel(settingsList[selItem] , 30, 160, 85, false);
+	txtLabel=new TextLabel(settingsList[selItem],210,85);
+	txtLabel->setFontSize(30);
+	txtLabel->setTextAlignment(TextLabel::CENTER_ALIGN);
+	txtLabel->doDraw();
 
 	if (myCurrentMenuPath[myCurrentMenuPath.size()-1]=="MetronomeVal"){
 		valChange=true;
@@ -569,68 +656,196 @@ void ScreenDrawing::DrawMetronomeSetup(){
 
 		valChange=false;
 	}
-	// Write the corresponding value under the label :
-	DrawLabel(valueList[selItem] , 30, 160, 120, valChange);
+
+	txtLabel->setText(valueList[selItem]);
+	txtLabel->setYPos(120);
+	txtLabel->setTextAlignment(TextLabel::CENTER_ALIGN);
+	txtLabel->setTextSelected(valChange);
+	txtLabel->doDraw();
+
+	delete txtLabel;
 
 
     // finally, update the screen :)
-    SDL_Flip(myScreenReference);
+    SDL_Flip(screen);
 
 }
 
 void ScreenDrawing::DrawAudioPlayer(){
 
 	// Clean the screen
-	SDL_FillRect(myScreenReference, NULL, SDL_MapRGB(myScreenReference->format, 0, 0, 0));
+	SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));
 
 	DrawLabel("Audio Player" , 18, 110, 0, false);
-	line(myScreenReference, 0, 20, 319, 20, SDL_MapRGB(myScreenReference->format, 255, 255, 255));
+	line(screen, 0, 20, 319, 20, SDL_MapRGB(screen->format, 255, 255, 255));
 
 
     // finally, update the screen :)
-    SDL_Flip(myScreenReference);
+    SDL_Flip(screen);
 
 }
 
 void ScreenDrawing::DrawTrainingMenu(){
 
 	// Clean the screen
-	SDL_FillRect(myScreenReference, NULL, SDL_MapRGB(myScreenReference->format, 0, 0, 0));
+	SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));
 
 	DrawLabel("Training" , 18, 120, 0, false);
-	line(myScreenReference, 0, 20, 319, 20, SDL_MapRGB(myScreenReference->format, 255, 255, 255));
+	line(screen, 0, 20, 319, 20, SDL_MapRGB(screen->format, 255, 255, 255));
 
 
     // finally, update the screen :)
-    SDL_Flip(myScreenReference);
+    SDL_Flip(screen);
 
 }
 
 void ScreenDrawing::DrawKitSetupMenu(){
+	vector<string> valueList;
+	std::vector<DrumKitComponent*> dkCompList;
+	unsigned int selItem;
+	Trigger *dkTrig;
+
+	dkCompList=	myglobalSettings.getCurrentDrumKit()->getDkComponentList();
+
+	// Set a list of available triggers :
+	for (unsigned int i=0; i<dkCompList.size() ; i++ ){
+		// Add the trigger name to the list :
+		dkTrig= dkCompList[i]->getAssociatedTrigger();
+		valueList.push_back(dkTrig->getTriggerName());
+	}
+
+	maxSelectedMenuItem= valueList.size()-1;
+
+	selItem=myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-1];
 
 	// Clean the screen
-	SDL_FillRect(myScreenReference, NULL, SDL_MapRGB(myScreenReference->format, 0, 0, 0));
+	SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));
 
 	DrawLabel("Kit Setup" , 18, 120, 0, false);
-	line(myScreenReference, 0, 20, 319, 20, SDL_MapRGB(myScreenReference->format, 255, 255, 255));
+	line(screen, 0, 20, 319, 20, SDL_MapRGB(screen->format, 255, 255, 255));
+
+	// Draw the current setting on right :
+	DrawLabel("Select a trigger" , 24, 120, 115, false);
+	DrawLabel("in list" , 24, 160, 145, false);
+	// TODO : Display basic informations about trigger in right panel
+
+
+
+	DrawList(valueList, 0, 21, 100, 219, selItem);
+
+	// Draw a line at right of the list :
+	line(screen, 100, 20, 100, 239, SDL_MapRGB(screen->format, 255, 255, 255));
 
 
     // finally, update the screen :)
-    SDL_Flip(myScreenReference);
+    SDL_Flip(screen);
 
+}
+
+void ScreenDrawing::DrawKitSetupTriggerChoosen(){
+	vector<string> valueList ;
+	unsigned int selItem;
+	string TrigName;
+	std::stringstream myItoA;
+	string txtValue;
+	TextLabel *txtLabel;
+	bool ValueSelected;
+
+
+	if (myCurrentMenuPath[myCurrentMenuPath.size()-1]=="KitSetup1"){
+		selItem=myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-1];
+		maxSelectedMenuItem=3;
+		ValueSelected=false;
+	}else{
+		selItem=myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-2];
+		ValueSelected=true;
+	}
+
+	TrigName = m_SelectedDK->getAssociatedTrigger()->getTriggerName();
+	TrigName += " Setup";
+
+
+	// Clean the screen
+	SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));
+
+	// Draw the name of selected trigger on screen :
+	txtLabel=new TextLabel(TrigName,160,0);
+	txtLabel->setFontSize(18);
+	txtLabel->setTextAlignment(TextLabel::CENTER_ALIGN);
+	txtLabel->doDraw();
+
+	line(screen, 0, 20, 319, 20, SDL_MapRGB(screen->format, 255, 255, 255));
+
+	// Make a list of available settings :
+	valueList.push_back("Instrument");
+	valueList.push_back("Pitch");
+	valueList.push_back("Gain");
+	valueList.push_back("Balance");
+
+	DrawList(valueList, 0, 21, 100, 219, selItem);
+
+	// Draw a line at right of the list :
+	line(screen, 100, 20, 100, 239, SDL_MapRGB(screen->format, 255, 255, 255));
+
+	// Draw the current setting on right :
+	txtLabel->setText(valueList[selItem]);
+	txtLabel->setXPos(210);
+	txtLabel->setYPos(85);
+	txtLabel->setFontSize(30);
+	txtLabel->doDraw();
+
+	// Draw the current value of setting :
+	switch(selItem){
+		case 0:
+			// Instrument
+			if (m_SelectedDK->getChoosenInstrument()==NULL){
+				txtValue = "- None selected -";
+			}else{
+				txtValue = m_SelectedDK->getChoosenInstrument()->getInstrumentName();
+			}
+			break;
+		case 1:
+			// Pitch
+			myItoA << std::fixed << std::setprecision(2) << m_SelectedDK->getPitch();
+			txtValue=myItoA.str();
+			break;
+		case 2:
+			// Gain
+			myItoA << std::fixed << std::setprecision(2) <<  m_SelectedDK->getReplayGain();
+			txtValue=myItoA.str();
+			break;
+		case 3:
+			// Balance
+			myItoA << std::fixed << std::setprecision(2) <<  m_SelectedDK->getBalance();
+			txtValue=myItoA.str();
+			break;
+	}
+
+	txtLabel->setFontSize(24);
+	txtLabel->setXPos(210);
+	txtLabel->setYPos(130);
+	txtLabel->setText(txtValue);
+	txtLabel->setTextSelected(ValueSelected);
+	txtLabel->doDraw();
+
+
+	delete txtLabel;
+
+    // finally, update the screen :)
+    SDL_Flip(screen);
 }
 
 void ScreenDrawing::DrawGlobalSettingsMenu(){
 
 	// Clean the screen
-	SDL_FillRect(myScreenReference, NULL, SDL_MapRGB(myScreenReference->format, 0, 0, 0));
+	SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));
 
 	DrawLabel("Global Settings" , 18, 100, 0, false);
-	line(myScreenReference, 0, 20, 319, 20, SDL_MapRGB(myScreenReference->format, 255, 255, 255));
+	line(screen, 0, 20, 319, 20, SDL_MapRGB(screen->format, 255, 255, 255));
 
 
     // finally, update the screen :)
-    SDL_Flip(myScreenReference);
+    SDL_Flip(screen);
 
 }
 
@@ -667,7 +882,7 @@ void ScreenDrawing::DrawList(std::vector<std::string> listText, int x, int y, in
 	}
 
 	SDL_BlitSurface(ListSurface, NULL, Container, &positionList); /* Blit List to the container*/
-	SDL_BlitSurface(Container, NULL, myScreenReference, &position); /* Blit container to screen*/
+	SDL_BlitSurface(Container, NULL, screen, &position); /* Blit container to screen*/
 
 
 

@@ -7,6 +7,8 @@
 
 #include "Layer.h"
 
+using namespace std;
+
 Layer::Layer() {
 	m_minVelocity=0;
 	m_maxVelocity=127;
@@ -45,19 +47,44 @@ void Layer::setMinVelocity(unsigned int minVelocity) {
 }
 
 void Layer::loadSample() {
+	// Using libsndfile to load files ...
+	SF_INFO sound_info;
+	wavSample=new SoLoud::Wav;
+	SNDFILE* file;
+
 	std::cerr << "Going to load sample file " << m_fileName << std::endl;
 
-	wavSample=new SoLoud::Wav;
+	// Open file, and get file info in struct :
+	file = sf_open( m_fileName.c_str(), SFM_READ, &sound_info );
+	if (!file){
+		cerr << "Error opening file : " << sf_strerror(file) << endl;
+	}
 
-	wavSample->load(m_fileName.c_str());
+	if (sound_info.channels>1){
+		cerr << "Sample has " << sound_info.channels << " but only 1 is supported. Going to take only first. " << std::endl;
+		sound_info.channels=1;
+	}
+
+	if ( sound_info.frames > ( std::numeric_limits<int>::max()/sound_info.channels ) ) {
+		cerr << "Sample is too long. it will be truncated. " << std::endl;
+		sound_info.frames = ( std::numeric_limits<int>::max()/sound_info.channels );
+	}
+
+	// Set a buffer :
+	float* buffer = new float[ sound_info.frames ];
+
+	sf_read_float( file, buffer, sound_info.frames * sound_info.channels );
+
+	sf_close( file );
+
+	wavSample->mData=buffer;
+	wavSample->mSampleCount=sound_info.frames * sound_info.channels;
+	wavSample->mBaseSamplerate=sound_info.samplerate;
+
 }
 
 
-<<<<<<< HEAD
 void Layer::unloadSample(){
-=======
-void Layer::UnloadSample(){
->>>>>>> 731334418433abb8c5467ac1c1b87b282f44ee33
 	delete wavSample;
 	wavSample = NULL;
 }

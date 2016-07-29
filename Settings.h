@@ -71,6 +71,9 @@ public:
 	void setCurrentDrumKit(DrumKit* currentDrumKit);
 
 	void loadInstrumentList();
+	Instrument* getNextInstrument(Instrument *currentInstrument);
+	Instrument* getPreviousInstrument(Instrument *currentInstrument);
+
 	void loadDrumKitList();
 
 	bool loadDrumKit(DrumKit *drumKit);
@@ -129,6 +132,9 @@ public:
 		m_MetronomeVolume = metronomeVolume;
 	}
 
+	Trigger *getLastHitTrigger() ;
+	void setLastHitTrigger(Trigger *lastHitTrigger);
+
 private:
 	SoLoud::Soloud *m_AudioEngine;
 	SoLoud::EchoFilter *m_Echofilter;
@@ -169,6 +175,9 @@ private:
 
 	// Pointer to currently loaded drumkit.
 	DrumKit *m_currentDrumKit;
+
+	// Pointer to the last hit trigger (or the trigger being setup)
+	Trigger *m_LastHitTrigger;
 
 	unsigned int m_MetronomeBPM;
 	unsigned int m_MetronomeVolume;

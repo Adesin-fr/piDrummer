@@ -12,6 +12,7 @@
 #include <string>
 #include <libconfig.h++>
 #include <iostream>
+#include <sstream>
 
 #include "soloud.h"
 #include "soloud_wav.h"
@@ -19,6 +20,7 @@
 #include "DrumKitComponent.h"
 #include "SignalCurve.h"
 
+extern SoLoud::Soloud myAudioEngine;
 
 class DrumKit {
 	public:
@@ -42,8 +44,9 @@ class DrumKit {
 		void setAfterTouchValue(unsigned char TriggerNumber, unsigned char TriggerPosition);
 
 		unsigned int getLastHitVelocity() const;
-		void setAudioEngine(SoLoud::Soloud* audioEngine);
 		std::vector<DrumKitComponent*> getDkComponentList();
+
+		unsigned int getHowManyTimeInstrumentUsed(Instrument *whichInstrument);
 
 	private:
 		std::vector<DrumKitComponent*> m_DKComponentList;
@@ -53,7 +56,6 @@ class DrumKit {
 		
 		unsigned int m_lastHitVelocity;
 		unsigned int m_numTriggerInput;
-		SoLoud::Soloud *m_audioEngine;
 
 };
 

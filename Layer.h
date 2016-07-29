@@ -9,9 +9,13 @@
 #define LAYER_H_
 
 #include <string>
-#include "soloud_wav.h"
+#include <limits>
 #include <iostream>
 
+#include "soloud_wav.h"
+#include <sndfile.hh>
+
+#define BUFFER_LEN 1024
 
 class Layer {
 	public:

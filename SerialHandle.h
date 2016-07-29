@@ -10,6 +10,8 @@
 
 #include <unistd.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <iomanip>
 #include <string>
 #include <string.h>
 #include <iostream>
@@ -18,7 +20,8 @@
 #include <linux/serial.h>
 #include <linux/ioctl.h>
 #include <asm/ioctls.h>
-#include "ScreenDrawing.h"
+#include <sys/select.h>
+
 
 #include "DrumKit.h"
 
@@ -32,11 +35,9 @@ public:
 	bool initSerial();
 	void sendParameter(int TriggerNumber, int ParameterNumber, int ParameterValue);
 
-	void setScreenDrawingReference(ScreenDrawing *ScreenDrawerRef);
-
-
 private:
-	int  m_serPort;
+	int m_serPort;
+
 	std::string m_SerialPort;
 	std::string m_serialDataLine;
 	int baudrate;
@@ -44,8 +45,6 @@ private:
 	struct termios oldtio, newtio;
 	struct serial_struct ser_info;
 	bool m_serPortOpened;
-
-	ScreenDrawing *mySDreference;
 };
 
 #endif /* SERIALHANDLE_H_ */

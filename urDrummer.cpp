@@ -62,8 +62,6 @@
  *	  		- Backup/Restore	(icon/label)
  *	  		- Alsa Buffer Size	(label/label)
  *
- *  	Degradé bleu : 92,189,251 vers 95, 92, 251
- *
  *  	Text input is made with knob : scroll current letter from
  *  		"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.()@*!# abcdefghijklmnopqrstuvwxyz<>~"
  *  		< and > moves carret left and right
@@ -83,7 +81,7 @@
 #include "ScreenDrawing.h"
 
 
-#define __urDrummerVERSION__ "v0.1a"
+const std::string urDrummerVersion="v0.1b";
 
 using namespace std;
 unsigned int lastTimeEvent;
@@ -95,16 +93,18 @@ SoLoud::Wav *songPlayer;
 int songPlayerPointer;
 bool songPlayerPaused;
 
+Settings myglobalSettings;
+SDL_Surface* screen;
+SoLoud::Soloud myAudioEngine;
+
 int main ( int argc, char** argv )
 {
 	// Global variables:
 
-	SDL_Surface* screen;
-	Settings myglobalSettings;
-	SoLoud::Soloud mySoloud;
 	ScreenDrawing myScreenDrawer;
 	SerialHandle *mySerialPort;
 	unsigned int keyEvent;
+	unsigned int HandleKeyEventRetVal=0;
 
 
 	// initialize SDL video
@@ -128,9 +128,6 @@ int main ( int argc, char** argv )
         return 1;
     }
 
-    // Pass the screen reference to the drawer class:
-    myScreenDrawer.setScreenReference(screen);
-
     if (!myglobalSettings.checkIfFileExists("res/arial.ttf")){
         cerr << "ERROR : Font file arial.ttf missing in .urDrummer/res folder." << endl;
     	return 1;
@@ -138,8 +135,6 @@ int main ( int argc, char** argv )
 
     // Draw the splash screen while we continue loading stuffs...
     myScreenDrawer.DrawSplashScreen();
-
-
 
 
     // Load the Global settings from file :
@@ -160,15 +155,12 @@ int main ( int argc, char** argv )
     mySerialPort = new SerialHandle(myglobalSettings.getSerialPort(), 115200);
     mySerialPort->initSerial();
 
-    myScreenDrawer.setSettingsReference(&myglobalSettings);
-
-
 
     lastTimeEvent = SDL_GetTicks();
 
 
     // Instanciate the audio engine :
-    mySoloud.init(1, 0,0, myglobalSettings.getAlsaBufferSize());	    // clipping = roundoff
+    myAudioEngine.init(1, 0,0, myglobalSettings.getAlsaBufferSize());	    // clipping = roundoff
 										// Backend =auto
 										// Sample rate = auto
 										// BufferSize = 256
@@ -191,7 +183,7 @@ int main ( int argc, char** argv )
     	// Check for serial port if bytes are available and handle them:
     	keyEvent=mySerialPort->handleEvents(myglobalSettings.getCurrentDrumKit());
     	if (keyEvent!=0){
-    		myScreenDrawer.handleKeyPress(keyEvent);
+    		HandleKeyEventRetVal=myScreenDrawer.handleKeyPress(keyEvent);
     	}
 
     	// Do the rotary button events :
@@ -212,18 +204,18 @@ int main ( int argc, char** argv )
             case SDL_KEYDOWN:
             	lastTimeEvent=SDL_GetTicks();
 
-        		myScreenDrawer.handleKeyPress(event.key.keysym.sym);
+            	HandleKeyEventRetVal=myScreenDrawer.handleKeyPress(event.key.keysym.sym);
 
 				break;
             } // end switch
         } // end of message processing
 
 
-        // Do we need to poweroff ?
+        // Do we need to poweroff because of delay ?
         if (myglobalSettings.getAutoPowerOffDelay() > 0){
-        	if (SDL_GetTicks() > (lastTimeEvent+myglobalSettings.getAutoPowerOffDelay())){
+        	if (SDL_GetTicks() > (lastTimeEvent+myglobalSettings.getAutoPowerOffDelay()*1000)){
         		cerr << "The power-off delay is over !" << endl;
-        		// TODO : POWER OFF ?
+        		HandleKeyEventRetVal=255;
         	}
         }
 
@@ -233,16 +225,23 @@ int main ( int argc, char** argv )
         	myScreenDrawer.RefreshScreen();
         }
 
+        if (HandleKeyEventRetVal==255){
+        	// Send a message to the Arduino to tell him we're going to shutdown,
+        	// So, it will blink the led and cut power in a few seconds...
+        	// TODO : send serial message !
+
+            // Clean the SDL libs :
+            TTF_Quit();
+            SDL_Quit();
+            // Saving settings
+            cerr << "Saving global settings..." << endl;
+            myglobalSettings.SaveSettings();
+
+            cout << "Exited cleanly" << endl;
+            return 255;
+        }
+
     } // end main loop
 
-    // Clean the SDL libs :
-    TTF_Quit();
-    SDL_Quit();
-
-    // Saving settings
-    cerr << "Saving global settings..." << endl;
-    myglobalSettings.SaveSettings();
-
-    cout << "Exited cleanly" << endl;
     return 0;
 }

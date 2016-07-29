@@ -125,11 +125,11 @@ void Trigger::setTriggerType(unsigned int triggerType) {
 	m_triggerType = triggerType;
 }
 
-const std::string& Trigger::getTriggerName() const {
+std::string Trigger::getTriggerName() {
 	return m_triggerName;
 }
 
-void Trigger::setTriggerName(const std::string& triggerName) {
+void Trigger::setTriggerName(std::string triggerName) {
 	m_triggerName = triggerName;
 }
 

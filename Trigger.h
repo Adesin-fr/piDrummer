@@ -42,8 +42,8 @@ class Trigger {
 		void setThreshold(unsigned int threshold);
 		unsigned int getTriggerType() const;
 		void setTriggerType(unsigned int triggerType);
-		const std::string& getTriggerName() const;
-		void setTriggerName(const std::string& triggerName);
+		std::string getTriggerName();
+		void setTriggerName(std::string triggerName);
 		unsigned int getInputNumber() const;
 		void setInputNumber(unsigned int inputNumber);
 
