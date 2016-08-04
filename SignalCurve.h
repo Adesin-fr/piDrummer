@@ -23,10 +23,10 @@ public:
 
 	void setValueAt(unsigned int x, unsigned int value);
 	unsigned int getValueForX(unsigned int x);
-	const std::vector<CurvePoint*>& getAllCurvePoints();
+	std::vector<CurvePoint*> *getAllCurvePoints();
 
 private:
-	std::vector<CurvePoint*> m_curvePoints;
+	std::vector<CurvePoint*> *m_curvePoints;
 };
 
 #endif /* SIGNALCURVE_H_ */

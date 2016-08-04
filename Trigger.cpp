@@ -13,14 +13,16 @@ Trigger::Trigger() {
 	m_dynamicTriggerPercent=20;
 	m_crossTalkGroup=0;
 	m_threshold=0;
-	m_signalCurve=0;
+	m_signalCurve=new SignalCurve();
 	m_isChoked=false;
 	m_hasController=false;
 	m_triggerType=0;
 	m_footSplashSensitivity=0;
 	m_retriggerDelay=10;
 	m_muteGroup=0;
-	m_lastVelocity=0;
+	m_lastVelocity=127;
+	m_lastTimeHit=ticksNow;
+	m_maxValue=0;
 }
 
 Trigger::~Trigger() {
@@ -82,6 +84,7 @@ unsigned int Trigger::getLastVelocity() const {
 
 void Trigger::setLastVelocity(unsigned int lastVelocity) {
 	m_lastVelocity = lastVelocity;
+	m_lastTimeHit=ticksNow;
 }
 
 unsigned int Trigger::getMuteGroup() const {
@@ -139,4 +142,20 @@ unsigned int Trigger::getInputNumber() const {
 
 void Trigger::setInputNumber(unsigned int inputNumber) {
 	m_InputNumber = inputNumber;
+}
+
+unsigned int Trigger::getMaxValue() const {
+	return m_maxValue;
+}
+
+void Trigger::setMaxValue(unsigned int maxValue) {
+	m_maxValue = maxValue;
+}
+
+unsigned int Trigger::getLastTimeHit() const {
+	return m_lastTimeHit;
+}
+
+void Trigger::setLastTimeHit(unsigned int lastTimeHit) {
+	m_lastTimeHit = lastTimeHit;
 }

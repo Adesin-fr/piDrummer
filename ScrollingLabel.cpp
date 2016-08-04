@@ -12,8 +12,11 @@ ScrollingLabel::ScrollingLabel() {
 	m_DrawSurface=NULL;
 	m_selected=false;
 	m_fontSize=18;
-	m_scrollSpeed=0.5f;
 	m_scrollOffset=0;
+	xPos=0;
+	yPos=0;
+	maxHeight=0;
+	maxWidth=0;
 }
 
 
@@ -22,8 +25,12 @@ ScrollingLabel::ScrollingLabel(SDL_Surface drawSurface, std::string text, unsign
 	m_DrawSurface=NULL;
 	m_selected=false;
 	m_fontSize=18;
-	m_scrollSpeed=0.5f;
 	m_scrollOffset=0;
+	xPos=0;
+	yPos=0;
+	maxHeight=0;
+	maxWidth=0;
+
 }
 
 
@@ -41,22 +48,6 @@ unsigned int ScrollingLabel::getFontSize() const {
 
 void ScrollingLabel::setFontSize(unsigned int fontSize) {
 	m_fontSize = fontSize;
-}
-
-unsigned int ScrollingLabel::getScrollOffset() const {
-	return m_scrollOffset;
-}
-
-void ScrollingLabel::setScrollOffset(unsigned int scrollOffset) {
-	m_scrollOffset = scrollOffset;
-}
-
-float ScrollingLabel::getScrollSpeed() const {
-	return m_scrollSpeed;
-}
-
-void ScrollingLabel::setScrollSpeed(float scrollSpeed) {
-	m_scrollSpeed = scrollSpeed;
 }
 
 const std::string& ScrollingLabel::getText() const {

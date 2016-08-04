@@ -25,6 +25,8 @@
 extern SDL_Surface* screen;
 extern Settings myglobalSettings;
 extern const std::string urDrummerVersion;
+extern unsigned int ticksNow;
+
 
 class ScreenDrawing{
 public:

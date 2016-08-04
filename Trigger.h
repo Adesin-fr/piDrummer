@@ -11,12 +11,12 @@
 #include "SignalCurve.h"
 #include <string>
 
+extern unsigned int ticksNow;
 
 class Trigger {
 	public:
 		Trigger();
 		virtual ~Trigger();
-
 
 		unsigned int getCrossTalkGroup() const;
 		void setCrossTalkGroup(unsigned int crossTalkGroup);
@@ -46,11 +46,17 @@ class Trigger {
 		void setTriggerName(std::string triggerName);
 		unsigned int getInputNumber() const;
 		void setInputNumber(unsigned int inputNumber);
+		unsigned int getMaxValue() const;
+		void setMaxValue(unsigned int maxValue);
+	unsigned int getLastTimeHit() const;
+	void setLastTimeHit(unsigned int lastTimeHit);
 
 	private:
 		unsigned int m_triggerType;
 		std::string m_triggerName;
 		unsigned int m_lastVelocity;
+		unsigned int m_lastTimeHit;
+
 		bool m_hasController;
 		bool m_isChoked;
 		SignalCurve *m_signalCurve;
@@ -62,6 +68,7 @@ class Trigger {
 		unsigned int m_footSplashSensitivity;
 		unsigned int m_ControllerResolution;
 		unsigned int m_InputNumber;
+		unsigned int m_maxValue;
 
 };
 

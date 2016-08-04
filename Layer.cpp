@@ -13,6 +13,7 @@ Layer::Layer() {
 	m_minVelocity=0;
 	m_maxVelocity=127;
 	wavSample = NULL;
+	sampleLoaded=false;
 }
 
 Layer::~Layer() {
@@ -46,23 +47,28 @@ void Layer::setMinVelocity(unsigned int minVelocity) {
 	m_minVelocity = minVelocity;
 }
 
-void Layer::loadSample() {
+bool Layer::loadSample() {
 	// Using libsndfile to load files ...
 	SF_INFO sound_info;
 	wavSample=new SoLoud::Wav;
 	SNDFILE* file;
 
-	std::cerr << "Going to load sample file " << m_fileName << std::endl;
+	wavSample->load(m_fileName.c_str());
+	sampleLoaded=true;
+	return true;
+
+	//TODO : bad behavior with libsndfile !!!
+	/*
 
 	// Open file, and get file info in struct :
 	file = sf_open( m_fileName.c_str(), SFM_READ, &sound_info );
 	if (!file){
 		cerr << "Error opening file : " << sf_strerror(file) << endl;
+		return false;
 	}
 
 	if (sound_info.channels>1){
-		cerr << "Sample has " << sound_info.channels << " but only 1 is supported. Going to take only first. " << std::endl;
-		sound_info.channels=1;
+//		cerr << "Sample has " << sound_info.channels << " but only 1 is supported. Going to take only first. " << std::endl;
 	}
 
 	if ( sound_info.frames > ( std::numeric_limits<int>::max()/sound_info.channels ) ) {
@@ -73,7 +79,21 @@ void Layer::loadSample() {
 	// Set a buffer :
 	float* buffer = new float[ sound_info.frames ];
 
-	sf_read_float( file, buffer, sound_info.frames * sound_info.channels );
+	// if we got more than 2 channels, do the conversion :
+	if (sound_info.channels >1){
+		// Set a temporary buffer :
+		float* tmpBuffer = new float[ sound_info.frames * sound_info.channels];
+		sf_read_float( file, tmpBuffer, sound_info.frames * sound_info.channels );
+
+		for (unsigned int i =0; i< sound_info.frames ; i++){
+			// Pick only the first channel :
+			buffer[i]=tmpBuffer[i*sound_info.channels];
+		}
+		// delete the tmpBuffer
+		delete tmpBuffer;
+	}else{
+		sf_read_float( file, buffer, sound_info.frames );
+	}
 
 	sf_close( file );
 
@@ -81,15 +101,26 @@ void Layer::loadSample() {
 	wavSample->mSampleCount=sound_info.frames * sound_info.channels;
 	wavSample->mBaseSamplerate=sound_info.samplerate;
 
+	sampleLoaded=true;
+
+	return true;
+	*/
 }
 
 
 void Layer::unloadSample(){
-	delete wavSample;
-	wavSample = NULL;
+	if (sampleLoaded){
+		// Release the buffer data :
+		delete wavSample;
+		wavSample = NULL;
+	}
 }
 
 SoLoud::Wav  *Layer::getWavSample() {
-	return wavSample;
+	if (sampleLoaded){
+		return wavSample;
+	}else{
+		return NULL;
+	}
 }
 

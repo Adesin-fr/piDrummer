@@ -71,13 +71,14 @@
 
 #include <cstdlib>
 #include <SDL/SDL.h>
+#include <string>
+
 #include "soloud.h"
 #include "soloud_wav.h"
 #include "soloud_thread.h"
 #include "Settings.h"
 #include "Instrument.h"
 #include "SerialHandle.h"
-#include <string>
 #include "ScreenDrawing.h"
 
 
@@ -86,7 +87,10 @@ const std::string urDrummerVersion="v0.1b";
 using namespace std;
 unsigned int lastTimeEvent;
 unsigned int lastTimeScreenRefresh;
+unsigned int lastTimeScroll;
+unsigned int ticksNow;
 
+unsigned char labelScrollOffset;
 
 // Song player related variables
 SoLoud::Wav *songPlayer;
@@ -119,7 +123,6 @@ int main ( int argc, char** argv )
 		return 1;
 	}
 
-
     // create a new window
     screen = SDL_SetVideoMode(320, 240, 16, SDL_HWSURFACE|SDL_DOUBLEBUF);
     if ( !screen )
@@ -143,7 +146,9 @@ int main ( int argc, char** argv )
     myglobalSettings.loadDrumKitList();
 
     // We have loaded our default settings, if we have a last loaded drumKit, we should use it :
-    if (!myglobalSettings.loadDrumKitFromName(myglobalSettings.getPowerOnKitName())){
+    string PowerOnKitName=myglobalSettings.getPowerOnKitName();
+    DrumKit *PowerOnKit=myglobalSettings.GetDrumKitFromName(PowerOnKitName);
+    if (PowerOnKit!=NULL && !myglobalSettings.loadDrumKit(PowerOnKit)){
     	// We could'nt load the default drum kit, so init an empty one :
         cerr << "Could not load kit : " << myglobalSettings.getPowerOnKitName() << ". Generating a new one." << endl;
     	myglobalSettings.setCurrentDrumKit(new DrumKit);
@@ -176,6 +181,9 @@ int main ( int argc, char** argv )
 
     // Disable mouse cursor if on target device :
     // SDL_ShowCursor(SDL_DISABLE);
+
+    //TODO : Fork the drawing handling (actually 2-5ms) to a second thread ???
+
     bool done = false;
     while (!done)
     {
@@ -185,8 +193,6 @@ int main ( int argc, char** argv )
     	if (keyEvent!=0){
     		HandleKeyEventRetVal=myScreenDrawer.handleKeyPress(keyEvent);
     	}
-
-    	// Do the rotary button events :
 
     	// Do all "graphic" events, including touch events
         SDL_Event event;
@@ -210,25 +216,31 @@ int main ( int argc, char** argv )
             } // end switch
         } // end of message processing
 
+        ticksNow=SDL_GetTicks();
 
         // Do we need to poweroff because of delay ?
         if (myglobalSettings.getAutoPowerOffDelay() > 0){
-        	if (SDL_GetTicks() > (lastTimeEvent+myglobalSettings.getAutoPowerOffDelay()*1000)){
+        	if (ticksNow > (lastTimeEvent+myglobalSettings.getAutoPowerOffDelay()*1000)){
         		cerr << "The power-off delay is over !" << endl;
         		HandleKeyEventRetVal=255;
         	}
         }
 
         // Refresh the screen every 50ms (20 fps)
-        if (SDL_GetTicks() > lastTimeScreenRefresh+50){
-        	lastTimeScreenRefresh=SDL_GetTicks();
+        if (ticksNow > lastTimeScreenRefresh+50){
+        	lastTimeScreenRefresh=ticksNow;
         	myScreenDrawer.RefreshScreen();
+        }
+
+        if (ticksNow > lastTimeScroll + 500){
+        	lastTimeScroll = ticksNow;
+        	labelScrollOffset++;
         }
 
         if (HandleKeyEventRetVal==255){
         	// Send a message to the Arduino to tell him we're going to shutdown,
         	// So, it will blink the led and cut power in a few seconds...
-        	// TODO : send serial message !
+        	// TODO : send serial message to power off !
 
             // Clean the SDL libs :
             TTF_Quit();
@@ -240,6 +252,7 @@ int main ( int argc, char** argv )
             cout << "Exited cleanly" << endl;
             return 255;
         }
+
 
     } // end main loop
 

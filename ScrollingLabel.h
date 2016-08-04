@@ -12,6 +12,7 @@
 #include "Draw.h"
 #include <string>
 
+
 class ScrollingLabel {
 public:
 	ScrollingLabel();
@@ -22,8 +23,6 @@ public:
 	void setFontSize(unsigned int fontSize);
 	unsigned int getScrollOffset() const;
 	void setScrollOffset(unsigned int scrollOffset);
-	float getScrollSpeed() const;
-	void setScrollSpeed(float scrollSpeed);
 	const std::string& getText() const;
 	void setText(const std::string& text);
 	bool isSelected() const;
@@ -34,7 +33,6 @@ private:
 	std::string m_text;
 	unsigned int m_fontSize;
 	unsigned int m_scrollOffset;
-	float m_scrollSpeed;
 	bool m_selected;
 	unsigned int xPos;
 	unsigned int yPos;

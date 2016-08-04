@@ -7,6 +7,8 @@
 
 #include "ControllerLayer.h"
 
+using namespace std;
+
 ControllerLayer::ControllerLayer() {
 
 	m_minControllerValue=0;
@@ -28,7 +30,7 @@ ControllerLayer::~ControllerLayer() {
 
 }
 
-Layer* ControllerLayer::getLayerFromVelocity(unsigned char &velocity){
+Layer* ControllerLayer::getLayerFromVelocity(unsigned int velocity){
 
 	for(unsigned int i(0);i<m_layers.size();i++) {
 
@@ -42,6 +44,11 @@ Layer* ControllerLayer::getLayerFromVelocity(unsigned char &velocity){
 		}
 	}
 
+	if(m_layers.size()>0){
+		// if no layer found for value, return the last from array...
+		return m_layers[m_layers.size()-1];
+	}
+	// If no layers , return null
 	return NULL;
 }
 
@@ -52,6 +59,7 @@ void ControllerLayer::loadSamples(){
 }
 
 void ControllerLayer::unloadSamples(){
+
 	for (unsigned int i=0; i<m_layers.size(); i++){
 		m_layers[i]->unloadSample();
 	}

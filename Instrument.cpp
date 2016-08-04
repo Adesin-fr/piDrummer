@@ -26,19 +26,21 @@ Instrument::~Instrument() {
 	};
 }
 
- SoLoud::Wav* Instrument::getSampleForVelocity(unsigned char &velocity){
+ SoLoud::Wav* Instrument::getSampleForVelocity(unsigned int velocity){
 	// Call to the ControllerLayer to get the Layer from the current controller Value:
 	ControllerLayer *tmpCtl = this->getControllerLayerFromVelocity(m_controllerValue);
 
 	if (tmpCtl==0){
-		cerr << "Aucun controlleur trouvé pour la valeur " << m_controllerValue << endl;
+		cerr << "(instr " << m_instrumentName << ") Aucun controlleur trouvé pour la valeur de controleur  " << m_controllerValue << endl;
 	}
 
 	Layer* tmpLayer(tmpCtl->getLayerFromVelocity(velocity));
 
 	if (tmpLayer==0){
-		cerr << "Aucun Layer trouvé pour la valeur " << m_controllerValue << endl;
+		cerr << "(instr " << m_instrumentName << ") Aucun Layer trouvé pour la valeur de velocity " << velocity << endl;
+		return NULL;
 	}
+
 
 	return tmpLayer->getWavSample();
 
@@ -62,13 +64,22 @@ ControllerLayer* Instrument::getControllerLayerFromVelocity(unsigned int &veloci
 	return NULL;
 }
 
-bool Instrument::loadInstrumentFromConfig(std::string configFileName){
+bool Instrument::loadInstrumentFromConfig(std::string Path, std::string configFileName){
 	Config m_cfg;
+	string completePath;
+	completePath=Path + configFileName;
+
+	// Check if file exists :
+	 struct stat buffer;
+	 std::string compFile=Path + configFileName;
+	 if (stat (compFile.c_str(), &buffer) != 0){
+		 return false;
+	 }
 
 	try {
-		m_cfg.readFile(configFileName.c_str());
+		m_cfg.readFile(completePath.c_str());
 	} catch (const FileIOException &fioex) {
-		cerr << "I/O error while reading file " << configFileName << endl;
+		cerr << "I/O error while reading file " << completePath << endl;
 		return (false);
 	} catch (const ParseException &pex) {
 		cerr << "Parse error at " << pex.getFile() << ":" << pex.getLine()
@@ -89,7 +100,7 @@ bool Instrument::loadInstrumentFromConfig(std::string configFileName){
     	int tmpMinValue(0);
     	int tmpMaxValue(127);
     	const Setting &cfgControllerLayer = ctlLayers[i];
-    	// Instanciate a new ControllerLayer :
+    	// Instantiate a new ControllerLayer :
     	ControllerLayer *ctlLayer= new ControllerLayer();
 
     	cfgControllerLayer.lookupValue("minControllerValue", tmpMinValue);
@@ -114,13 +125,14 @@ bool Instrument::loadInstrumentFromConfig(std::string configFileName){
         	currentLayer.lookupValue("maxVelocity", tmpMaxVelocity);
         	currentLayer.lookupValue("filename", fileName);
 
-        	ctlLayer->addLayer(tmpMinVelocity, tmpMaxVelocity, fileName);
+        	ctlLayer->addLayer(tmpMinVelocity, tmpMaxVelocity, Path + fileName);
         }
 
         m_ctlLayers.push_back(ctlLayer);
 
-
     }
+
+	cerr << "Loaded instrument " << Path << endl;
 
     return true;
 
@@ -138,13 +150,6 @@ void Instrument::setControllerValue(unsigned int controllerValue) {
 	m_controllerValue = controllerValue;
 }
 
-const std::vector<ControllerLayer*>& Instrument::getCtlLayers() const {
-	return m_ctlLayers;
-}
-
-void Instrument::setCtlLayers(const std::vector<ControllerLayer*>& ctlLayers) {
-	m_ctlLayers = ctlLayers;
-}
 
 unsigned int Instrument::getCurrentPlayingSample() const {
 	return m_currentPlayingSample;
@@ -163,6 +168,9 @@ void Instrument::setInstrumentName(const std::string& instrumentName) {
 }
 
 void Instrument::loadInstrumentSamples(){
+
+	cerr << "Loading samples for instrument " << m_instrumentName << endl;
+
 	for (unsigned int i=0; i<m_ctlLayers.size(); i++){
 		m_ctlLayers[i]->loadSamples();
 	}
@@ -170,6 +178,8 @@ void Instrument::loadInstrumentSamples(){
 }
 
 void Instrument::unloadInstrumentSamples(){
+	cerr << "Unloading samples for instrument " << m_instrumentName << endl;
+
 	for (unsigned int i=0; i<m_ctlLayers.size(); i++){
 		m_ctlLayers[i]->unloadSamples();
 	}

@@ -16,7 +16,7 @@ class ControllerLayer {
 	public:
 		ControllerLayer();
 		virtual ~ControllerLayer();
-		Layer* getLayerFromVelocity(unsigned char &velocity);
+		Layer* getLayerFromVelocity(unsigned int velocity);
 
 	unsigned int getMaxControllerValue() const {
 		return m_maxControllerValue;

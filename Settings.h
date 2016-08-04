@@ -26,6 +26,8 @@
 #include "DrumKit.h"
 #include "Instrument.h"
 
+// Reference the DrumKit Class :
+class DrumKit;
 
 class Settings {
 public:
@@ -77,16 +79,16 @@ public:
 	void loadDrumKitList();
 
 	bool loadDrumKit(DrumKit *drumKit);
-	bool loadDrumKitFromName(std::string drumKitName);
+	DrumKit *GetDrumKitFromName(std::string drumKitName);
 
 	bool checkIfFileExists(const std::string& filePath);
 
 	std::string getUserDirectory();
-	const std::vector<Instrument*>& getInstrumentList() const;
+	std::vector<Instrument*> *getInstrumentList();
 	unsigned int getNumTriggerInputs() const;
 	const std::string& getSerialPort() const;
 	void setSerialPort(const std::string& serialPort);
-	const std::vector<DrumKit*>& getDrumKitList() const;
+	std::vector<DrumKit*> *getDrumKitList();
 
 	unsigned int getMetronomeBCount() const {
 		return m_MetronomeBCount;
@@ -134,6 +136,8 @@ public:
 
 	Trigger *getLastHitTrigger() ;
 	void setLastHitTrigger(Trigger *lastHitTrigger);
+	float getGlobalFadeOutTime() const;
+	void setGlobalFadeOutTime(float globalFadeOutTime);
 
 private:
 	SoLoud::Soloud *m_AudioEngine;
@@ -163,15 +167,10 @@ private:
 	std::string m_serialPort;
 
 	// This list contains all available instruments (loaded or not)
-	std::vector<Instrument*> m_instrumentList;
+	std::vector<Instrument*> *m_instrumentList;
 
 	// This list contains all available drumkits
-	std::vector<DrumKit*> m_drumKitList;
-
-	// This list is kept up-to-date with loaded instruments.
-	// So, when we load a drumkit, we can ask unloaded instruments to load samples,
-	// and unload loaded ones that are not needed anymore!
-	std::vector<Instrument*> m_LoadedinstrumentList;
+	std::vector<DrumKit*> *m_drumKitList;
 
 	// Pointer to currently loaded drumkit.
 	DrumKit *m_currentDrumKit;
@@ -184,6 +183,10 @@ private:
 	unsigned int m_MetronomeBCount;
 	bool m_MetronomeOn;
 
+	float m_GlobalFadeOutTime;
+
 };
+
+void fillBackground();
 
 #endif /* INCLUDE_SETTINGS_H_ */

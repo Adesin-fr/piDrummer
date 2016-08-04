@@ -11,8 +11,6 @@ using namespace std;
 using namespace libconfig;
 
 
-
-
 ScreenDrawing::ScreenDrawing(){
 	m_screenNeedRefresh=false;
 
@@ -202,8 +200,6 @@ unsigned int ScreenDrawing::handleKeyPress(unsigned int keyEvent){
 		currentSelectedItem=0;
 	}
 
-	cerr << "Received key event num " << keyEvent << endl;
-
 	switch (keyEvent){
 	case SDLK_F12:
 		// POWER OFF !
@@ -250,7 +246,7 @@ unsigned int ScreenDrawing::handleKeyPress(unsigned int keyEvent){
 					break;
 				}
 		}else if (currentScreen=="KitSelect"){
-			myglobalSettings.loadDrumKit(myglobalSettings.getDrumKitList()[currentSelectedItem]);
+			myglobalSettings.loadDrumKit((*myglobalSettings.getDrumKitList())[currentSelectedItem]);
 			// and exit to mainscreen (pop 2 times : 1 to go back to main menu, and 1 more to go back to main screen!)
 			myCurrentMenuPath.pop_back();
 			myCurrentSelectedMenuItem.pop_back();
@@ -272,7 +268,7 @@ unsigned int ScreenDrawing::handleKeyPress(unsigned int keyEvent){
 			myCurrentSelectedMenuItem.push_back(0);
 			// Set selected DK Component :
 			unsigned int SelectedDKIndex = myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-2];
-			m_SelectedDK = myglobalSettings.getCurrentDrumKit()->getDkComponentList()[SelectedDKIndex];
+			m_SelectedDK = (*myglobalSettings.getCurrentDrumKit()->getDkComponentList())[SelectedDKIndex];
 
 			refreshFunction=&ScreenDrawing::DrawKitSetupTriggerChoosen;
 		}else if(currentScreen=="KitSetup1"){
@@ -291,6 +287,8 @@ unsigned int ScreenDrawing::handleKeyPress(unsigned int keyEvent){
 			// TODO : what to do with "escape key" when on main screen ?
 			refreshFunction=&ScreenDrawing::DrawMainScreen;
 		}else{
+
+			string previousMenu = currentScreen;
 
 			cerr << "previousMenu is " << currentScreen << endl;
 			cerr << "previousSel is " << currentScreen << endl;
@@ -311,6 +309,11 @@ unsigned int ScreenDrawing::handleKeyPress(unsigned int keyEvent){
 				// Save the function name to call it later if needed !
 				refreshFunction=&ScreenDrawing::DrawMainMenu;
 				maxSelectedMenuItem=5;
+				if (previousMenu=="KitSetup"){
+
+					// Save the drumkit to file :
+					myglobalSettings.getCurrentDrumKit()->saveDrumKitToConfigFile();
+				}
 			}else if (currentScreen=="KitSetup"){
 				// Save the function name to call it later if needed !
 				refreshFunction=&ScreenDrawing::DrawKitSetupMenu;
@@ -356,17 +359,18 @@ unsigned int ScreenDrawing::handleKeyPress(unsigned int keyEvent){
 						tmpInstr=m_SelectedDK->getChoosenInstrument();
 						tmpInstr=myglobalSettings.getPreviousInstrument(m_SelectedDK->getChoosenInstrument());
 						if (tmpInstr!=NULL){
-							// TODO : unload previous instrument and load new one WHEN USER VALIDATE
-							// myglobalSettings.getCurrentDrumKit()->getHowManyTimeInstrumentUsed(previousInstr);
-
+							// Clean up instruments to unload those which are not needed anymore
 							m_SelectedDK->setChoosenInstrument(tmpInstr);
+							tmpInstr->loadInstrumentSamples();
+
+							myglobalSettings.getCurrentDrumKit()->cleanUpInstrumentSamples();
 						}
 						break;
 					case 1:
 						// Change Pitch
 						m_tmpFloatValue=m_SelectedDK->getPitch();
 						if (m_tmpFloatValue>0.0f){
-							m_tmpFloatValue-=0.05f;
+							m_tmpFloatValue-=0.01f;
 							m_SelectedDK->setPitch(m_tmpFloatValue);
 						}
 						break;
@@ -430,16 +434,17 @@ unsigned int ScreenDrawing::handleKeyPress(unsigned int keyEvent){
 					tmpInstr=m_SelectedDK->getChoosenInstrument();
 					tmpInstr=myglobalSettings.getNextInstrument(tmpInstr);
 					if (tmpInstr!=NULL){
-						// TODO : unload previous instrument and load new one WHEN USER VALIDATE
-						// myglobalSettings.getCurrentDrumKit()->getHowManyTimeInstrumentUsed(previousInstr);
 						m_SelectedDK->setChoosenInstrument(tmpInstr);
+						tmpInstr->loadInstrumentSamples();
+
+						myglobalSettings.getCurrentDrumKit()->cleanUpInstrumentSamples();
 					}
 					break;
 				case 1:
 					// Change Pitch
 					m_tmpFloatValue=m_SelectedDK->getPitch();
 					if (m_tmpFloatValue<2.00f){
-						m_tmpFloatValue+=0.05f;
+						m_tmpFloatValue+=0.01f;
 						m_SelectedDK->setPitch(m_tmpFloatValue);
 					}
 					break;
@@ -490,7 +495,7 @@ void ScreenDrawing::DrawMainScreen(){
 	string Vol;
 
 	// Clean the screen
-	SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));
+	fillBackground();
 
 	// An horizontal line on top and bottom:
 	line(screen, 0, 20, 319, 20, SDL_MapRGB(screen->format, 255, 255, 255));
@@ -519,7 +524,51 @@ void ScreenDrawing::DrawMainScreen(){
 	svol<< "Vol : " << myglobalSettings.getVolume();
 	DrawLabel(svol.str() , 18, 2, 0, false );
 
-	// Last trigger Hits for each input :
+	// Last trigger velocity for each input :
+	// TODO : add histogram to mainscreen : [NBChannels] bars showing last hit velocity
+	std::vector<DrumKitComponent*> *dkCompList=myglobalSettings.getCurrentDrumKit()->getDkComponentList();
+	unsigned int nbTriggers=dkCompList->size();
+	unsigned int histogramBarSize=(310/nbTriggers);
+
+	unsigned int xOffset= (320 - (histogramBarSize*nbTriggers))/2;
+
+	// Bar height = 100 max.
+	unsigned int maxHeight=100;
+
+	// Draw a box around histogram
+	unsigned int boxW= (histogramBarSize*nbTriggers) + 4;
+	box(screen, xOffset-2, 213 - maxHeight, boxW, maxHeight+4 , SDL_MapRGB(screen->format, 255, 255, 255));
+	// Draw a light grey line in middle of histogram :
+	line(screen, xOffset-1, (213-(maxHeight/2)), xOffset + boxW-2, (213-(maxHeight/2)),  SDL_MapRGB(screen->format, 120,120,120) );
+
+	Uint32 barColor;
+
+	for(unsigned int i=0; i<nbTriggers;i++){
+		// 1 pixel narrower so we have a space between bars.
+		for (unsigned int x=0;x<histogramBarSize-1;x++){
+
+			unsigned int xpos=xOffset+(i*histogramBarSize)+x;
+
+			// If Hit since less than 2 second :
+			if ((*dkCompList)[i]->getAssociatedTrigger()->getLastTimeHit() + 2000 > ticksNow ){
+				unsigned int barHeight = (*dkCompList)[i]->getAssociatedTrigger()->getLastVelocity()*maxHeight/127;
+
+				if (barHeight>0){
+					if ((*dkCompList)[i]->getAssociatedTrigger() == myglobalSettings.getCurrentDrumKit()->getLastTriggerHit() ){
+						// If last hit trigger, set RED.
+						barColor=SDL_MapRGB(screen->format, 255, 0, 0);
+					}else{
+						// Else set white...
+						barColor=SDL_MapRGB(screen->format, 255, 255, 255);
+					}
+					// Draw a vertical line :
+					line(screen, xpos, 215-barHeight,  xpos, 215, barColor);
+				}
+			}
+
+		}
+	}
+
 
 
     // finally, update the screen :)
@@ -532,7 +581,7 @@ void ScreenDrawing::DrawMainMenu(){
 	unsigned int currentSel=myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-1];
 
 	// Clean the screen
-	SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));
+	fillBackground();
 
 	// First line of icons
 	DrawIcon(myglobalSettings.getUserDirectory() + "/.urDrummer/res/kitsel.gif",44, 20, false);
@@ -565,17 +614,17 @@ void ScreenDrawing::DrawKitSelect(){
 	unsigned int selItem;
 
 	// Clean the screen
-	SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));
+	fillBackground();
 
 	DrawLabel("Kit Select" , 18, 110, 0, false);
 	line(screen, 0, 20, 319, 20, SDL_MapRGB(screen->format, 255, 255, 255));
 
-	if (myglobalSettings.getDrumKitList().size()>0){
-		maxSelectedMenuItem= myglobalSettings.getDrumKitList().size()-1;
+	if (myglobalSettings.getDrumKitList()->size()>0){
+		maxSelectedMenuItem= myglobalSettings.getDrumKitList()->size()-1;
 
 		// Draw the list of available drumkits :
 		for(unsigned int i=0;i <= maxSelectedMenuItem;i++){
-			ListOfKits.push_back(myglobalSettings.getDrumKitList()[i]->getKitName());
+			ListOfKits.push_back((*myglobalSettings.getDrumKitList())[i]->getKitName());
 		}
 
 		if (myCurrentSelectedMenuItem.size()>0){
@@ -625,7 +674,7 @@ void ScreenDrawing::DrawMetronomeSetup(){
 	}
 
 	// Clean the screen
-	SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));
+	fillBackground();
 
 	DrawLabel("Metronome" , 18, 110, 0, false);
 	line(screen, 0, 20, 319, 20, SDL_MapRGB(screen->format, 255, 255, 255));
@@ -674,7 +723,7 @@ void ScreenDrawing::DrawMetronomeSetup(){
 void ScreenDrawing::DrawAudioPlayer(){
 
 	// Clean the screen
-	SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));
+	fillBackground();
 
 	DrawLabel("Audio Player" , 18, 110, 0, false);
 	line(screen, 0, 20, 319, 20, SDL_MapRGB(screen->format, 255, 255, 255));
@@ -688,7 +737,7 @@ void ScreenDrawing::DrawAudioPlayer(){
 void ScreenDrawing::DrawTrainingMenu(){
 
 	// Clean the screen
-	SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));
+	fillBackground();
 
 	DrawLabel("Training" , 18, 120, 0, false);
 	line(screen, 0, 20, 319, 20, SDL_MapRGB(screen->format, 255, 255, 255));
@@ -701,16 +750,19 @@ void ScreenDrawing::DrawTrainingMenu(){
 
 void ScreenDrawing::DrawKitSetupMenu(){
 	vector<string> valueList;
-	std::vector<DrumKitComponent*> dkCompList;
+	std::vector<DrumKitComponent*> *dkCompList;
 	unsigned int selItem;
 	Trigger *dkTrig;
+
+	// TODO : allow changing kit name in kit setup
+	// TODO : allow changing REVERB and EQ of kit.
 
 	dkCompList=	myglobalSettings.getCurrentDrumKit()->getDkComponentList();
 
 	// Set a list of available triggers :
-	for (unsigned int i=0; i<dkCompList.size() ; i++ ){
+	for (unsigned int i=0; i<dkCompList->size() ; i++ ){
 		// Add the trigger name to the list :
-		dkTrig= dkCompList[i]->getAssociatedTrigger();
+		dkTrig= (*dkCompList)[i]->getAssociatedTrigger();
 		valueList.push_back(dkTrig->getTriggerName());
 	}
 
@@ -719,7 +771,7 @@ void ScreenDrawing::DrawKitSetupMenu(){
 	selItem=myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-1];
 
 	// Clean the screen
-	SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));
+	fillBackground();
 
 	DrawLabel("Kit Setup" , 18, 120, 0, false);
 	line(screen, 0, 20, 319, 20, SDL_MapRGB(screen->format, 255, 255, 255));
@@ -766,7 +818,7 @@ void ScreenDrawing::DrawKitSetupTriggerChoosen(){
 
 
 	// Clean the screen
-	SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));
+	fillBackground();
 
 	// Draw the name of selected trigger on screen :
 	txtLabel=new TextLabel(TrigName,160,0);
@@ -838,10 +890,32 @@ void ScreenDrawing::DrawKitSetupTriggerChoosen(){
 void ScreenDrawing::DrawGlobalSettingsMenu(){
 
 	// Clean the screen
-	SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));
+	fillBackground();
 
 	DrawLabel("Global Settings" , 18, 100, 0, false);
 	line(screen, 0, 20, 319, 20, SDL_MapRGB(screen->format, 255, 255, 255));
+
+	/* TODO : Global settings to be set :
+	 * Volume
+	 * Reverb	 (TO BE DONE)
+	 * Equalizer (TO BE DONE)
+	 * Triggers
+	 * 		Trigger List
+	 * 			Name
+	 * 			Type
+	 * 			Signal Curve
+	 * 			Threshold
+	 * 			Max Value
+	 * 			Mute Group
+	 * 			CrossTalk Group
+	 * 			Mask Time
+	 * 			Dynamic Trigger
+	 * 			Foot Splash Sensitivity
+	 * 			Controller Resolution
+	 * Instrument Fade-Out Time
+	 * Auto PowerOff Delay
+	 * Inv. Rot. Sw.
+	 */
 
 
     // finally, update the screen :)
@@ -881,6 +955,9 @@ void ScreenDrawing::DrawList(std::vector<std::string> listText, int x, int y, in
 
 	}
 
+	SDL_SetColorKey(ListSurface, SDL_SRCCOLORKEY, SDL_MapRGB(ListSurface->format, 0, 0, 0));
+	SDL_SetColorKey(Container, SDL_SRCCOLORKEY, SDL_MapRGB(Container->format, 0, 0, 0));
+
 	SDL_BlitSurface(ListSurface, NULL, Container, &positionList); /* Blit List to the container*/
 	SDL_BlitSurface(Container, NULL, screen, &position); /* Blit container to screen*/
 
@@ -897,5 +974,22 @@ void ScreenDrawing::RefreshScreen(){
 	(*this.*refreshFunction)();
 
 	// Fall off the peaks of histogram :
+
+}
+
+
+void fillBackground(){
+	// Draw a gradient :
+
+	SDL_Rect dims;
+	dims.x=0;
+	dims.w=320;
+	dims.h=4;
+
+	for (unsigned int i=0;i<80;i++){
+		dims.y=i*4;
+		SDL_FillRect(screen, &dims, SDL_MapRGB(screen->format, i, i, i));
+
+	}
 
 }

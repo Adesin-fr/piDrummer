@@ -13,6 +13,8 @@
 #include <libconfig.h++>
 #include <list>
 #include <iostream>
+#include <sys/stat.h>
+
 #include "ControllerLayer.h"
 #include "soloud_wav.h"
 
@@ -21,8 +23,8 @@ class Instrument {
 	public:
 		Instrument();
 		virtual ~Instrument();
-		SoLoud::Wav* getSampleForVelocity(unsigned char &velocity);
-		bool loadInstrumentFromConfig(std::string configFileName);
+		SoLoud::Wav* getSampleForVelocity(unsigned int velocity);
+		bool loadInstrumentFromConfig(std::string Path, std::string configFileName);
 
 		void loadInstrumentSamples();
 		void unloadInstrumentSamples();
@@ -30,8 +32,6 @@ class Instrument {
 		bool isLoaded() const;
 		unsigned int getControllerValue() const;
 		void setControllerValue(unsigned int controllerValue);
-		const std::vector<ControllerLayer*>& getCtlLayers() const;
-		void setCtlLayers(const std::vector<ControllerLayer*>& ctlLayers);
 		unsigned int getCurrentPlayingSample() const;
 		void setCurrentPlayingSample(unsigned int currentPlayingSample);
 		const std::string& getInstrumentName() const;

@@ -19,8 +19,15 @@
 #include "Trigger.h"
 #include "DrumKitComponent.h"
 #include "SignalCurve.h"
+#include "Settings.h"
+
+
+// Reference the Settings Class :
+class Settings;
+
 
 extern SoLoud::Soloud myAudioEngine;
+extern Settings myglobalSettings;
 
 class DrumKit {
 	public:
@@ -38,23 +45,25 @@ class DrumKit {
 		void setNumTriggerInput(int numTriggerInput);
 
 		bool loadDrumKitFromConfigFile(std::string configFileName);
+		bool saveDrumKitToConfigFile();
 
 		void playInstrumentForTriggerInput(unsigned char TriggerNumber, unsigned char TriggerVelocity, unsigned char TriggerPosition);
 		void setNewControllerValue(unsigned char TriggerNumber, unsigned char TriggerPosition);
 		void setAfterTouchValue(unsigned char TriggerNumber, unsigned char TriggerPosition);
 
-		unsigned int getLastHitVelocity() const;
-		std::vector<DrumKitComponent*> getDkComponentList();
+		std::vector<DrumKitComponent*> *getDkComponentList();
 
 		unsigned int getHowManyTimeInstrumentUsed(Instrument *whichInstrument);
+		Trigger* getLastTriggerHit();
+
+		void cleanUpInstrumentSamples();
 
 	private:
-		std::vector<DrumKitComponent*> m_DKComponentList;
+		std::vector<DrumKitComponent*> *m_DKComponentList;
 		std::string m_kitName;
 		unsigned int m_reverbDelay;
 		Trigger *m_lastTriggerHit;
 		
-		unsigned int m_lastHitVelocity;
 		unsigned int m_numTriggerInput;
 
 };

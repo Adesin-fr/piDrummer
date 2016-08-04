@@ -11,6 +11,8 @@
 #include "Instrument.h"
 #include "Trigger.h"
 
+
+
 class DrumKitComponent {
 public:
 	DrumKitComponent();
@@ -63,6 +65,9 @@ private:
 	float m_balance;
 	Instrument *m_choosenInstrument;
 	Trigger *m_associatedTrigger;
+
+
+	// TODO : add REVERB and LO/HI/BANDPASS filter
 
 };
 

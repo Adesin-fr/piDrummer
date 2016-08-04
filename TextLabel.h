@@ -15,7 +15,7 @@
 
 extern Settings myglobalSettings;
 extern SDL_Surface* screen;
-
+extern unsigned char labelScrollOffset;
 
 class TextLabel {
 

@@ -28,7 +28,7 @@ class Layer {
 		void setMaxVelocity(unsigned int maxVelocity);
 		unsigned int getMinVelocity() const;
 		void setMinVelocity(unsigned int minVelocity);
-		void loadSample();
+		bool loadSample();
 		void unloadSample();
 		SoLoud::Wav *getWavSample();
 
@@ -38,6 +38,7 @@ class Layer {
 		unsigned int m_maxVelocity;
         std::string m_fileName;
         SoLoud::Wav *wavSample;
+        bool sampleLoaded;
 
 };
 

@@ -21,6 +21,10 @@ Settings::Settings() {
 	m_MetronomeBPM=120;
 	m_MetronomeVolume=16;
 	m_MetronomeOn=false;
+	m_GlobalFadeOutTime=0.5f;
+	m_instrumentList=new vector<Instrument*>;
+
+	m_drumKitList = new vector<DrumKit*>;
 
 }
 
@@ -350,7 +354,7 @@ void Settings::loadDrumKitList(){
 
 				if (loadKit->loadDrumKitFromConfigFile(KitDir + fileName)){
 					// add the drumkit to the list
-					m_drumKitList.push_back(loadKit);
+					m_drumKitList->push_back(loadKit);
 				}
 				else{
 					// Delete the drumkit : it is not valid !
@@ -364,7 +368,7 @@ void Settings::loadDrumKitList(){
 	}
 
 	// Finished : debug some info about instrument loaded count :
-	cerr << "Finished scanning folder. " << m_drumKitList.size() << " Drum kits successfully loaded." << endl << endl;
+	cerr << "Finished scanning folder. " << m_drumKitList->size() << " Drum kits successfully loaded." << endl << endl;
 
 }
 
@@ -387,9 +391,9 @@ void Settings::loadInstrumentList(){
 
 			if (folderName!="." && folderName!=".."){
 				loadInstr= new Instrument();
-				if (loadInstr->loadInstrumentFromConfig(instrumentDir + folderName + "/instrument.cfg")){
+				if (loadInstr->loadInstrumentFromConfig(instrumentDir + folderName + "/", "instrument.cfg")){
 					// add the instrument to the list
-					m_instrumentList.push_back(loadInstr);
+					m_instrumentList->push_back(loadInstr);
 				}
 				else{
 					// Delete the instrument : it is not valid !
@@ -403,7 +407,7 @@ void Settings::loadInstrumentList(){
 	}
 
 	// Finished : debug some info about instrument loaded count :
-	cerr << "Finished scanning folder. " << m_instrumentList.size() << " instrument successfully loaded." << endl << endl;
+	cerr << "Finished scanning folder. " << m_instrumentList->size() << " instrument successfully loaded." << endl << endl;
 
 }
 
@@ -411,14 +415,14 @@ void Settings::loadInstrumentList(){
 Instrument* Settings::getNextInstrument(Instrument *currentInstrument){
 	string currentInstrName;
 	if (currentInstrument==NULL){
-		return m_instrumentList[0];
+		return (*m_instrumentList)[0];
 	}
 	currentInstrName=currentInstrument->getInstrumentName();
 	// Scroll the list from the begining, when we find our current instrument, returns the next one if exist
-	for(unsigned int i=0 ; i<m_instrumentList.size() ; i++){
-		if (m_instrumentList[i]->getInstrumentName() == currentInstrName){
-			if (i<m_instrumentList.size()-1){
-				return m_instrumentList[i+1];
+	for(unsigned int i=0 ; i<m_instrumentList->size() ; i++){
+		if ((*m_instrumentList)[i]->getInstrumentName() == currentInstrName){
+			if (i<m_instrumentList->size()-1){
+				return (*m_instrumentList)[i+1];
 			}
 		}
 	}
@@ -428,14 +432,14 @@ Instrument* Settings::getNextInstrument(Instrument *currentInstrument){
 Instrument* Settings::getPreviousInstrument(Instrument *currentInstrument){
 	string currentInstrName;
 	if (currentInstrument==NULL){
-		return m_instrumentList[0];
+		return (*m_instrumentList)[0];
 	}
 	currentInstrName=currentInstrument->getInstrumentName();
 	// Scroll the list from the begining, when we find our current instrument, returns the previous one if exist
-	for(unsigned int i=0 ; i<m_instrumentList.size() ; i++){
-		if (m_instrumentList[i]->getInstrumentName() == currentInstrName){
+	for(unsigned int i=0 ; i<m_instrumentList->size() ; i++){
+		if ((*m_instrumentList)[i]->getInstrumentName() == currentInstrName){
 			if (i>0){
-				return m_instrumentList[i-1];
+				return (*m_instrumentList)[i-1];
 			}
 		}
 	}
@@ -446,34 +450,40 @@ Instrument* Settings::getPreviousInstrument(Instrument *currentInstrument){
 
 bool Settings::loadDrumKit(DrumKit *drumKit){
 
-	std::vector<DrumKitComponent*> newDKCL, oldDKCL;
+	std::vector<DrumKitComponent*> *newDKCL, *oldDKCL;
 	bool instrFound;
 	DrumKitComponent *oDK, *nDK;
 
-	oldDKCL=drumKit->getDkComponentList();
-	newDKCL=m_currentDrumKit->getDkComponentList();
+	newDKCL=drumKit->getDkComponentList();
 
-	// First ,  Scan the current drumkit for instruments that are not needed anymore (not included in current drumkit)
-	for (unsigned int o=0; o<oldDKCL.size();o++){
-		instrFound=false;
-		oDK=oldDKCL[o];
-		for (unsigned int n=0; n<newDKCL.size();n++){
-			nDK=newDKCL[n];
-			if (oDK->getChoosenInstrument()==nDK->getChoosenInstrument()){
-				instrFound=true;
-				break;
+	// Go here only if we already loaded a kit.
+	if (m_currentDrumKit!=NULL){
+		oldDKCL=m_currentDrumKit->getDkComponentList();
+
+		// First ,  Scan the current drumkit for instruments that are not needed anymore (not included in current drumkit)
+		for (unsigned int o=0; o<oldDKCL->size();o++){
+			instrFound=false;
+			oDK=(*oldDKCL)[o];
+			for (unsigned int n=0; n<newDKCL->size();n++){
+				nDK=(*newDKCL)[n];
+				if (oDK->getChoosenInstrument()==nDK->getChoosenInstrument()){
+					instrFound=true;
+					break;
+				}
+			}
+			if (!instrFound){
+				// Instr was in the previous drumkit but not the new one, no more needed !
+				oDK->getChoosenInstrument()->unloadInstrumentSamples();
 			}
 		}
-		if (!instrFound){
-			// Instr was in the previous drumkit but not the new one, no more needed !
-			oDK->getChoosenInstrument()->unloadInstrumentSamples();
-		}
 	}
+
+
 	// Then load missing instruments :
-	for (unsigned int n=0; n<newDKCL.size();n++){
+	for (unsigned int n=0; n<newDKCL->size();n++){
 		// Get a pointer to the DrumKitComponent :
-		nDK=newDKCL[n];
-		if (!nDK->getChoosenInstrument()->isLoaded()){
+		nDK=(*newDKCL)[n];
+		if (nDK->getChoosenInstrument()!=NULL && !nDK->getChoosenInstrument()->isLoaded()){
 			// Load only if the instrument is not already loaded !
 			nDK->getChoosenInstrument()->loadInstrumentSamples();
 		}
@@ -485,18 +495,16 @@ bool Settings::loadDrumKit(DrumKit *drumKit){
 }
 
 
-bool Settings::loadDrumKitFromName(std::string drumKitName){
+DrumKit *Settings::GetDrumKitFromName(std::string drumKitName){
 	// search for the drumkit in loaded kits, and assign it to the current one :
 
 
-
-	for (unsigned int i=0; i<m_drumKitList.size(); i++){
-		if (m_drumKitList[i]->getKitName() == drumKitName){
-			m_currentDrumKit=m_drumKitList[i];
-			return true;
+	for (unsigned int i=0; i<m_drumKitList->size(); i++){
+		if ((*m_drumKitList)[i]->getKitName() == drumKitName){
+			return (*m_drumKitList)[i];
 		}
 	}
-	return false;
+	return NULL;
 }
 
 std::string Settings::getUserDirectory(){
@@ -508,7 +516,7 @@ std::string Settings::getUserDirectory(){
 	return userDir;
 }
 
-const std::vector<Instrument*>& Settings::getInstrumentList() const {
+std::vector<Instrument*>  *Settings::getInstrumentList()  {
 	return m_instrumentList;
 }
 
@@ -524,7 +532,7 @@ void Settings::setSerialPort(const std::string& serialPort) {
 	m_serialPort = serialPort;
 }
 
-const std::vector<DrumKit*>& Settings::getDrumKitList() const {
+std::vector<DrumKit*> *Settings::getDrumKitList(){
 	return m_drumKitList;
 }
 
@@ -534,4 +542,12 @@ Trigger *Settings::getLastHitTrigger(){
 
 void Settings::setLastHitTrigger(Trigger *lastHitTrigger) {
 	m_LastHitTrigger = lastHitTrigger;
+}
+
+float Settings::getGlobalFadeOutTime() const {
+	return m_GlobalFadeOutTime;
+}
+
+void Settings::setGlobalFadeOutTime(float globalFadeOutTime) {
+	m_GlobalFadeOutTime = globalFadeOutTime;
 }

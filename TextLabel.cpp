@@ -85,6 +85,8 @@ void TextLabel::doDraw(){
 		texte = TTF_RenderText_Blended(myFont, m_text.c_str(), m_textColor);
 	}
 
+	// TODO : offset blitting position respectif to labelScrollOffset and maxWidth
+
 	SDL_BlitSurface(texte, NULL, screen, &position); /* Blit text */
 
 	delete texte;

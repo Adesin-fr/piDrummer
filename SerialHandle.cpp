@@ -107,7 +107,7 @@ bool SerialHandle::initSerial(){
 
 unsigned int SerialHandle::handleEvents(DrumKit *currentDrumKit){
 
-	unsigned char triggerNumber, triggerVelocity, triggerPosition, triggerValue ;
+	unsigned int triggerNumber, triggerVelocity, triggerPosition, triggerValue ;
 
 	char nextData[32];
 	int n;
@@ -129,8 +129,6 @@ unsigned int SerialHandle::handleEvents(DrumKit *currentDrumKit){
 		return 0;
 	}
 
-	cerr << "Serial data present ! " << endl;
-
 	while (m_serPortOpened && read(m_serPort, nextData, 1)){
 
 		m_serialDataLine+=nextData[0];
@@ -138,7 +136,7 @@ unsigned int SerialHandle::handleEvents(DrumKit *currentDrumKit){
 		//Is the line over ?
 		if (m_serialDataLine[m_serialDataLine.size()-1] == 10){
 			// Yes,  handle it !
-			if (m_serialDataLine.size()<4){
+			if (m_serialDataLine.size()<5){
 				return 0;
 			}
 
@@ -152,12 +150,10 @@ unsigned int SerialHandle::handleEvents(DrumKit *currentDrumKit){
 				triggerVelocity = m_serialDataLine[2];
 				triggerPosition = m_serialDataLine[3];
 
-				cerr << "Received Trigger Event : " << endl;
-				cerr << "   Trigger number   : " << triggerNumber << endl;
-				cerr << "   Trigger velocity : " << triggerVelocity << endl;
-				cerr << "   Trigger position : " << triggerPosition << endl;
-
 				// Find in the current drumKit if the corresponding trigger is mapped:
+				if (currentDrumKit==NULL){
+					cerr << " No current drumkit ! "<< endl;
+				}
 				currentDrumKit->playInstrumentForTriggerInput(triggerNumber, triggerVelocity, triggerPosition);
 
 				m_serialDataLine="";
