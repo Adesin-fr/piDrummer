@@ -525,7 +525,6 @@ void ScreenDrawing::DrawMainScreen(){
 	DrawLabel(svol.str() , 18, 2, 0, false );
 
 	// Last trigger velocity for each input :
-	// TODO : add histogram to mainscreen : [NBChannels] bars showing last hit velocity
 	std::vector<DrumKitComponent*> *dkCompList=myglobalSettings.getCurrentDrumKit()->getDkComponentList();
 	unsigned int nbTriggers=dkCompList->size();
 	unsigned int histogramBarSize=(310/nbTriggers);
@@ -533,7 +532,7 @@ void ScreenDrawing::DrawMainScreen(){
 	unsigned int xOffset= (320 - (histogramBarSize*nbTriggers))/2;
 
 	// Bar height = 100 max.
-	unsigned int maxHeight=100;
+	unsigned int maxHeight=127;
 
 	// Draw a box around histogram
 	unsigned int boxW= (histogramBarSize*nbTriggers) + 4;
