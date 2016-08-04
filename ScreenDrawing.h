@@ -15,6 +15,7 @@
 #include <vector>
 #include <map>
 #include <libconfig.h++>
+#include <pthread.h>
 
 #include "Settings.h"
 #include "Draw.h"
@@ -26,6 +27,7 @@ extern SDL_Surface* screen;
 extern Settings myglobalSettings;
 extern const std::string urDrummerVersion;
 extern unsigned int ticksNow;
+extern unsigned int lastTimeScreenRefresh;
 
 
 class ScreenDrawing{

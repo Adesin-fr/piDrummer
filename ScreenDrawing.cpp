@@ -968,14 +968,13 @@ void ScreenDrawing::DrawList(std::vector<std::string> listText, int x, int y, in
 }
 
 
+
 void ScreenDrawing::RefreshScreen(){
 	// Call the function to draw the screen :
+
 	(*this.*refreshFunction)();
 
-	// Fall off the peaks of histogram :
-
 }
-
 
 void fillBackground(){
 	// Draw a gradient :
@@ -992,3 +991,4 @@ void fillBackground(){
 	}
 
 }
+

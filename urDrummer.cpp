@@ -72,6 +72,7 @@
 #include <cstdlib>
 #include <SDL/SDL.h>
 #include <string>
+#include <thread>
 
 #include "soloud.h"
 #include "soloud_wav.h"
@@ -96,16 +97,32 @@ unsigned char labelScrollOffset;
 SoLoud::Wav *songPlayer;
 int songPlayerPointer;
 bool songPlayerPaused;
+bool done;
 
 Settings myglobalSettings;
 SDL_Surface* screen;
 SoLoud::Soloud myAudioEngine;
+ScreenDrawing myScreenDrawer;
+
+// function called by thread
+void RefreshScreen(){
+
+	while(!done){
+		SDL_Delay(15);
+		// 20ms between each call, we should get about 50fps
+        if (ticksNow > lastTimeScreenRefresh+20){
+        	lastTimeScreenRefresh=ticksNow;
+        	// Call the function to draw the screen :
+        	myScreenDrawer.RefreshScreen();
+        }
+	}
+
+}
 
 int main ( int argc, char** argv )
 {
 	// Global variables:
 
-	ScreenDrawing myScreenDrawer;
 	SerialHandle *mySerialPort;
 	unsigned int keyEvent;
 	unsigned int HandleKeyEventRetVal=0;
@@ -177,14 +194,14 @@ int main ( int argc, char** argv )
     	/// Wait...
     }
 
-    myScreenDrawer.DrawMainScreen();
-
     // Disable mouse cursor if on target device :
     // SDL_ShowCursor(SDL_DISABLE);
 
-    //TODO : Fork the drawing handling (actually 2-5ms) to a second thread ???
+    done = false;
 
-    bool done = false;
+    // Run the screen Drawer refresh in a separate thread :
+    std::thread t1(RefreshScreen);
+
     while (!done)
     {
 
@@ -226,12 +243,6 @@ int main ( int argc, char** argv )
         	}
         }
 
-        // Refresh the screen every 50ms (20 fps)
-        if (ticksNow > lastTimeScreenRefresh+50){
-        	lastTimeScreenRefresh=ticksNow;
-        	myScreenDrawer.RefreshScreen();
-        }
-
         if (ticksNow > lastTimeScroll + 500){
         	lastTimeScroll = ticksNow;
         	labelScrollOffset++;
@@ -242,7 +253,10 @@ int main ( int argc, char** argv )
         	// So, it will blink the led and cut power in a few seconds...
         	// TODO : send serial message to power off !
 
-            // Clean the SDL libs :
+        	// Stop the screen drawer :
+        	done=true;
+
+        	// Clean the SDL libs :
             TTF_Quit();
             SDL_Quit();
             // Saving settings

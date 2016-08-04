@@ -20,7 +20,7 @@ Trigger::Trigger() {
 	m_footSplashSensitivity=0;
 	m_retriggerDelay=10;
 	m_muteGroup=0;
-	m_lastVelocity=127;
+	m_lastVelocity=0;
 	m_lastTimeHit=ticksNow;
 	m_maxValue=0;
 }
