@@ -18,6 +18,7 @@ TextLabel::TextLabel() {
 	m_drawingSurface=screen;
 	m_textColor=(SDL_Color){255,255,255};
 	m_textSelected=false;
+	m_doScroll=true;
 }
 
 TextLabel::TextLabel(std::string text, unsigned int xPos, unsigned int yPos){
@@ -30,6 +31,7 @@ TextLabel::TextLabel(std::string text, unsigned int xPos, unsigned int yPos){
 	m_drawingSurface=screen;
 	m_textColor=(SDL_Color){255,255,255};
 	m_textSelected=false;
+	m_doScroll=true;
 }
 
 void TextLabel::doDraw(){
@@ -52,7 +54,7 @@ void TextLabel::doDraw(){
 		scrollNeeded=true;
 	}
 	// Set blitting size...
-	if (scrollNeeded){
+	if (scrollNeeded && m_doScroll){
 		//unsigned int labelOverSizeAmount=(texte->w-m_maxWidth)+150;
 		unsigned int labelOverSizeAmount=texte->w*2;
 		blitSize.x=(labelScrollOffset % labelOverSizeAmount)-(labelOverSizeAmount/2);
@@ -94,14 +96,14 @@ void TextLabel::doDraw(){
 		SDL_Surface *BGSurf;
 		BGSurf=SDL_CreateRGBSurface(SDL_HWSURFACE,labelWidth, texte->h, 16,0,0,0,0);
 		SDL_FillRect(BGSurf, NULL, SDL_MapRGB(BGSurf->format, m_textColor.r, m_textColor.g, m_textColor.b));
-		SDL_BlitSurface(BGSurf, NULL, screen, &position); /* Blit background*/
+		SDL_BlitSurface(BGSurf, NULL, m_drawingSurface, &position); /* Blit background*/
 		SDL_FreeSurface( BGSurf);
 		BGSurf=NULL;
 	}else{
 		texte = TTF_RenderText_Blended(myFont, m_text.c_str(), m_textColor);
 	}
 
-	SDL_BlitSurface(texte, &blitSize, screen, &position); /* Blit text */
+	SDL_BlitSurface(texte, &blitSize, m_drawingSurface, &position); /* Blit text */
 
 	SDL_FreeSurface( texte);
 	texte=NULL;

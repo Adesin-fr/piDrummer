@@ -8,11 +8,12 @@
 #include "SDLFont.h"
 
 SDLFont::SDLFont() {
-	// TODO Auto-generated constructor stub
+	fontSize=0;
+	fontReference=NULL;
 
 }
 
 SDLFont::~SDLFont() {
-	// TODO Auto-generated destructor stub
+	TTF_CloseFont(fontReference);
 }
 

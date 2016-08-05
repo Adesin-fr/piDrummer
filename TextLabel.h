@@ -103,6 +103,10 @@ class TextLabel {
 		m_drawingSurface = drawingSurface;
 	}
 
+	void setDoScroll(bool doScroll){
+		m_doScroll=doScroll;
+	}
+
 	private:
 		std::string m_text;
 		unsigned int m_fontSize;
@@ -113,7 +117,7 @@ class TextLabel {
 		SDL_Color m_textColor;
 		bool m_textSelected;
 		SDL_Surface *m_drawingSurface;
-
+		bool m_doScroll;
 
 };
 

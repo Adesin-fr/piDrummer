@@ -142,7 +142,7 @@ int main ( int argc, char** argv )
 	}
 
     // create a new window
-    screen = SDL_SetVideoMode(320, 240, 16, SDL_HWSURFACE|SDL_DOUBLEBUF);
+    screen = SDL_SetVideoMode(320, 240, 24, SDL_HWSURFACE|SDL_DOUBLEBUF);
     if ( !screen )
     {
         cerr << "Unable to set video: " << SDL_GetError() << endl;

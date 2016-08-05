@@ -32,11 +32,6 @@ ScreenDrawing::~ScreenDrawing(){
 
 }
 
-void ScreenDrawing::setLastTriggerVelocity(unsigned int TriggerInput, unsigned int TriggerVelocity){
-	m_triggerLastHitValues[TriggerInput]=TriggerVelocity;
-}
-
-
 void ScreenDrawing::DrawSplashScreen(){
 
 	SDL_Color orange={255,162,0};
@@ -201,9 +196,6 @@ unsigned int ScreenDrawing::handleKeyPress(unsigned int keyEvent){
 	case SDLK_F12:
 		// POWER OFF !
 		return 255;
-		break;
-	case SDLK_u:
-		myglobalSettings.getCurrentDrumKit()->playInstrumentForTriggerInput(0, 127, 127);
 		break;
 	case 112:
 		// Handle play/pause action whenever we are..
@@ -483,14 +475,6 @@ unsigned int ScreenDrawing::handleKeyPress(unsigned int keyEvent){
 }
 
 void ScreenDrawing::DrawMainScreen(){
-	/*
-	 * Main screen shows :
-	 * 	- current Kit Name
-	 * 	- current BPM
-	 * 	- Loaded audio file name
-	 * 	- Position in playing track
-	 * 	- Last Hit pad and velocity
-	 */
 	string kitName;
 	string Vol;
 
@@ -782,7 +766,6 @@ void ScreenDrawing::DrawKitSetupMenu(){
 	// TODO : Display basic informations about trigger in right panel
 
 
-
 	DrawList(valueList, 0, 21, 100, 219, selItem);
 
 	// Draw a line at right of the list :
@@ -893,6 +876,8 @@ void ScreenDrawing::DrawKitSetupTriggerChoosen(){
 }
 
 void ScreenDrawing::DrawGlobalSettingsMenu(){
+	vector<string> settingsList;
+	unsigned int selItem=0;
 
 	// Clean the screen
 	fillBackground();
@@ -922,6 +907,27 @@ void ScreenDrawing::DrawGlobalSettingsMenu(){
 	 * Inv. Rot. Sw.
 	 */
 
+	settingsList.push_back("Volume");
+	settingsList.push_back("Master Reverb");
+	settingsList.push_back("Master Equalizer");
+	settingsList.push_back("Triggers Settings");
+	settingsList.push_back("Instrument Fade-out Time");
+	settingsList.push_back("Auto Power-Off Delay");
+	settingsList.push_back("Invert rotary knob");
+	settingsList.push_back("Main screen rotary action");
+
+	line(screen, 0, 20, 319, 20, SDL_MapRGB(screen->format, 255, 255, 255));
+
+
+	// Draw the list of available settings :
+	maxSelectedMenuItem= settingsList.size()-1;
+
+	selItem=myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-1];
+
+	DrawList(settingsList, 0, 21, 100, 219, selItem);
+	// Draw a line at right of the list :
+	line(screen, 100, 20, 100, 239, SDL_MapRGB(screen->format, 255, 255, 255));
+
 
     // finally, update the screen :)
     SDL_Flip(screen);
@@ -934,6 +940,9 @@ void ScreenDrawing::DrawList(std::vector<std::string> listText, int x, int y, in
 	SDL_Color white={255,255,255};
 	SDL_Rect position;
 	SDL_Rect positionList;
+	TextLabel *txtLabel;
+	unsigned int i; // List index
+	unsigned int listHeight;
 
 	position.x=x;
 	position.y=y;
@@ -942,31 +951,45 @@ void ScreenDrawing::DrawList(std::vector<std::string> listText, int x, int y, in
 	positionList.x=0;
 	positionList.y=(h/2)-(selectedItem*20);
 
-	unsigned int i; // List index
-	unsigned int listHeight;
 	// With a 18 font size, each line should be about 20 pixel high.
 	listHeight=listText.size()*20;
 
 	//Create the container surface :
 	Container=SDL_CreateRGBSurface(SDL_HWSURFACE,w, h, 16,0,0,0,0);
 
-
 	// Create the receiving surface :
 	ListSurface=SDL_CreateRGBSurface(SDL_HWSURFACE,w, listHeight, 16,0,0,0,0);
 
+	// Initialize the textLabel
+	txtLabel=new TextLabel();
+	txtLabel->setFontSize(18);
+	txtLabel->setTextAlignment(TextLabel::LEFT_ALIGN);
+	txtLabel->setDrawingSurface(ListSurface);
+	txtLabel->setXPos(0);
+	txtLabel->setMaxWidth(w);
+
+
 	// Fill the receiving surface :
 	for (i=0; i<listText.size(); i++){
-		DrawLabelToList(ListSurface, listText[i],18,0,i*20,white,(selectedItem==i?true:false));
+		txtLabel->setText(listText[i]);
+		txtLabel->setYPos(i*20);
+		txtLabel->setTextColor(white);
+		txtLabel->setTextSelected(selectedItem==i?true:false);
+		txtLabel->setDoScroll(selectedItem==i?true:false);
+
+		// Draw the current setting on right :
+		txtLabel->doDraw();
 
 	}
+
+	delete txtLabel;
+	txtLabel=NULL;
 
 	SDL_SetColorKey(ListSurface, SDL_SRCCOLORKEY, SDL_MapRGB(ListSurface->format, 0, 0, 0));
 	SDL_SetColorKey(Container, SDL_SRCCOLORKEY, SDL_MapRGB(Container->format, 0, 0, 0));
 
 	SDL_BlitSurface(ListSurface, NULL, Container, &positionList); /* Blit List to the container*/
 	SDL_BlitSurface(Container, NULL, screen, &position); /* Blit container to screen*/
-
-
 
 	SDL_FreeSurface( ListSurface );
 	SDL_FreeSurface( Container );
@@ -976,16 +999,20 @@ void ScreenDrawing::DrawList(std::vector<std::string> listText, int x, int y, in
 }
 
 
-
 void ScreenDrawing::RefreshScreen(){
 	// Call the function to draw the screen :
-
 	(*this.*refreshFunction)();
-
 }
 
+
+void ScreenDrawing::setLastTriggerVelocity(unsigned int TriggerInput, unsigned int TriggerVelocity){
+	m_triggerLastHitValues[TriggerInput]=TriggerVelocity;
+}
+
+
+
 void fillBackground(){
-	// Draw a gradient :
+	// Draw a gradient from black to grey:
 
 	SDL_Rect dims;
 	dims.x=0;
@@ -995,7 +1022,6 @@ void fillBackground(){
 	for (unsigned int i=0;i<80;i++){
 		dims.y=i*4;
 		SDL_FillRect(screen, &dims, SDL_MapRGB(screen->format, i, i, i));
-
 	}
 
 }
