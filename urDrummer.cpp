@@ -88,10 +88,9 @@ const std::string urDrummerVersion="v0.1b";
 using namespace std;
 unsigned int lastTimeEvent;
 unsigned int lastTimeScreenRefresh;
-unsigned int lastTimeScroll;
 unsigned int ticksNow;
 
-unsigned char labelScrollOffset;
+unsigned int labelScrollOffset;
 
 // Song player related variables
 SoLoud::Wav *songPlayer;
@@ -103,18 +102,19 @@ Settings myglobalSettings;
 SDL_Surface* screen;
 SoLoud::Soloud myAudioEngine;
 ScreenDrawing myScreenDrawer;
+SerialHandle *mySerialPort;
+unsigned int HandleKeyEventRetVal;
 
 // function called by thread
 void RefreshScreen(){
+	unsigned int keyEvent;
 
 	while(!done){
-		SDL_Delay(15);
-		// 20ms between each call, we should get about 50fps
-        if (ticksNow > lastTimeScreenRefresh+20){
-        	lastTimeScreenRefresh=ticksNow;
-        	// Call the function to draw the screen :
-        	myScreenDrawer.RefreshScreen();
-        }
+    	// Check for serial port if bytes are available and handle them:
+    	keyEvent=mySerialPort->handleEvents(myglobalSettings.getCurrentDrumKit());
+    	if (keyEvent!=0){
+    		HandleKeyEventRetVal=myScreenDrawer.handleKeyPress(keyEvent);
+    	}
 	}
 
 }
@@ -123,10 +123,8 @@ int main ( int argc, char** argv )
 {
 	// Global variables:
 
-	SerialHandle *mySerialPort;
-	unsigned int keyEvent;
-	unsigned int HandleKeyEventRetVal=0;
-
+	unsigned int keyEvent=0;
+	HandleKeyEventRetVal=0;
 
 	// initialize SDL video
 	if ( SDL_Init( SDL_INIT_VIDEO ) < 0 ){
@@ -205,11 +203,6 @@ int main ( int argc, char** argv )
     while (!done)
     {
 
-    	// Check for serial port if bytes are available and handle them:
-    	keyEvent=mySerialPort->handleEvents(myglobalSettings.getCurrentDrumKit());
-    	if (keyEvent!=0){
-    		HandleKeyEventRetVal=myScreenDrawer.handleKeyPress(keyEvent);
-    	}
 
     	// Do all "graphic" events, including touch events
         SDL_Event event;
@@ -235,17 +228,20 @@ int main ( int argc, char** argv )
 
         ticksNow=SDL_GetTicks();
 
+        if (ticksNow > lastTimeScreenRefresh+20){
+        	// Increment the "label scroller offset"
+        	labelScrollOffset++;
+        	lastTimeScreenRefresh=ticksNow;
+        	// Call the function to draw the screen :
+        	myScreenDrawer.RefreshScreen();
+        }
+
         // Do we need to poweroff because of delay ?
         if (myglobalSettings.getAutoPowerOffDelay() > 0){
         	if (ticksNow > (lastTimeEvent+myglobalSettings.getAutoPowerOffDelay()*1000)){
         		cerr << "The power-off delay is over !" << endl;
         		HandleKeyEventRetVal=255;
         	}
-        }
-
-        if (ticksNow > lastTimeScroll + 500){
-        	lastTimeScroll = ticksNow;
-        	labelScrollOffset++;
         }
 
         if (HandleKeyEventRetVal==255){
@@ -266,6 +262,8 @@ int main ( int argc, char** argv )
             cout << "Exited cleanly" << endl;
             return 255;
         }
+
+        SDL_Delay(10);
 
 
     } // end main loop

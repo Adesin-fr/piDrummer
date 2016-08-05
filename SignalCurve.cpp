@@ -7,24 +7,24 @@
 
 #include "SignalCurve.h"
 
-SignalCurve::SignalCurve() {
-	// Create a linear curve:
-	SignalCurve((unsigned int)0);
-}
 
-SignalCurve::SignalCurve(unsigned int curveType) {
+using namespace std;
+
+
+
+void FillList(unsigned int curveType, std::vector<CurvePoint*> *m_curvePoints){
+
 	CurvePoint *tmpPoint;
-
-	m_curvePoints=new std::vector<CurvePoint*>;
 
 	unsigned int xValues[16]={ 8, 16, 24, 32, 40, 48, 56, 64, 72, 80 ,88, 96, 104, 112, 120, 127};
 	unsigned int exp[16]={ 1, 2, 5, 8, 13, 18, 25, 32, 41, 50, 61, 72, 84, 98, 112,	127};
 	unsigned int log[16]={ 1, 2, 5, 8, 13, 18, 25, 32, 41, 50, 61, 72, 84, 98, 112,	127};
 	unsigned int sCurve[16]={ 2, 3, 5, 10, 20, 40, 75, 95, 107, 113, 118, 121, 123, 125, 126, 127};
+	unsigned int maxedOut[16]={ 127, 127, 127, 127, 127, 127, 127, 127, 127, 127,127, 127, 127, 127, 127,	127};
 
 	// Create a list of points with a specified count :
 	for (unsigned int i=0; i<16; i++){
-		tmpPoint=new CurvePoint;
+		tmpPoint=new CurvePoint();
 		tmpPoint->xValue=xValues[i];
 		tmpPoint->yValue=xValues[i];
 		m_curvePoints->push_back(tmpPoint);
@@ -52,6 +52,23 @@ SignalCurve::SignalCurve(unsigned int curveType) {
 		}
 
 	}
+}
+
+SignalCurve::SignalCurve() {
+	// Init the vector list :
+	m_curvePoints=new vector<CurvePoint*>;
+
+	// Create a linear curve:
+	FillList((unsigned int)1, m_curvePoints);
+}
+
+SignalCurve::SignalCurve(unsigned int curveType) {
+	// Init the vector list :
+	m_curvePoints=new vector<CurvePoint*>;
+
+	// Create a linear curve:
+	FillList(curveType, m_curvePoints);
+
 
 }
 
@@ -65,7 +82,7 @@ void SignalCurve::setValueAt(unsigned int x, unsigned int value){
 	CurvePoint *tmpPt;
 
 	for (unsigned int i=0; i<m_curvePoints->size(); i++){
-		tmpPt=(*m_curvePoints)[i];
+		tmpPt=m_curvePoints->operator[](i);
 		if (tmpPt->xValue==x){
 			tmpPt->yValue=value;
 			return;
@@ -79,6 +96,7 @@ unsigned int SignalCurve::getValueForX(unsigned int x){
 	unsigned int i=0;
 
 	// Search for the segment that contains our value :
+
 	upPt=(*m_curvePoints)[i];
 	do{
 		if (upPt->xValue==x){
@@ -86,7 +104,7 @@ unsigned int SignalCurve::getValueForX(unsigned int x){
 		}
 		i++;
 		upPt=(*m_curvePoints)[i];
-	}while (x<upPt->xValue);
+	}while (x > (upPt->xValue));
 
 	// Now we got our "upper" segment point, calculate the slope and get our output point :
 	lowPt=(*m_curvePoints)[i-1];
@@ -98,3 +116,5 @@ unsigned int SignalCurve::getValueForX(unsigned int x){
 std::vector<CurvePoint*> *SignalCurve::getAllCurvePoints(){
 	return m_curvePoints;
 }
+
+

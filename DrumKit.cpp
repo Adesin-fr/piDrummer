@@ -217,7 +217,7 @@ void DrumKit::playInstrumentForTriggerInput(unsigned char TriggerNumber, unsigne
 		TriggerVelocity=127;
 	}
 
-	for (i=0; i<m_DKComponentList->size(); i++){
+	for (i=0; i < m_DKComponentList->size(); i++){
 		// Get the trigger associated with this DK Component :
 		tmpTrigger = (*m_DKComponentList)[i]->getAssociatedTrigger();
 

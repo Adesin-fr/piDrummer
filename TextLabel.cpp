@@ -18,8 +18,6 @@ TextLabel::TextLabel() {
 	m_drawingSurface=screen;
 	m_textColor=(SDL_Color){255,255,255};
 	m_textSelected=false;
-	fontLoaded=false;
-	myFont=NULL;
 }
 
 TextLabel::TextLabel(std::string text, unsigned int xPos, unsigned int yPos){
@@ -32,23 +30,39 @@ TextLabel::TextLabel(std::string text, unsigned int xPos, unsigned int yPos){
 	m_drawingSurface=screen;
 	m_textColor=(SDL_Color){255,255,255};
 	m_textSelected=false;
-	fontLoaded=false;
-	myFont=NULL;
 }
 
 void TextLabel::doDraw(){
-	SDL_Rect position;
+	SDL_Surface *texte ;
+	SDL_Rect position, blitSize;
 	SDL_Color invertColor;
+	unsigned int labelWidth;
+	bool scrollNeeded=false;
+	TTF_Font *myFont;
 
 	string fontPath = myglobalSettings.getUserDirectory() + "/.urDrummer/res/arial.ttf";
 
-	if ( fontLoaded==false ){
-		myFont = TTF_OpenFont(fontPath.c_str(), m_fontSize);
-	}
+	myFont = TTF_OpenFont(fontPath.c_str(), m_fontSize);
 
-	SDL_Surface *texte ;
 
 	texte = TTF_RenderText_Blended(myFont, m_text.c_str(), m_textColor);
+
+	labelWidth=texte->w;
+	if (labelWidth>m_maxWidth){
+		labelWidth=m_maxWidth;
+		scrollNeeded=true;
+	}
+	// Set blitting size...
+	if (scrollNeeded){
+		unsigned int labelOverSizeAmount=(texte->w-m_maxWidth)+150;
+		blitSize.x=(labelScrollOffset % labelOverSizeAmount);
+	}else{
+		blitSize.x=0;
+	}
+
+	blitSize.y=0;
+	blitSize.w=labelWidth;
+	blitSize.h=texte->h;
 
 	//calculate text position :
 
@@ -58,15 +72,16 @@ void TextLabel::doDraw(){
 			position.x=m_xPos;
 			break;
 		case TextLabel::CENTER_ALIGN:
-			position.x=m_xPos-(texte->w/2);
+			position.x=m_xPos-(labelWidth/2);
 			break;
 		case TextLabel::RIGHT_ALIGN:
-			position.x=m_xPos-texte->w;
+			position.x=m_xPos-labelWidth;
 			break;
 	}
 
 	// Delete the generated text : it will be re-generated !
-	delete texte;
+	SDL_FreeSurface(texte);
+	texte=NULL;
 
 	if (m_textSelected){
 
@@ -77,20 +92,22 @@ void TextLabel::doDraw(){
 		texte = TTF_RenderText_Blended(myFont, m_text.c_str(), invertColor);
 
 		SDL_Surface *BGSurf;
-		BGSurf=SDL_CreateRGBSurface(SDL_HWSURFACE,texte->w, texte->h, 16,0,0,0,0);
+		BGSurf=SDL_CreateRGBSurface(SDL_HWSURFACE,labelWidth, texte->h, 16,0,0,0,0);
 		SDL_FillRect(BGSurf, NULL, SDL_MapRGB(BGSurf->format, m_textColor.r, m_textColor.g, m_textColor.b));
 		SDL_BlitSurface(BGSurf, NULL, screen, &position); /* Blit background*/
-		delete BGSurf;
+		SDL_FreeSurface( BGSurf);
+		BGSurf=NULL;
 	}else{
 		texte = TTF_RenderText_Blended(myFont, m_text.c_str(), m_textColor);
 	}
 
-	// TODO : offset blitting position respectif to labelScrollOffset and maxWidth
+	SDL_BlitSurface(texte, &blitSize, screen, &position); /* Blit text */
 
-	SDL_BlitSurface(texte, NULL, screen, &position); /* Blit text */
+	SDL_FreeSurface( texte);
+	texte=NULL;
 
-	delete texte;
-
+	TTF_CloseFont(myFont);
+	myFont=NULL;
 }
 
 

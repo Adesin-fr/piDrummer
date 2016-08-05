@@ -74,7 +74,6 @@ private:
 	// Screen & SDL variables :
 	bool m_screenNeedRefresh;
 	int m_lastFontSizeUsed;
-	TTF_Font *myFont= NULL;
 
 	// function used to refresh Screen :
 	void(ScreenDrawing::*refreshFunction)(void);

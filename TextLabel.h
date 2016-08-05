@@ -15,7 +15,7 @@
 
 extern Settings myglobalSettings;
 extern SDL_Surface* screen;
-extern unsigned char labelScrollOffset;
+extern unsigned int labelScrollOffset;
 
 class TextLabel {
 
@@ -111,8 +111,6 @@ class TextLabel {
 		bool m_textSelected;
 		SDL_Surface *m_drawingSurface;
 
-		TTF_Font *myFont;
-		bool fontLoaded;
 
 };
 

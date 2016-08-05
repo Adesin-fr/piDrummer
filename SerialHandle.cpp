@@ -129,9 +129,11 @@ unsigned int SerialHandle::handleEvents(DrumKit *currentDrumKit){
 		return 0;
 	}
 
+
 	while (m_serPortOpened && read(m_serPort, nextData, 1)){
 
 		m_serialDataLine+=nextData[0];
+
 
 		//Is the line over ?
 		if (m_serialDataLine[m_serialDataLine.size()-1] == 10){

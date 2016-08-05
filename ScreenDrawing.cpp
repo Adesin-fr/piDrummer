@@ -70,7 +70,8 @@ void ScreenDrawing::DrawIcon(const string iconPath, int posX, int posY,  bool se
 	SDL_SetColorKey(icon, SDL_SRCCOLORKEY, SDL_MapRGB(icon->format, 0, 0, 0));
 	SDL_BlitSurface(icon, NULL, screen, &positionIcon);
 
-	delete icon;
+	SDL_FreeSurface( icon );
+	icon=NULL;
 }
 
 void ScreenDrawing::DrawLabel( std::string labelText, int fontSize, int posX, int posY){
@@ -94,17 +95,14 @@ void ScreenDrawing::DrawLabel( std::string labelText, int fontSize, int posX, in
 void ScreenDrawing::DrawLabel( std::string labelText, int fontSize, int posX, int posY, SDL_Color color, bool selected){
 	SDL_Rect position;
 	SDL_Color invertColor;
+	SDL_Surface *texte;
+	SDL_Surface *BGSurf;
+	TTF_Font *myFont= NULL;
 
 	string fontPath = myglobalSettings.getUserDirectory() + "/.urDrummer/res/arial.ttf";
 
-	if (m_lastFontSizeUsed!=fontSize){
-		if (m_lastFontSizeUsed!=0) TTF_CloseFont(myFont);
-		// Open the font with the new size :
-		m_lastFontSizeUsed=fontSize,
-		myFont = TTF_OpenFont(fontPath.c_str(), fontSize);
-	}
+	myFont = TTF_OpenFont(fontPath.c_str(), fontSize);
 
-	SDL_Surface *texte ;
 	position.x=posX;
 	position.y=posY;
 
@@ -119,12 +117,12 @@ void ScreenDrawing::DrawLabel( std::string labelText, int fontSize, int posX, in
 		texte = TTF_RenderText_Blended(myFont, labelText.c_str(), invertColor);
 
 
-		SDL_Surface *BGSurf;
 		BGSurf=SDL_CreateRGBSurface(SDL_HWSURFACE,texte->w, texte->h, 16,0,0,0,0);
 		SDL_FillRect(BGSurf, NULL, SDL_MapRGB(BGSurf->format, color.r, color.g, color.b));
 		SDL_BlitSurface(BGSurf, NULL, screen, &position); /* Blit background*/
 
-		delete BGSurf;
+		SDL_FreeSurface( BGSurf );
+		BGSurf=NULL;
 
 	}else{
 		texte = TTF_RenderText_Blended(myFont, labelText.c_str(), color);
@@ -132,7 +130,10 @@ void ScreenDrawing::DrawLabel( std::string labelText, int fontSize, int posX, in
 
 	SDL_BlitSurface(texte, NULL, screen, &position); /* Blit text */
 
-	delete texte;
+	SDL_FreeSurface( texte );
+	texte=NULL;
+
+	TTF_CloseFont(myFont);
 
 }
 
@@ -140,17 +141,14 @@ void ScreenDrawing::DrawLabel( std::string labelText, int fontSize, int posX, in
 void ScreenDrawing::DrawLabelToList(SDL_Surface *dest, std::string labelText, int fontSize, int posX, int posY, SDL_Color color, bool selected=false){
 	SDL_Rect position;
 	SDL_Color invertColor;
+	SDL_Surface *texte ;
+	SDL_Surface *BGSurf;
+	TTF_Font *myFont= NULL;
 
 	string fontPath = myglobalSettings.getUserDirectory() + "/.urDrummer/res/arial.ttf";
 
-	if (m_lastFontSizeUsed!=fontSize){
-		if (m_lastFontSizeUsed!=0) TTF_CloseFont(myFont);
-		// Open the font with the new size :
-		m_lastFontSizeUsed=fontSize,
-		myFont = TTF_OpenFont(fontPath.c_str(), fontSize);
-	}
+	myFont = TTF_OpenFont(fontPath.c_str(), fontSize);
 
-	SDL_Surface *texte ;
 	position.x=posX;
 	position.y=posY;
 
@@ -164,13 +162,12 @@ void ScreenDrawing::DrawLabelToList(SDL_Surface *dest, std::string labelText, in
 
 		texte = TTF_RenderText_Blended(myFont, labelText.c_str(), invertColor);
 
-
-		SDL_Surface *BGSurf;
 		BGSurf=SDL_CreateRGBSurface(SDL_HWSURFACE,dest->w, texte->h, 16,0,0,0,0);
 		SDL_FillRect(BGSurf, NULL, SDL_MapRGB(BGSurf->format, color.r, color.g, color.b));
 		SDL_BlitSurface(BGSurf, NULL, dest, &position); /* Blit background*/
 
-		delete BGSurf;
+		SDL_FreeSurface( BGSurf );
+		BGSurf=NULL;
 
 	}else{
 		texte = TTF_RenderText_Blended(myFont, labelText.c_str(), color);
@@ -178,8 +175,10 @@ void ScreenDrawing::DrawLabelToList(SDL_Surface *dest, std::string labelText, in
 
 	SDL_BlitSurface(texte, NULL, dest, &position); /* Blit text */
 
-	delete texte;
+	SDL_FreeSurface( texte );
+	texte=NULL;
 
+	TTF_CloseFont(myFont);
 }
 
 
@@ -476,7 +475,7 @@ unsigned int ScreenDrawing::handleKeyPress(unsigned int keyEvent){
 
 
 	// Call the function to draw the screen :
-	(*this.*refreshFunction)();
+	//(*this.*refreshFunction)();
 
 	return 0;
 
@@ -712,6 +711,7 @@ void ScreenDrawing::DrawMetronomeSetup(){
 	txtLabel->doDraw();
 
 	delete txtLabel;
+	txtLabel=NULL;
 
 
     // finally, update the screen :)
@@ -791,6 +791,9 @@ void ScreenDrawing::DrawKitSetupMenu(){
     // finally, update the screen :)
     SDL_Flip(screen);
 
+    // Free pointers ...
+    dkCompList=NULL;
+    dkTrig=NULL;
 }
 
 void ScreenDrawing::DrawKitSetupTriggerChoosen(){
@@ -877,10 +880,12 @@ void ScreenDrawing::DrawKitSetupTriggerChoosen(){
 	txtLabel->setYPos(130);
 	txtLabel->setText(txtValue);
 	txtLabel->setTextSelected(ValueSelected);
+	txtLabel->setMaxWidth(210);
 	txtLabel->doDraw();
 
 
 	delete txtLabel;
+	txtLabel=NULL;
 
     // finally, update the screen :)
     SDL_Flip(screen);
@@ -962,8 +967,10 @@ void ScreenDrawing::DrawList(std::vector<std::string> listText, int x, int y, in
 
 
 
-	delete ListSurface;
-	delete Container;
+	SDL_FreeSurface( ListSurface );
+	SDL_FreeSurface( Container );
+	ListSurface=NULL;
+	Container=NULL;
 
 }
 
