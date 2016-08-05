@@ -53,12 +53,6 @@ bool Layer::loadSample() {
 	wavSample=new SoLoud::Wav;
 	SNDFILE* file;
 
-/*	CLASSICAL soloud loading way*/
- 	wavSample->load(m_fileName.c_str());
-	sampleLoaded=true;
-	return true;
-
-
 	// Open file, and get file info in struct :
 	file = sf_open( m_fileName.c_str(), SFM_READ, &sound_info );
 	if (!file){
@@ -81,15 +75,35 @@ bool Layer::loadSample() {
 
 	// Set a buffer :
 	float* buffer = new float[ sound_info.frames  * sound_info.channels];
-
 	sf_read_float( file, buffer, sound_info.frames * sound_info.channels);
-
 	sf_close( file );
 
+	// if more than 1 channel, reorder data correctly :
+	// We need to have values for first channel first, then second, etc... :
+	// ex : 	  L,L,L,L,L,L,L,L,L,L,L,R,R,R,R,R,R,R,R,R,R,R
+	// instead of L,R,L,R,L,R,L,R,L,R,L,R,L,R,L,R,L,R,L,R,L,R
+	if (sound_info.channels>1){
+		float* newBuffer = new float[ sound_info.frames  * sound_info.channels];
+
+		for (unsigned int i=0; i< sound_info.frames ; i++){
+			for (int ch=0; ch< sound_info.channels; ch++){
+				// Destination = sound_info.frames * ch + i
+				newBuffer[sound_info.frames * ch + i] = buffer[i*sound_info.channels+ch];
+			}
+		}
+
+		// destroy old buffer:
+		delete[] buffer;
+
+		// assign data to wav object :
+		wavSample->mData=newBuffer;
+	}else{
+		wavSample->mData=buffer;
+	}
+
 	wavSample->mChannels=sound_info.channels;
-	wavSample->mData=buffer;
 	wavSample->mSampleCount=sound_info.frames ;
-	wavSample->mBaseSamplerate=sound_info.samplerate;
+	wavSample->mBaseSamplerate= (float)sound_info.samplerate;
 
 	sampleLoaded=true;
 

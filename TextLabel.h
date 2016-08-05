@@ -12,10 +12,13 @@
 #include <SDL/SDL_ttf.h>
 #include <string>
 #include "Settings.h"
+#include "SDLFontStore.h"
 
 extern Settings myglobalSettings;
 extern SDL_Surface* screen;
 extern unsigned int labelScrollOffset;
+extern SDLFontStore myFontstore;
+
 
 class TextLabel {
 

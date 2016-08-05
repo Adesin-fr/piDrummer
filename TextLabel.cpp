@@ -42,8 +42,7 @@ void TextLabel::doDraw(){
 
 	string fontPath = myglobalSettings.getUserDirectory() + "/.urDrummer/res/arial.ttf";
 
-	myFont = TTF_OpenFont(fontPath.c_str(), m_fontSize);
-
+	myFont = myFontstore.getFont(fontPath, m_fontSize);
 
 	texte = TTF_RenderText_Blended(myFont, m_text.c_str(), m_textColor);
 
@@ -54,8 +53,9 @@ void TextLabel::doDraw(){
 	}
 	// Set blitting size...
 	if (scrollNeeded){
-		unsigned int labelOverSizeAmount=(texte->w-m_maxWidth)+150;
-		blitSize.x=(labelScrollOffset % labelOverSizeAmount);
+		//unsigned int labelOverSizeAmount=(texte->w-m_maxWidth)+150;
+		unsigned int labelOverSizeAmount=texte->w*2;
+		blitSize.x=(labelScrollOffset % labelOverSizeAmount)-(labelOverSizeAmount/2);
 	}else{
 		blitSize.x=0;
 	}
@@ -105,9 +105,6 @@ void TextLabel::doDraw(){
 
 	SDL_FreeSurface( texte);
 	texte=NULL;
-
-	TTF_CloseFont(myFont);
-	myFont=NULL;
 }
 
 

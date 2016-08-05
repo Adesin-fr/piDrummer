@@ -104,9 +104,12 @@ SoLoud::Soloud myAudioEngine;
 ScreenDrawing myScreenDrawer;
 SerialHandle *mySerialPort;
 unsigned int HandleKeyEventRetVal;
+SDLFontStore myFontstore;
 
 // function called by thread
 void RefreshScreen(){
+
+
 	unsigned int keyEvent;
 
 	while(!done){
@@ -228,10 +231,11 @@ int main ( int argc, char** argv )
 
         ticksNow=SDL_GetTicks();
 
-        if (ticksNow > lastTimeScreenRefresh+20){
+        if (ticksNow > lastTimeScreenRefresh+30){
         	// Increment the "label scroller offset"
         	labelScrollOffset++;
         	lastTimeScreenRefresh=ticksNow;
+
         	// Call the function to draw the screen :
         	myScreenDrawer.RefreshScreen();
         }

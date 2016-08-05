@@ -101,7 +101,7 @@ void ScreenDrawing::DrawLabel( std::string labelText, int fontSize, int posX, in
 
 	string fontPath = myglobalSettings.getUserDirectory() + "/.urDrummer/res/arial.ttf";
 
-	myFont = TTF_OpenFont(fontPath.c_str(), fontSize);
+	myFont = myFontstore.getFont(fontPath, fontSize);
 
 	position.x=posX;
 	position.y=posY;
@@ -133,7 +133,6 @@ void ScreenDrawing::DrawLabel( std::string labelText, int fontSize, int posX, in
 	SDL_FreeSurface( texte );
 	texte=NULL;
 
-	TTF_CloseFont(myFont);
 
 }
 
@@ -147,7 +146,7 @@ void ScreenDrawing::DrawLabelToList(SDL_Surface *dest, std::string labelText, in
 
 	string fontPath = myglobalSettings.getUserDirectory() + "/.urDrummer/res/arial.ttf";
 
-	myFont = TTF_OpenFont(fontPath.c_str(), fontSize);
+	myFont = myFontstore.getFont(fontPath, fontSize);
 
 	position.x=posX;
 	position.y=posY;
@@ -178,7 +177,6 @@ void ScreenDrawing::DrawLabelToList(SDL_Surface *dest, std::string labelText, in
 	SDL_FreeSurface( texte );
 	texte=NULL;
 
-	TTF_CloseFont(myFont);
 }
 
 
@@ -203,6 +201,9 @@ unsigned int ScreenDrawing::handleKeyPress(unsigned int keyEvent){
 	case SDLK_F12:
 		// POWER OFF !
 		return 255;
+		break;
+	case SDLK_u:
+		myglobalSettings.getCurrentDrumKit()->playInstrumentForTriggerInput(0, 127, 127);
 		break;
 	case 112:
 		// Handle play/pause action whenever we are..

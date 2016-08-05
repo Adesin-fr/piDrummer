@@ -62,6 +62,9 @@ bool DrumKit::loadDrumKitFromConfigFile(std::string configFileName){
 	if (root.exists("Components")){
 		Setting &DKComps = root["Components"];
 		unsigned int nbComps = DKComps.getLength();
+		if (nbComps > myglobalSettings.getNumTriggerInputs()){
+			nbComps = myglobalSettings.getNumTriggerInputs();
+		}
 		// iterate throught components :
 
 		for (unsigned int i =0; i<nbComps; i++){
