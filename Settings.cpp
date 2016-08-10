@@ -17,10 +17,6 @@ Settings::Settings() {
 	m_AlsaBufferSize=2048; // Default value for buffer size .
 	m_Volume=32;
 
-	m_MetronomeBCount=4;
-	m_MetronomeBPM=120;
-	m_MetronomeVolume=16;
-	m_MetronomeOn=false;
 	m_GlobalFadeOutTime=0.5f;
 	m_instrumentList=new vector<Instrument*>;
 

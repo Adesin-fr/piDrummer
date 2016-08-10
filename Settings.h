@@ -90,49 +90,6 @@ public:
 	void setSerialPort(const std::string& serialPort);
 	std::vector<DrumKit*> *getDrumKitList();
 
-	unsigned int getMetronomeBCount() const {
-		return m_MetronomeBCount;
-	}
-
-	void setMetronomeBCount(unsigned int metronomeBCount) {
-		m_MetronomeBCount = metronomeBCount;
-	}
-
-	unsigned int getMetronomeBpm() const {
-		return m_MetronomeBPM;
-	}
-
-	void setMetronomeBpm(unsigned int metronomeBpm) {
-		m_MetronomeBPM = metronomeBpm;
-	}
-
-
-	void IncMetronomeBpm(unsigned int HowMuch) {
-		m_MetronomeBPM += HowMuch;
-		if (m_MetronomeBPM>240) m_MetronomeBPM=240;
-	}
-
-	void DecMetronomeBpm(unsigned int HowMuch) {
-		m_MetronomeBPM -= HowMuch;
-		if (m_MetronomeBPM<20) m_MetronomeBPM=20;
-	}
-
-
-	bool isMetronomeOn() const {
-		return m_MetronomeOn;
-	}
-
-	void setMetronomeOn(bool metronomeOn) {
-		m_MetronomeOn = metronomeOn;
-	}
-
-	unsigned int getMetronomeVolume() const {
-		return m_MetronomeVolume;
-	}
-
-	void setMetronomeVolume(unsigned int metronomeVolume) {
-		m_MetronomeVolume = metronomeVolume;
-	}
 
 	Trigger *getLastHitTrigger() ;
 	void setLastHitTrigger(Trigger *lastHitTrigger);
@@ -178,10 +135,6 @@ private:
 	// Pointer to the last hit trigger (or the trigger being setup)
 	Trigger *m_LastHitTrigger;
 
-	unsigned int m_MetronomeBPM;
-	unsigned int m_MetronomeVolume;
-	unsigned int m_MetronomeBCount;
-	bool m_MetronomeOn;
 
 	float m_GlobalFadeOutTime;
 

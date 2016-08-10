@@ -123,9 +123,24 @@ bool Instrument::loadInstrumentFromConfig(std::string Path, std::string configFi
 
         	currentLayer.lookupValue("minVelocity", tmpMinVelocity);
         	currentLayer.lookupValue("maxVelocity", tmpMaxVelocity);
-        	currentLayer.lookupValue("filename", fileName);
 
-        	ctlLayer->addLayer(tmpMinVelocity, tmpMaxVelocity, Path + fileName);
+        	// if we have multiple filenames, we do support RoundRobin,
+        	if (currentLayer.exists("filenames")){
+            	const Setting &FileNames = currentLayer.lookup("filenames");
+            	std::vector<string> v_FileNames;
+            	// add samples file names to vector :
+            	for (int fn=0; fn< FileNames.getLength(); fn++){
+            		v_FileNames.push_back(FileNames[fn]);
+            	}
+
+            	ctlLayer->addLayer(tmpMinVelocity, tmpMaxVelocity, Path , v_FileNames);
+        	}else{
+            	currentLayer.lookupValue("filename", fileName);
+
+            	ctlLayer->addLayer(tmpMinVelocity, tmpMaxVelocity, Path + fileName);
+        	}
+
+
         }
 
         m_ctlLayers.push_back(ctlLayer);

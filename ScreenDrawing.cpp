@@ -319,27 +319,27 @@ unsigned int ScreenDrawing::handleKeyPress(unsigned int keyEvent){
 		if (currentScreen=="MainScreen"){
 			// If we are on main screen, then we handle special action (
 			// TODO : handle special action from main screen
-			myglobalSettings.DecMetronomeBpm(5);
+			myMetronome.DecMetronomeBpm(5);
 
 		}else if (currentScreen=="MetronomeVal"){
 				switch(myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-2]){
 					case 0:
-						myglobalSettings.DecMetronomeBpm(1);
+						myMetronome.DecMetronomeBpm(1);
 						break;
 					case 1:
-						m_tmpIntValue=myglobalSettings.getMetronomeVolume();
+						m_tmpIntValue=myMetronome.getMetronomeVolume();
 						if (m_tmpIntValue>1){
-							myglobalSettings.setMetronomeVolume(--m_tmpIntValue);
+							myMetronome.setMetronomeVolume(--m_tmpIntValue);
 						}
 						break;
 					case 2:
-						m_tmpIntValue=myglobalSettings.getMetronomeBCount();
+						m_tmpIntValue=myMetronome.getMetronomeBCount();
 						if (m_tmpIntValue>0){
-							myglobalSettings.setMetronomeBCount(--m_tmpIntValue);
+							myMetronome.setMetronomeBCount(--m_tmpIntValue);
 						}
 						break;
 					case 3:
-						myglobalSettings.setMetronomeOn(!myglobalSettings.isMetronomeOn());
+						myMetronome.setMetronomeOn(!myMetronome.isMetronomeOn());
 						break;
 				}
 			}else if (currentScreen=="KitSetup1Val"){
@@ -395,26 +395,26 @@ unsigned int ScreenDrawing::handleKeyPress(unsigned int keyEvent){
 		if (currentScreen=="MainScreen"){
 			// If we are on main screen, then we handle special action (
 			// TODO : handle special action from main screen
-			myglobalSettings.IncMetronomeBpm(5);
+			myMetronome.IncMetronomeBpm(5);
 		}else if (currentScreen=="MetronomeVal"){
 			switch(myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-2]){
 				case 0:
-					myglobalSettings.IncMetronomeBpm(1);
+					myMetronome.IncMetronomeBpm(1);
 					break;
 				case 1:
-					m_tmpIntValue=myglobalSettings.getMetronomeVolume();
+					m_tmpIntValue=myMetronome.getMetronomeVolume();
 					if (m_tmpIntValue<32){
-						myglobalSettings.setMetronomeVolume(m_tmpIntValue+1);
+						myMetronome.setMetronomeVolume(m_tmpIntValue+1);
 					}
 					break;
 				case 2:
-					m_tmpIntValue=myglobalSettings.getMetronomeBCount();
+					m_tmpIntValue=myMetronome.getMetronomeBCount();
 					if (m_tmpIntValue<32){
-						myglobalSettings.setMetronomeBCount(m_tmpIntValue+1);
+						myMetronome.setMetronomeBCount(m_tmpIntValue+1);
 					}
 					break;
 				case 3:
-					myglobalSettings.setMetronomeOn(!myglobalSettings.isMetronomeOn());
+					myMetronome.setMetronomeOn(!myMetronome.isMetronomeOn());
 					break;
 			}
 		}else if (currentScreen=="KitSetup1Val"){
@@ -500,7 +500,7 @@ void ScreenDrawing::DrawMainScreen(){
 
 	// Metronome BPM : bottom left
 	std::stringstream sbpm;
-	sbpm << "BPM : " << myglobalSettings.getMetronomeBpm();
+	sbpm << "BPM : " << myMetronome.getMetronomeBpm();
 	DrawLabel(sbpm.str(), 18, 2, 220, false );
 
 	// Volume : top left
@@ -639,18 +639,18 @@ void ScreenDrawing::DrawMetronomeSetup(){
 
 
 	std::stringstream myItoA;
-	myItoA << myglobalSettings.getMetronomeBpm();
+	myItoA << myMetronome.getMetronomeBpm();
 	valueList.push_back(myItoA.str());
 
 	myItoA.str("");
-	myItoA << myglobalSettings.getMetronomeVolume();
+	myItoA << myMetronome.getMetronomeVolume();
 	valueList.push_back(myItoA.str());
 
 	myItoA.str("");
-	myItoA << myglobalSettings.getMetronomeBCount();
+	myItoA << myMetronome.getMetronomeBCount();
 	valueList.push_back(myItoA.str());
 
-	if (myglobalSettings.isMetronomeOn()){
+	if (myMetronome.isMetronomeOn()){
 		valueList.push_back("On");
 	}else{
 		valueList.push_back("Off");

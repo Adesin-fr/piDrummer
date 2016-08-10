@@ -105,10 +105,10 @@ ScreenDrawing myScreenDrawer;
 SerialHandle *mySerialPort;
 unsigned int HandleKeyEventRetVal;
 SDLFontStore myFontstore;
+Metronome myMetronome;
 
 // function called by thread
-void RefreshScreen(){
-
+void AudioThread(){
 
 	unsigned int keyEvent;
 
@@ -126,7 +126,6 @@ int main ( int argc, char** argv )
 {
 	// Global variables:
 
-	unsigned int keyEvent=0;
 	HandleKeyEventRetVal=0;
 
 	// initialize SDL video
@@ -192,6 +191,7 @@ int main ( int argc, char** argv )
 
     // We're ready, disable splash screen after 3 seconds !
     while (SDL_GetTicks() <  lastTimeEvent + 1000 ){
+    	SDL_Delay(20);
     	/// Wait...
     }
 
@@ -201,19 +201,18 @@ int main ( int argc, char** argv )
     done = false;
 
     // Run the screen Drawer refresh in a separate thread :
-    std::thread t1(RefreshScreen);
+    std::thread t1(AudioThread);
 
-    while (!done)
-    {
+    while (!done){
 
+    	// Play metronome:
+    	myMetronome.doClick();
 
     	// Do all "graphic" events, including touch events
         SDL_Event event;
-        while (SDL_PollEvent(&event))
-        {
+        while (SDL_PollEvent(&event)){
             // check for messages
-            switch (event.type)
-            {
+            switch (event.type){
                 // exit if the window is closed
             case SDL_QUIT:
                 done = true;

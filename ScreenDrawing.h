@@ -21,6 +21,7 @@
 #include "Draw.h"
 #include "Trigger.h"
 #include "TextLabel.h"
+#include "Metronome.h"
 
 
 extern SDL_Surface* screen;
@@ -28,7 +29,7 @@ extern Settings myglobalSettings;
 extern const std::string urDrummerVersion;
 extern unsigned int ticksNow;
 extern unsigned int lastTimeScreenRefresh;
-
+extern Metronome myMetronome;
 
 class ScreenDrawing{
 public:

@@ -9,21 +9,19 @@
 #define LAYER_H_
 
 #include <string>
+#include <vector>
 #include <limits>
 #include <iostream>
 
 #include "soloud_wav.h"
 #include <sndfile.hh>
 
-#define BUFFER_LEN 1024
-
 class Layer {
 	public:
 		Layer();
 		virtual ~Layer();
 
-		const std::string& getFileName() const;
-		void setFileName(const std::string& fileName);
+		void addFileName(const std::string& fileName);
 		unsigned int getMaxVelocity() const;
 		void setMaxVelocity(unsigned int maxVelocity);
 		unsigned int getMinVelocity() const;
@@ -36,10 +34,13 @@ class Layer {
 	private:
 		unsigned int m_minVelocity;
 		unsigned int m_maxVelocity;
-        std::string m_fileName;
-        SoLoud::Wav *wavSample;
+
         bool sampleLoaded;
 
+        std::vector <SoLoud::Wav*> m_RRSamples;
+        std::vector <std::string> m_fileNames;
+        unsigned int m_roundRobinIndex;
+        unsigned int m_roundRobinItemCount;
 };
 
 #endif /* LAYER_H_ */
