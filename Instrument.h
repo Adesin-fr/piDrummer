@@ -18,7 +18,6 @@
 #include "ControllerLayer.h"
 #include "soloud_wav.h"
 
-
 class Instrument {
 	public:
 		Instrument();
@@ -36,6 +35,7 @@ class Instrument {
 		void setCurrentPlayingSample(unsigned int currentPlayingSample);
 		const std::string& getInstrumentName() const;
 		void setInstrumentName(const std::string& instrumentName);
+
 
 	private:
 		std::string m_instrumentName;

@@ -13,12 +13,42 @@ using namespace std;
 DrumKit::DrumKit() {
 	m_reverbDelay=0;
 	m_lastTriggerHit=NULL;
-	m_numTriggerInput=0;
 	m_DKComponentList = new vector<DrumKitComponent*>;
 }
 
 DrumKit::~DrumKit() {
 
+}
+
+DrumKit *DrumKit::CopyDrumKit(){
+	DrumKit *newDrumKit;
+	newDrumKit = new DrumKit();
+
+	// Set new name :
+	newDrumKit->setKitName("Copy Of " + m_kitName);
+
+	// Copy components :
+	for (unsigned int i=0; i < m_DKComponentList->size(); i++){
+		DrumKitComponent *newDKC, *thisDKC;
+
+		thisDKC= (*m_DKComponentList)[i];
+		// Create a new component :
+		newDKC=new DrumKitComponent();
+
+		newDKC->setAssociatedTrigger(thisDKC->getAssociatedTrigger());
+		newDKC->setChoosenInstrument(thisDKC->getChoosenInstrument());
+		newDKC->setBalance(thisDKC->getBalance());
+		newDKC->setPitch(thisDKC->getPitch());
+		newDKC->setReplayGain(thisDKC->getReplayGain());
+
+		// Add the component to the new DK component's list :
+		newDrumKit->addComponent(newDKC);
+	}
+
+	// Save the drumkit :
+	newDrumKit->saveDrumKitToConfigFile();
+
+	return newDrumKit;
 }
 
 
@@ -176,29 +206,18 @@ void DrumKit::setReverbDelay(unsigned int reverbDelay) {
 	m_reverbDelay = reverbDelay;
 }
 
-int DrumKit::getNumTriggerInput() const {
-	return m_numTriggerInput;
-}
-
 void DrumKit::setNumTriggerInput(int numTriggerInput) {
-	m_numTriggerInput = numTriggerInput;
-	Trigger *tmpTrigger;
 	DrumKitComponent *DKComp;
-	std::stringstream triggerName;
+	std::vector<Trigger*> *TriggList;
+
+	TriggList=myglobalSettings.getTriggerList();
 
 	// Generate a list of triggers and add it to the current Trigger List
 	m_DKComponentList->clear();
-	for (unsigned int i=0; i<m_numTriggerInput; i++){
+	for (unsigned int i=0; i < myglobalSettings.getNumTriggerInputs() ; i++){
 		DKComp = new DrumKitComponent;
-		tmpTrigger = new Trigger;
 
-		triggerName.str("");
-		triggerName << "Trigger " << (i+1);
-
-		tmpTrigger->setInputNumber(i);
-		tmpTrigger->setTriggerName(triggerName.str());
-
-		DKComp->setAssociatedTrigger(tmpTrigger);
+		DKComp->setAssociatedTrigger((*TriggList)[i]);
 
 		m_DKComponentList->push_back(DKComp);
 	}

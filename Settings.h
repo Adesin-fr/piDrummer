@@ -19,13 +19,16 @@
 #include "sys/types.h"
 #include "pwd.h"
 #include <vector>
+#include <algorithm>	// Sort
 #include <sys/stat.h>
+#include <sstream>
 
 #include "soloud.h"
 #include "soloud_echofilter.h"
 #include "DrumKit.h"
 #include "Instrument.h"
 
+extern SoLoud::Soloud myAudioEngine;
 // Reference the DrumKit Class :
 class DrumKit;
 
@@ -42,8 +45,6 @@ public:
 	bool SaveSettings(std::string settingsFile);
 
 
-	// Initialize the Setting object with the audio Engine
-	void SetAudioEngine(SoLoud::Soloud &audioEngine);
 
 	unsigned int getAutoPowerOffDelay() const;
 	void setAutoPowerOffDelay(unsigned int autoPowerOffDelay);
@@ -95,9 +96,17 @@ public:
 	void setLastHitTrigger(Trigger *lastHitTrigger);
 	float getGlobalFadeOutTime() const;
 	void setGlobalFadeOutTime(float globalFadeOutTime);
+	bool isPlaySampleOnSettingChange() const;
+	void setPlaySampleOnSettingChange(bool playSampleOnSettingChange);
+	bool isRotaryKnobReversed() const;
+	void setRotaryKnobReversed(bool rotaryKnobReversed);
+	std::vector<Trigger*>* getTriggerList();
 
 private:
-	SoLoud::Soloud *m_AudioEngine;
+
+	// Function to fill trigger list :
+	void fillTriggerList();
+
 	SoLoud::EchoFilter *m_Echofilter;
 
 	// Current global Volume
@@ -129,6 +138,10 @@ private:
 	// This list contains all available drumkits
 	std::vector<DrumKit*> *m_drumKitList;
 
+	// This list contains the triggers (with settings)
+	std::vector<Trigger*> *m_TriggerList;
+
+
 	// Pointer to currently loaded drumkit.
 	DrumKit *m_currentDrumKit;
 
@@ -137,6 +150,19 @@ private:
 
 
 	float m_GlobalFadeOutTime;
+
+	// Shall we play the sample when we change a setting on a drumkit component ?
+	bool m_playSampleOnSettingChange;
+
+	// Is the rotary knob rotation reversed ?
+	bool m_rotaryKnobReversed;
+
+
+    struct InstrumentCompare {
+      bool operator()(const Instrument* l, const Instrument* r) {
+        return l->getInstrumentName() < r->getInstrumentName();
+      }
+    };
 
 };
 

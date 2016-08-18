@@ -22,6 +22,10 @@ Settings::Settings() {
 
 	m_drumKitList = new vector<DrumKit*>;
 
+	m_TriggerList = new vector<Trigger*>;
+
+	m_playSampleOnSettingChange=true;
+
 }
 
 Settings::~Settings() {
@@ -148,6 +152,9 @@ bool Settings::LoadSettings(){
 		 root.lookupValue("EQHiGain", m_EQHiGain);
 	 }
 
+	 // Set the trigger List :
+	 fillTriggerList();
+
 	  return true;
 
 }
@@ -158,6 +165,9 @@ bool Settings::LoadSettings(string settingsFile){
 }
 
 bool Settings::SaveSettings(){
+
+	//TODO : add last added stuff to globalsettings !
+	//TODO : load/save trigger list with properties...
 	Config m_cfg;
 	 // Init the setting Object with the config from file :
 	 Setting &root = m_cfg.getRoot();
@@ -199,10 +209,6 @@ bool Settings::SaveSettings(string settingsFile){
 }
 
 
-
-void Settings::SetAudioEngine(SoLoud::Soloud &audioEngine){
-	m_AudioEngine=&audioEngine;
-}
 
 
 unsigned int Settings::getAutoPowerOffDelay() const {
@@ -279,9 +285,9 @@ void Settings::setReverbDelay(int reverbDelay) {
 	m_ReverbDelay = reverbDelay;
 	if (reverbDelay>0){
 		m_Echofilter->setParams(tmpDelay , 0.1f);
-		m_AudioEngine->setGlobalFilter(0, m_Echofilter);
+		myAudioEngine.setGlobalFilter(0, m_Echofilter);
 	}else{
-		m_AudioEngine->setGlobalFilter(0, NULL);
+		myAudioEngine.setGlobalFilter(0, NULL);
 	}
 }
 
@@ -290,9 +296,11 @@ int Settings::getVolume() const {
 }
 
 void Settings::setVolume(int volume) {
-	float tmpVolume=volume/100;
+	if (volume>32) volume=32;
+	if (volume<0) volume=0;
+	float tmpVolume=(float)volume/32;
 	m_Volume = volume;
-	m_AudioEngine->setGlobalVolume(tmpVolume);
+	myAudioEngine.setGlobalVolume(tmpVolume);
 }
 
 int Settings::getAlsaBufferSize() const {
@@ -304,10 +312,10 @@ void Settings::setAlsaBufferSize(int bufferSize) {
 	m_AlsaBufferSize=bufferSize;
 
 	// Deinit the audio engine :
-	m_AudioEngine->deinit();
+	myAudioEngine.deinit();
 
 	// Reinit the audio engine :
-	m_AudioEngine->init(1, 0,0, m_AlsaBufferSize);
+	myAudioEngine.init(1, 0,0, m_AlsaBufferSize);
 
 }
 
@@ -402,6 +410,9 @@ void Settings::loadInstrumentList(){
 		cout << "Error opening folder " + instrumentDir << endl;
 	}
 
+	// Sort the Instrument List :
+	std::sort(m_instrumentList->begin(), m_instrumentList->end(), InstrumentCompare());
+
 	// Finished : debug some info about instrument loaded count :
 	cerr << "Finished scanning folder. " << m_instrumentList->size() << " instrument successfully loaded." << endl << endl;
 
@@ -449,6 +460,11 @@ bool Settings::loadDrumKit(DrumKit *drumKit){
 	std::vector<DrumKitComponent*> *newDKCL, *oldDKCL;
 	bool instrFound;
 	DrumKitComponent *oDK, *nDK;
+
+	// Return if given drumkit is null :
+	if (drumKit==NULL){
+		return false;
+	}
 
 	newDKCL=drumKit->getDkComponentList();
 
@@ -546,4 +562,40 @@ float Settings::getGlobalFadeOutTime() const {
 
 void Settings::setGlobalFadeOutTime(float globalFadeOutTime) {
 	m_GlobalFadeOutTime = globalFadeOutTime;
+}
+
+bool Settings::isPlaySampleOnSettingChange() const {
+	return m_playSampleOnSettingChange;
+}
+
+void Settings::setPlaySampleOnSettingChange(bool playSampleOnSettingChange) {
+	m_playSampleOnSettingChange = playSampleOnSettingChange;
+}
+
+bool Settings::isRotaryKnobReversed() const {
+	return m_rotaryKnobReversed;
+}
+
+void Settings::setRotaryKnobReversed(bool rotaryKnobReversed) {
+	m_rotaryKnobReversed = rotaryKnobReversed;
+}
+
+void Settings::fillTriggerList(){
+	std::stringstream triggerName;
+
+	for (unsigned int i=0; i< m_numTriggerInputs; i++){
+		Trigger *newTrig;
+		newTrig=new Trigger();
+
+		triggerName.str("");
+		triggerName << "Trigger " << (i+1);
+
+		newTrig->setTriggerName(triggerName.str());
+		m_TriggerList->push_back(newTrig);
+	}
+
+}
+
+std::vector<Trigger*>* Settings::getTriggerList(){
+	return m_TriggerList;
 }

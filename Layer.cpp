@@ -129,9 +129,8 @@ void Layer::unloadSample(){
 		for (unsigned int i=0;i<m_RRSamples.size(); i++){
 			smp=m_RRSamples[i];
 			delete smp;
-			m_RRSamples.pop_back();
 		}
-
+		m_RRSamples.clear();
 	}
 }
 

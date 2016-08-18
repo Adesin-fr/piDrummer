@@ -16,13 +16,13 @@ Trigger::Trigger() {
 	m_signalCurve=new SignalCurve();
 	m_isChoked=false;
 	m_hasController=false;
-	m_triggerType=0;
-	m_footSplashSensitivity=0;
-	m_retriggerDelay=10;
+	m_triggerType=Trigger::TT_PadCenter;
+	m_footSplashSensitivity=4;
+	m_FixedMaskTime=10;
 	m_muteGroup=0;
 	m_lastVelocity=0;
 	m_lastTimeHit=ticksNow;
-	m_maxValue=0;
+	m_maxValue=1024;
 }
 
 Trigger::~Trigger() {
@@ -96,12 +96,12 @@ void Trigger::setMuteGroup(unsigned int muteGroup) {
 }
 
 
-unsigned int Trigger::getRetriggerDelay() const {
-	return m_retriggerDelay;
+unsigned int Trigger::getFixedMaskTime() const {
+	return m_FixedMaskTime;
 }
 
-void Trigger::setRetriggerDelay(unsigned int retriggerDelay) {
-	m_retriggerDelay = retriggerDelay;
+void Trigger::setFixedMaskTime(unsigned int retriggerDelay) {
+	m_FixedMaskTime = retriggerDelay;
 }
 
 SignalCurve *Trigger::getSignalCurve() {

@@ -122,8 +122,7 @@ void AudioThread(){
 
 }
 
-int main ( int argc, char** argv )
-{
+int main ( int argc, char** argv ){
 	// Global variables:
 
 	HandleKeyEventRetVal=0;
@@ -165,7 +164,13 @@ int main ( int argc, char** argv )
     // We have loaded our default settings, if we have a last loaded drumKit, we should use it :
     string PowerOnKitName=myglobalSettings.getPowerOnKitName();
     DrumKit *PowerOnKit=myglobalSettings.GetDrumKitFromName(PowerOnKitName);
-    if (PowerOnKit!=NULL && !myglobalSettings.loadDrumKit(PowerOnKit)){
+    if (PowerOnKit==NULL){
+    	// Get the first drumKit of the list if the list is not empty :
+    	if (myglobalSettings.getDrumKitList()->size()>0){
+        	PowerOnKit=(*myglobalSettings.getDrumKitList())[0];
+    	}
+    }
+    if (!myglobalSettings.loadDrumKit(PowerOnKit)){
     	// We could'nt load the default drum kit, so init an empty one :
         cerr << "Could not load kit : " << myglobalSettings.getPowerOnKitName() << ". Generating a new one." << endl;
     	myglobalSettings.setCurrentDrumKit(new DrumKit);
@@ -181,7 +186,7 @@ int main ( int argc, char** argv )
     lastTimeEvent = SDL_GetTicks();
 
 
-    // Instanciate the audio engine :
+    // Instantiate the audio engine :
     myAudioEngine.init(1, 0,0, myglobalSettings.getAlsaBufferSize());	    // clipping = roundoff
 										// Backend =auto
 										// Sample rate = auto
@@ -258,6 +263,10 @@ int main ( int argc, char** argv )
         	// Clean the SDL libs :
             TTF_Quit();
             SDL_Quit();
+
+            //Set the current drumkit as the "power on" kit :
+            myglobalSettings.setPowerOnKitName( myglobalSettings.getCurrentDrumKit()->getKitName() );
+
             // Saving settings
             cerr << "Saving global settings..." << endl;
             myglobalSettings.SaveSettings();
@@ -266,7 +275,7 @@ int main ( int argc, char** argv )
             return 255;
         }
 
-        SDL_Delay(10);
+        SDL_Delay(30);
 
 
     } // end main loop

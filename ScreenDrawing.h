@@ -51,7 +51,8 @@ public:
 	void DrawKitSetupMenu();
 	void DrawKitSetupTriggerChoosen();
 	void DrawGlobalSettingsMenu();
-
+	void DrawTriggerSettings();
+	void DrawGlobalSetupTriggerChoosen();
 	void DrawSubMenuSelect();
 
 
@@ -88,7 +89,8 @@ private:
 	std::vector<unsigned int> m_triggerLastHitValues;
 
 	// Pointer to Selected DK Component being edited.
-	DrumKitComponent* m_SelectedDK;
+	DrumKitComponent *m_SelectedDK;
+	Trigger *m_SelectedTrigger;
 
 };
 

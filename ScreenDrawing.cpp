@@ -25,6 +25,7 @@ ScreenDrawing::ScreenDrawing(){
 	m_tmpIntValue=0;
 	m_tmpStringValue="";
 	m_SelectedDK=NULL;
+	m_SelectedTrigger = NULL;
 }
 
 
@@ -43,6 +44,7 @@ void ScreenDrawing::DrawSplashScreen(){
 	// Draw the logo
    	DrawIcon(myglobalSettings.getUserDirectory() + "/.urDrummer/res/urdrummer_logo.gif", 140, 30, false);
 
+   	//TODO : fill a progress bar as we load the instruments samples.
 
     SDL_Flip(screen);
 
@@ -213,6 +215,13 @@ unsigned int ScreenDrawing::handleKeyPress(unsigned int keyEvent){
 				myCurrentSelectedMenuItem.push_back(0);
 				switch (currentSelectedItem){
 				case 0:	// Kit Select
+					// Select the current kit in list :
+					for(unsigned int i=0;i < myglobalSettings.getDrumKitList()->size();i++){
+						if ((*myglobalSettings.getDrumKitList())[i]->getKitName() == myglobalSettings.getCurrentDrumKit()->getKitName()) {
+							myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-1]=i;
+							break;
+						}
+					}
 					myCurrentMenuPath.push_back("KitSelect");
 					refreshFunction=&ScreenDrawing::DrawKitSelect;
 					break;
@@ -271,6 +280,52 @@ unsigned int ScreenDrawing::handleKeyPress(unsigned int keyEvent){
 			// Confirm value change
 			myCurrentMenuPath.pop_back();
 			myCurrentSelectedMenuItem.pop_back();
+		}else if (currentScreen == "GlobalSetup"){
+			// if we are on 7th element, go to trigger settings
+			if (currentSelectedItem==7){
+				myCurrentMenuPath.push_back("TriggerSettings");
+				myCurrentSelectedMenuItem.push_back(0);
+				refreshFunction=&ScreenDrawing::DrawTriggerSettings;
+			}else{
+				myCurrentMenuPath.push_back("GlobalSetup1");
+				myCurrentSelectedMenuItem.push_back(0);
+			}
+		}else if (currentScreen=="GlobalSetup1" && myCurrentSelectedMenuItem.size()>2 && myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-2]==6){
+			// Copy kit confirmed ! copy the kit :
+			DrumKit *copiedDrumKit;
+			copiedDrumKit = myglobalSettings.getCurrentDrumKit()->CopyDrumKit();
+			// Add it to the list of availables kits :
+			std::vector<DrumKit*> *ptrTodrumKitList;
+			ptrTodrumKitList=myglobalSettings.getDrumKitList();
+			ptrTodrumKitList->push_back(copiedDrumKit);
+			// Set the current kit = new kit.
+			myglobalSettings.setCurrentDrumKit(copiedDrumKit);
+
+			// Now, go back 3 levels (1> GlobalSetup, 2>Main Menu)
+			myCurrentMenuPath.pop_back();
+			myCurrentSelectedMenuItem.pop_back();
+			myCurrentMenuPath.pop_back();
+			myCurrentSelectedMenuItem.pop_back();
+			myCurrentMenuPath.pop_back();
+			myCurrentSelectedMenuItem.pop_back();
+			refreshFunction=&ScreenDrawing::DrawMainScreen;
+
+			currentScreen=myCurrentMenuPath[myCurrentMenuPath.size()-1];
+
+		}else if (currentScreen=="GlobalSetup1"){
+			// Validate the current setting and go back to global menu
+			myCurrentMenuPath.pop_back();
+			myCurrentSelectedMenuItem.pop_back();
+		}else if (currentScreen=="TriggerSettings"){
+			myCurrentMenuPath.push_back("TriggerSettings1");
+			myCurrentSelectedMenuItem.push_back(0);
+			// Set selected Trigger :
+			unsigned int SelectedTriggerIndex = myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-2];
+			m_SelectedTrigger = (*myglobalSettings.getTriggerList())[SelectedTriggerIndex];
+
+			// Set function to setup Trigger
+			refreshFunction=&ScreenDrawing::DrawGlobalSetupTriggerChoosen;
+
 		}
 
 		break;
@@ -310,7 +365,8 @@ unsigned int ScreenDrawing::handleKeyPress(unsigned int keyEvent){
 				// Save the function name to call it later if needed !
 				refreshFunction=&ScreenDrawing::DrawKitSetupMenu;
 				maxSelectedMenuItem=5;
-
+			}else if (currentScreen=="GlobalSetup"){
+				refreshFunction=&ScreenDrawing::DrawGlobalSettingsMenu;
 			}
 
 		}
@@ -355,6 +411,9 @@ unsigned int ScreenDrawing::handleKeyPress(unsigned int keyEvent){
 							m_SelectedDK->setChoosenInstrument(tmpInstr);
 							tmpInstr->loadInstrumentSamples();
 
+							// Play the sample so we ear what we choose :
+							if (myglobalSettings.isPlaySampleOnSettingChange()) m_SelectedDK->playInstrument(127,127);
+
 							myglobalSettings.getCurrentDrumKit()->cleanUpInstrumentSamples();
 						}
 						break;
@@ -364,6 +423,9 @@ unsigned int ScreenDrawing::handleKeyPress(unsigned int keyEvent){
 						if (m_tmpFloatValue>0.0f){
 							m_tmpFloatValue-=0.01f;
 							m_SelectedDK->setPitch(m_tmpFloatValue);
+
+							// Play the sample so we ear what we choose :
+							if (myglobalSettings.isPlaySampleOnSettingChange()) m_SelectedDK->playInstrument(127,127);
 						}
 						break;
 					case 2:
@@ -372,6 +434,9 @@ unsigned int ScreenDrawing::handleKeyPress(unsigned int keyEvent){
 						if (m_tmpFloatValue>0.0f){
 							m_tmpFloatValue-=0.1f;
 							m_SelectedDK->setReplayGain(m_tmpFloatValue);
+
+							// Play the sample so we ear what we choose :
+							if (myglobalSettings.isPlaySampleOnSettingChange()) m_SelectedDK->playInstrument(127,127);
 						}
 						break;
 					case 3:
@@ -380,16 +445,54 @@ unsigned int ScreenDrawing::handleKeyPress(unsigned int keyEvent){
 						if (m_tmpFloatValue>-1.0f){
 							m_tmpFloatValue-=0.1f;
 							m_SelectedDK->setBalance(m_tmpFloatValue);
+
+							// Play the sample so we ear what we choose :
+							if (myglobalSettings.isPlaySampleOnSettingChange()) m_SelectedDK->playInstrument(127,127);
 						}
 						break;
 				}
 
+			}else if (currentScreen == "GlobalSetup1"){
+				switch(myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-2]){
+					case 0: // Volume
+						// Substract 1
+						m_tmpIntValue=myglobalSettings.getVolume();
+						if (m_tmpIntValue>0){
+							myglobalSettings.setVolume(--m_tmpIntValue);
+						}
+						break;
+					case 1: // Instrument fadeout time
+						// Substract 0.1s
+						m_tmpFloatValue=myglobalSettings.getGlobalFadeOutTime();
+						if (m_tmpFloatValue>0.0f){
+							m_tmpFloatValue-=0.1f;
+							myglobalSettings.setGlobalFadeOutTime(m_tmpFloatValue);
+						}
+						break;
+					case 2:	//Auto poweroff delay
+						// Substract 5 minutes (300 seconds)
+						m_tmpIntValue=myglobalSettings.getAutoPowerOffDelay();
+						if (m_tmpIntValue>0){
+							myglobalSettings.setAutoPowerOffDelay(m_tmpIntValue-300);
+						}
+						break;
+					case 3:	// Invert rotary knob :
+						// Set value = NOT value
+						myglobalSettings.setRotaryKnobReversed(!myglobalSettings.isRotaryKnobReversed());
+						break;
+					case 4: // Main screen rotary action
+						// TODO: Iterate thru the list of available actions
+						break;
+					case 5:	// Play sample on setting change
+						// Set value = NOT value
+						myglobalSettings.setPlaySampleOnSettingChange(!myglobalSettings.isPlaySampleOnSettingChange());
+						break;
+				}
 			}else{
 				if (currentSelectedItem > 0){
 					myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-1]--;
-
 				}
-		}
+			}
 		break;
 	case 275:	// RIGHT key
 		if (currentScreen=="MainScreen"){
@@ -429,6 +532,9 @@ unsigned int ScreenDrawing::handleKeyPress(unsigned int keyEvent){
 						m_SelectedDK->setChoosenInstrument(tmpInstr);
 						tmpInstr->loadInstrumentSamples();
 
+						// Play the sample so we ear what we choose :
+						if (myglobalSettings.isPlaySampleOnSettingChange()) m_SelectedDK->playInstrument(127,127);
+
 						myglobalSettings.getCurrentDrumKit()->cleanUpInstrumentSamples();
 					}
 					break;
@@ -438,6 +544,10 @@ unsigned int ScreenDrawing::handleKeyPress(unsigned int keyEvent){
 					if (m_tmpFloatValue<2.00f){
 						m_tmpFloatValue+=0.01f;
 						m_SelectedDK->setPitch(m_tmpFloatValue);
+
+						// Play the sample so we ear what we choose :
+						if (myglobalSettings.isPlaySampleOnSettingChange()) m_SelectedDK->playInstrument(127,127);
+
 					}
 					break;
 				case 2:
@@ -446,6 +556,9 @@ unsigned int ScreenDrawing::handleKeyPress(unsigned int keyEvent){
 					if (m_tmpFloatValue<3.00f){
 						m_tmpFloatValue+=0.1f;
 						m_SelectedDK->setReplayGain(m_tmpFloatValue);
+
+						// Play the sample so we ear what we choose :
+						if (myglobalSettings.isPlaySampleOnSettingChange()) m_SelectedDK->playInstrument(127,127);
 					}
 					break;
 				case 3:
@@ -454,21 +567,57 @@ unsigned int ScreenDrawing::handleKeyPress(unsigned int keyEvent){
 					if (m_tmpFloatValue<1.0f){
 						m_tmpFloatValue+=0.1f;
 						m_SelectedDK->setBalance(m_tmpFloatValue);
+
+						// Play the sample so we ear what we choose :
+						if (myglobalSettings.isPlaySampleOnSettingChange()) m_SelectedDK->playInstrument(127,127);
 					}
 					break;
 			}
-		}
-		else  {
+		}else if (currentScreen == "GlobalSetup1"){
+			switch(myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-2]){
+				case 0: // Volume
+					// Add 1
+					m_tmpIntValue=myglobalSettings.getVolume();
+					if (m_tmpIntValue<32){
+						myglobalSettings.setVolume(++m_tmpIntValue);
+					}
+					break;
+				case 1: // Instrument fadeout time
+					// Add 0.1s
+					m_tmpFloatValue=myglobalSettings.getGlobalFadeOutTime();
+					// Max value = 2s
+					if (m_tmpFloatValue<2.0f){
+						m_tmpFloatValue+=0.1f;
+						myglobalSettings.setGlobalFadeOutTime(m_tmpFloatValue);
+					}
+					break;
+				case 2:	//Auto poweroff delay
+					// Substract 5 minutes (300 seconds)
+					m_tmpIntValue=myglobalSettings.getAutoPowerOffDelay();
+					// Max value = 4 hours
+					if (m_tmpIntValue<14400){
+						myglobalSettings.setAutoPowerOffDelay(m_tmpIntValue+300);
+					}
+					break;
+				case 3:	// Invert rotary knob :
+					// Set value = NOT value
+					myglobalSettings.setRotaryKnobReversed(!myglobalSettings.isRotaryKnobReversed());
+					break;
+				case 4: // Main screen rotary action
+					// TODO: Iterate thru the list of available actions
+					break;
+				case 5:	// Play sample on setting change
+					// Set value = NOT value
+					myglobalSettings.setPlaySampleOnSettingChange(!myglobalSettings.isPlaySampleOnSettingChange());
+					break;
+			}
+		}else {
 			if (currentSelectedItem < maxSelectedMenuItem){
 				myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-1]++;
 			}
 		}
 		break;
 	}
-
-
-	// Call the function to draw the screen :
-	//(*this.*refreshFunction)();
 
 	return 0;
 
@@ -554,7 +703,7 @@ void ScreenDrawing::DrawMainScreen(){
 
 
 
-    // finally, update the screen :)
+
     SDL_Flip(screen);
 
 }
@@ -585,7 +734,7 @@ void ScreenDrawing::DrawMainMenu(){
 	DrawLabel("Kit Setup" , 18, 126, 180, (currentSel==4?true:false));
 	DrawLabel("Settings" , 18, 223, 180, (currentSel==5?true:false));
 
-    // finally, update the screen :)
+
     SDL_Flip(screen);
 
 }
@@ -620,7 +769,7 @@ void ScreenDrawing::DrawKitSelect(){
 	}
 
 
-    // finally, update the screen :)
+
     SDL_Flip(screen);
 
 }
@@ -699,7 +848,7 @@ void ScreenDrawing::DrawMetronomeSetup(){
 	txtLabel=NULL;
 
 
-    // finally, update the screen :)
+
     SDL_Flip(screen);
 
 }
@@ -713,7 +862,7 @@ void ScreenDrawing::DrawAudioPlayer(){
 	line(screen, 0, 20, 319, 20, SDL_MapRGB(screen->format, 255, 255, 255));
 
 
-    // finally, update the screen :)
+
     SDL_Flip(screen);
 
 }
@@ -727,7 +876,7 @@ void ScreenDrawing::DrawTrainingMenu(){
 	line(screen, 0, 20, 319, 20, SDL_MapRGB(screen->format, 255, 255, 255));
 
 
-    // finally, update the screen :)
+
     SDL_Flip(screen);
 
 }
@@ -737,9 +886,6 @@ void ScreenDrawing::DrawKitSetupMenu(){
 	std::vector<DrumKitComponent*> *dkCompList;
 	unsigned int selItem;
 	Trigger *dkTrig;
-
-	// TODO : allow changing kit name in kit setup
-	// TODO : allow changing REVERB and EQ of kit.
 
 	dkCompList=	myglobalSettings.getCurrentDrumKit()->getDkComponentList();
 
@@ -763,7 +909,6 @@ void ScreenDrawing::DrawKitSetupMenu(){
 	// Draw the current setting on right :
 	DrawLabel("Select a trigger" , 24, 120, 115, false);
 	DrawLabel("in list" , 24, 160, 145, false);
-	// TODO : Display basic informations about trigger in right panel
 
 
 	DrawList(valueList, 0, 21, 100, 219, selItem);
@@ -772,7 +917,7 @@ void ScreenDrawing::DrawKitSetupMenu(){
 	line(screen, 100, 20, 100, 239, SDL_MapRGB(screen->format, 255, 255, 255));
 
 
-    // finally, update the screen :)
+
     SDL_Flip(screen);
 
     // Free pointers ...
@@ -871,13 +1016,19 @@ void ScreenDrawing::DrawKitSetupTriggerChoosen(){
 	delete txtLabel;
 	txtLabel=NULL;
 
-    // finally, update the screen :)
+
     SDL_Flip(screen);
 }
 
 void ScreenDrawing::DrawGlobalSettingsMenu(){
 	vector<string> settingsList;
 	unsigned int selItem=0;
+	TextLabel *txtLabel;
+	string txtValue;
+	std::stringstream myItoA;
+	bool ValueSelected;
+
+
 
 	// Clean the screen
 	fillBackground();
@@ -886,6 +1037,7 @@ void ScreenDrawing::DrawGlobalSettingsMenu(){
 	line(screen, 0, 20, 319, 20, SDL_MapRGB(screen->format, 255, 255, 255));
 
 	/* TODO : Global settings to be set :
+	 * Copy Kit
 	 * Volume
 	 * Reverb	 (TO BE DONE)
 	 * Equalizer (TO BE DONE)
@@ -904,32 +1056,106 @@ void ScreenDrawing::DrawGlobalSettingsMenu(){
 	 * 			Controller Resolution
 	 * Instrument Fade-Out Time
 	 * Auto PowerOff Delay
+	 * Play sample on setting change
 	 * Inv. Rot. Sw.
 	 */
 
 	settingsList.push_back("Volume");
-	settingsList.push_back("Master Reverb");
-	settingsList.push_back("Master Equalizer");
-	settingsList.push_back("Triggers Settings");
+//	settingsList.push_back("Master Reverb");
+//	settingsList.push_back("Master Equalizer");
 	settingsList.push_back("Instrument Fade-out Time");
 	settingsList.push_back("Auto Power-Off Delay");
 	settingsList.push_back("Invert rotary knob");
 	settingsList.push_back("Main screen rotary action");
+	settingsList.push_back("Play sample on setting change");
+	settingsList.push_back("Copy Kit");
+	settingsList.push_back("Triggers Settings");
 
 	line(screen, 0, 20, 319, 20, SDL_MapRGB(screen->format, 255, 255, 255));
 
-
 	// Draw the list of available settings :
-	maxSelectedMenuItem= settingsList.size()-1;
+	if (myCurrentMenuPath[myCurrentMenuPath.size()-1]=="GlobalSetup1"){
+		selItem=myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-2];
+		ValueSelected=true;
+	}else{
+		selItem=myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-1];
+		maxSelectedMenuItem= settingsList.size()-1;
+		ValueSelected=false;
+	}
 
-	selItem=myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-1];
 
 	DrawList(settingsList, 0, 21, 100, 219, selItem);
 	// Draw a line at right of the list :
 	line(screen, 100, 20, 100, 239, SDL_MapRGB(screen->format, 255, 255, 255));
 
+	// Draw the name of selected trigger on screen :
+	txtLabel=new TextLabel(settingsList[selItem],210,85);
+	txtLabel->setMaxWidth(210);
+	txtLabel->setFontSize(30);
+	txtLabel->setTextAlignment(TextLabel::CENTER_ALIGN);
+	txtLabel->doDraw();
 
-    // finally, update the screen :)
+	// Draw the current value of setting :
+	txtLabel->setFontSize(24);
+	txtLabel->setXPos(210);
+	txtLabel->setYPos(130);
+
+	switch(selItem){
+		case 0:
+			// Volume
+			myItoA << myglobalSettings.getVolume();
+			txtValue=myItoA.str();
+			break;
+		case 1:
+			// Instrument FadeOut Time
+			myItoA << std::fixed << std::setprecision(2) <<  myglobalSettings.getGlobalFadeOutTime() << " s.";
+			txtValue=myItoA.str();
+			break;
+		case 2:
+			// Power Off delay
+			myItoA << (myglobalSettings.getAutoPowerOffDelay()/60) << " min.";
+			txtValue=myItoA.str();
+			break;
+		case 3:
+			// Invert rot. Knob
+			if (myglobalSettings.isRotaryKnobReversed()){
+				txtValue="On";
+			}else{
+				txtValue="Off";
+			}
+			break;
+		case 4:
+			// Main screen rotary action
+			txtValue="BPM Change";
+			break;
+		case 5:
+			// Play sample on setting change
+			if (myglobalSettings.isPlaySampleOnSettingChange()){
+				txtValue="On";
+			}else{
+				txtValue="Off";
+			}
+			break;
+		case 6:
+			// Copy Kit
+			txtValue = "Copy";
+			break;
+		case 7:
+			// Trigger Settings
+			txtValue = "> Setup";
+			break;
+	}
+
+	txtLabel->setText(txtValue);
+	txtLabel->setTextSelected(ValueSelected);
+	txtLabel->doDraw();
+
+
+	delete txtLabel;
+	txtLabel=NULL;
+
+
+
     SDL_Flip(screen);
 
 }
@@ -999,6 +1225,50 @@ void ScreenDrawing::DrawList(std::vector<std::string> listText, int x, int y, in
 }
 
 
+void ScreenDrawing::DrawTriggerSettings(){
+	// Draw the trigger Settings menu :
+	vector<string> valueList;
+	std::vector<Trigger*> *TriggerList ;
+	unsigned int selItem;
+	Trigger *Trig;
+
+
+	TriggerList =myglobalSettings.getTriggerList();
+
+	// Set a list of available triggers :
+	for (unsigned int i=0; i < TriggerList->size() ; i++ ){
+		// Add the trigger name to the list :
+		Trig= (*TriggerList )[i];
+		valueList.push_back(Trig->getTriggerName());
+	}
+
+	maxSelectedMenuItem= valueList.size()-1;
+
+	selItem=myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-1];
+
+	// Clean the screen
+	fillBackground();
+
+	DrawLabel("Triggers Setup" , 18, 120, 0, false);
+	line(screen, 0, 20, 319, 20, SDL_MapRGB(screen->format, 255, 255, 255));
+
+	// Draw the current setting on right :
+	DrawLabel("Select a trigger" , 24, 120, 115, false);
+	DrawLabel("in list" , 24, 160, 145, false);
+
+
+	DrawList(valueList, 0, 21, 100, 219, selItem);
+
+	// Draw a line at right of the list :
+	line(screen, 100, 20, 100, 239, SDL_MapRGB(screen->format, 255, 255, 255));
+
+    SDL_Flip(screen);
+
+    // Free pointers ...
+    TriggerList = NULL;
+    Trig = NULL;
+}
+
 void ScreenDrawing::RefreshScreen(){
 	// Call the function to draw the screen :
 	(*this.*refreshFunction)();
@@ -1009,6 +1279,190 @@ void ScreenDrawing::setLastTriggerVelocity(unsigned int TriggerInput, unsigned i
 	m_triggerLastHitValues[TriggerInput]=TriggerVelocity;
 }
 
+
+void ScreenDrawing::DrawGlobalSetupTriggerChoosen(){
+	vector<string> settingsList;
+	unsigned int selItem=0;
+	TextLabel *txtLabel;
+	string txtValue;
+	std::stringstream myItoA;
+	bool ValueSelected;
+
+
+
+	// Clean the screen
+	fillBackground();
+
+	txtValue=m_SelectedTrigger->getTriggerName() + " settings";
+
+	DrawLabel(txtValue , 18, 100, 0, false);
+	line(screen, 0, 20, 319, 20, SDL_MapRGB(screen->format, 255, 255, 255));
+
+	/* Trigger settings to be set :
+	 * 			Type
+	 * 			Threshold
+	 * 			Signal Curve
+	 * 			Max Value
+	 * 			Mute Group
+	 * 			Xtalk Group
+	 * 			Fixed Mask Time
+	 * 			Dynamic Threshold
+	 * 			Positional Sensing
+	 * 			Foot Splash Sensitivity
+	 * 			Controller Resolution
+	 */
+
+	settingsList.push_back("Type");
+	settingsList.push_back("Threshold");
+	settingsList.push_back("Signal curve");
+	settingsList.push_back("Max. Value");
+	settingsList.push_back("Mute Group");
+	settingsList.push_back("Xtalk Group");
+	settingsList.push_back("Fixed Mask Time");
+	settingsList.push_back("Dynamic Threshold");
+	settingsList.push_back("Positional Sensing");
+	settingsList.push_back("Controller Resolution");
+	if (m_SelectedTrigger->getTriggerType() == Trigger::TT_HiHatController){
+		settingsList.push_back("Foot splash sensitivity");
+	}
+
+	line(screen, 0, 20, 319, 20, SDL_MapRGB(screen->format, 255, 255, 255));
+
+	// Draw the list of available settings :
+	if (myCurrentMenuPath[myCurrentMenuPath.size()-1]=="TriggerSettings2"){
+		selItem=myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-2];
+		ValueSelected=true;
+	}else{
+		selItem=myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-1];
+		maxSelectedMenuItem= settingsList.size()-1;
+		ValueSelected=false;
+	}
+
+
+	DrawList(settingsList, 0, 21, 100, 219, selItem);
+	// Draw a line at right of the list :
+	line(screen, 100, 20, 100, 239, SDL_MapRGB(screen->format, 255, 255, 255));
+
+	// Draw the name of selected trigger on screen :
+	txtLabel=new TextLabel(settingsList[selItem],210,85);
+	txtLabel->setMaxWidth(210);
+	txtLabel->setFontSize(30);
+	txtLabel->setTextAlignment(TextLabel::CENTER_ALIGN);
+	txtLabel->doDraw();
+
+	// Draw the current value of setting :
+	txtLabel->setFontSize(24);
+	txtLabel->setXPos(210);
+	txtLabel->setYPos(130);
+
+	switch(selItem){
+		case 0:
+			// Type
+			switch(m_SelectedTrigger->getTriggerType()){
+				case Trigger::TT_CymbalBell:
+					txtValue="Cymbal Bell";
+					break;
+				case Trigger::TT_CymbalEdgeOrChoke:
+					txtValue="Cymbal Edge or Choke";
+					break;
+				case Trigger::TT_CymbalPiezo:
+					txtValue="Cymbal Piezo";
+					break;
+				case Trigger::TT_PadCenter:
+					txtValue="Pad Center";
+					break;
+				case Trigger::TT_PadEdge:
+					txtValue="Pad Edge";
+					break;
+				case Trigger::TT_HiHatController:
+					txtValue="HiHat Controller";
+					break;
+				case Trigger::TT_Switch:
+					txtValue="Switch";
+					break;
+			}
+			break;
+		case 1:
+			// Threshold
+			myItoA <<  m_SelectedTrigger->getThreshold();
+			txtValue=myItoA.str();
+			break;
+		case 2:
+			// Signal Curve
+			switch(m_SelectedTrigger->getSignalCurve()->getCurveType()){
+				case SignalCurve::Curve_Linear:
+					txtValue="Linear";
+					break;
+				case SignalCurve::Curve_Exp:
+					txtValue="Exponential";
+					break;
+				case SignalCurve::Curve_Log:
+					txtValue="Logarithmic";
+					break;
+				case SignalCurve::Curve_SLine:
+					txtValue="S-Line";
+					break;
+				case SignalCurve::Curve_Max:
+					txtValue="Max Value";
+					break;
+			}
+			break;
+		case 3:
+			// Max Value
+			myItoA <<  m_SelectedTrigger->getMaxValue();
+			txtValue=myItoA.str();
+			break;
+		case 4:
+			// Mute Group
+			myItoA <<  m_SelectedTrigger->getMuteGroup();
+			txtValue=myItoA.str();
+			break;
+		case 5:
+			// Xtalk Group
+			myItoA <<  m_SelectedTrigger->getCrossTalkGroup();
+			txtValue=myItoA.str();
+			break;
+		case 6:
+			// Fixed Mask Time
+			myItoA <<  m_SelectedTrigger->getFixedMaskTime();
+			txtValue=myItoA.str();
+			break;
+		case 7:
+			// Dynamic Threshold
+			myItoA <<  m_SelectedTrigger->getDynamicTriggerPercent() << " %";
+			txtValue=myItoA.str();
+			break;
+		case 8:
+			//Positional Sensing
+			if (m_SelectedTrigger->HasController() ){
+				txtValue="On";
+			}else{
+				txtValue="Off";
+			}
+			break;
+		case 9:
+			// Controller Resolution
+			myItoA <<  m_SelectedTrigger->getControllerResolution();
+			txtValue=myItoA.str();
+			break;
+		case 10:
+			// Foot Splash Sensitivity
+			myItoA <<  m_SelectedTrigger->getFootSplashSensitivity();
+			txtValue=myItoA.str();
+			break;
+	}
+
+	txtLabel->setText(txtValue);
+	txtLabel->setTextSelected(ValueSelected);
+	txtLabel->doDraw();
+
+
+	delete txtLabel;
+	txtLabel=NULL;
+
+    SDL_Flip(screen);
+
+}
 
 
 void fillBackground(){

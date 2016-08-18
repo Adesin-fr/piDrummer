@@ -185,11 +185,11 @@ void Instrument::setInstrumentName(const std::string& instrumentName) {
 void Instrument::loadInstrumentSamples(){
 
 	cerr << "Loading samples for instrument " << m_instrumentName << endl;
-
 	for (unsigned int i=0; i<m_ctlLayers.size(); i++){
 		m_ctlLayers[i]->loadSamples();
 	}
 	loaded=true;
+
 }
 
 void Instrument::unloadInstrumentSamples(){

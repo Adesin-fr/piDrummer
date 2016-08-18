@@ -10,6 +10,10 @@
 
 #include "Instrument.h"
 #include "Trigger.h"
+#include "soloud.h"
+#include "soloud_wav.h"
+
+extern SoLoud::Soloud myAudioEngine;
 
 
 
@@ -58,6 +62,8 @@ public:
 	void setAssociatedTrigger(Trigger *associatedTrigger) {
 		m_associatedTrigger = associatedTrigger;
 	}
+
+	void playInstrument(unsigned int controllerValue, unsigned int velocity);
 
 private:
 	float m_replayGain;

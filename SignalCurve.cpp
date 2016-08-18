@@ -51,12 +51,20 @@ void FillList(unsigned int curveType, std::vector<CurvePoint*> *m_curvePoints){
 			tmpPoint->yValue=sCurve[i];
 		}
 
+	}else if (curveType==4){
+		// maxed out :
+		for (unsigned int i=0; i<16; i++){
+			tmpPoint=(*m_curvePoints)[i];
+			tmpPoint->yValue=maxedOut[i];
+		}
+
 	}
 }
 
 SignalCurve::SignalCurve() {
 	// Init the vector list :
 	m_curvePoints=new vector<CurvePoint*>;
+	m_curveType=0;
 
 	// Create a linear curve:
 	FillList((unsigned int)1, m_curvePoints);
@@ -65,6 +73,7 @@ SignalCurve::SignalCurve() {
 SignalCurve::SignalCurve(unsigned int curveType) {
 	// Init the vector list :
 	m_curvePoints=new vector<CurvePoint*>;
+	m_curveType=curveType;
 
 	// Create a linear curve:
 	FillList(curveType, m_curvePoints);
@@ -117,4 +126,10 @@ std::vector<CurvePoint*> *SignalCurve::getAllCurvePoints(){
 	return m_curvePoints;
 }
 
+unsigned int SignalCurve::getCurveType() const {
+	return m_curveType;
+}
 
+void SignalCurve::setCurveType(unsigned int curveType) {
+	m_curveType = curveType;
+}

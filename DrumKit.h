@@ -58,13 +58,14 @@ class DrumKit {
 
 		void cleanUpInstrumentSamples();
 
+		DrumKit *CopyDrumKit();
+
 	private:
 		std::vector<DrumKitComponent*> *m_DKComponentList;
 		std::string m_kitName;
 		unsigned int m_reverbDelay;
 		Trigger *m_lastTriggerHit;
 		
-		unsigned int m_numTriggerInput;
 
 };
 

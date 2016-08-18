@@ -14,7 +14,19 @@
 extern unsigned int ticksNow;
 
 class Trigger {
+
 	public:
+
+		enum TriggerType{
+			TT_PadCenter,
+			TT_PadEdge,
+			TT_CymbalPiezo,
+			TT_CymbalEdgeOrChoke,
+			TT_CymbalBell,
+			TT_Switch,
+			TT_HiHatController
+		};
+
 		Trigger();
 		virtual ~Trigger();
 
@@ -34,8 +46,8 @@ class Trigger {
 		void setLastVelocity(unsigned int lastVelocity);
 		unsigned int getMuteGroup() const;
 		void setMuteGroup(unsigned int muteGroup);
-		unsigned int getRetriggerDelay() const;
-		void setRetriggerDelay(unsigned int retriggerDelay);
+		unsigned int getFixedMaskTime() const;
+		void setFixedMaskTime(unsigned int retriggerDelay);
 		SignalCurve *getSignalCurve();
 		void setSignalCurve(SignalCurve *signalCurve);
 		unsigned int getThreshold() const;
@@ -48,8 +60,8 @@ class Trigger {
 		void setInputNumber(unsigned int inputNumber);
 		unsigned int getMaxValue() const;
 		void setMaxValue(unsigned int maxValue);
-	unsigned int getLastTimeHit() const;
-	void setLastTimeHit(unsigned int lastTimeHit);
+		unsigned int getLastTimeHit() const;
+		void setLastTimeHit(unsigned int lastTimeHit);
 
 	private:
 		unsigned int m_triggerType;
@@ -63,7 +75,7 @@ class Trigger {
 		unsigned int m_threshold;
 		unsigned int m_muteGroup;
 		unsigned int m_crossTalkGroup;
-		unsigned int m_retriggerDelay;
+		unsigned int m_FixedMaskTime;
 		unsigned int m_dynamicTriggerPercent;
 		unsigned int m_footSplashSensitivity;
 		unsigned int m_ControllerResolution;
