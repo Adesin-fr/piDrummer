@@ -17,7 +17,11 @@ DrumKit::DrumKit() {
 }
 
 DrumKit::~DrumKit() {
-
+	// empty the comp list:
+	for (unsigned int i=0; i<m_DKComponentList->size(); i++){
+		delete (*m_DKComponentList)[i];
+	}
+	delete m_DKComponentList;
 }
 
 DrumKit *DrumKit::CopyDrumKit(){

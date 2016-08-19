@@ -72,13 +72,6 @@ private:
 	std::vector<std::string> myCurrentMenuPath;
 	std::vector<unsigned int> myCurrentSelectedMenuItem;
 
-
-	// Screen & SDL variables :
-	bool m_screenNeedRefresh;
-	int m_lastFontSizeUsed;
-
-	// function used to refresh Screen :
-	void(ScreenDrawing::*refreshFunction)(void);
 	unsigned int maxSelectedMenuItem;
 
 	bool m_tmpBoolValue;
@@ -91,6 +84,9 @@ private:
 	// Pointer to Selected DK Component being edited.
 	DrumKitComponent *m_SelectedDK;
 	Trigger *m_SelectedTrigger;
+
+	// function used to refresh Screen :
+	void(ScreenDrawing::*refreshFunction)(void);
 
 };
 

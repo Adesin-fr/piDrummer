@@ -216,6 +216,32 @@ unsigned int SerialHandle::handleEvents(DrumKit *currentDrumKit){
 	return 0;
 }
 
-void SerialHandle::sendParameter(int TriggerNumber, int ParameterNumber, int ParameterValue){
+void SerialHandle::sendParameter(unsigned int TriggerNumber, string ParameterCode, int ParameterValue){
+	/*
+	 * Message format :
+	 * TTPPVVVV
+	 * TT = Trigger Number
+	 * PP = Parameter Code
+	 * VVVV = Parameter Value (variable length)
+	 */
+
+	std::stringstream myItoA;
+	string outString;
+
+	myItoA << "TP" << std::setw(2) << std::setfill('0') <<  TriggerNumber << ParameterCode << ParameterValue << endl;
+	outString=myItoA.str();
+
+	// Send string to serial port.
+
+	if (m_serPortOpened==true){
+		write( m_serPort, outString.c_str(), outString.size() );
+	}
+
+}
+
+void SerialHandle::sendString(string serialString){
+	if (m_serPortOpened==true){
+		write( m_serPort, serialString.c_str(), serialString.size() );
+	}
 
 }

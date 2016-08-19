@@ -10,7 +10,13 @@
 
 
 #include <SDL/SDL.h>
+#include "SignalCurve.h"
 
+
+typedef struct SDL_Point {
+       int x;
+       int y;
+   } SDL_Point;
 
 
 void pxl(SDL_Surface *surface, int x, int y, Uint32 color);
@@ -49,7 +55,7 @@ void disc(SDL_Surface *surface, int cx, int cy, int rayon, int color);
 // radius.
 
 
-
+void drawSignalCurve(SDL_Surface *surface, SignalCurve *sigCurve, int xPos, int yPos, int width, int height);
 
 
 

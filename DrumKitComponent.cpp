@@ -18,7 +18,8 @@ DrumKitComponent::DrumKitComponent() {
 }
 
 DrumKitComponent::~DrumKitComponent() {
-
+	m_associatedTrigger=NULL;
+	m_choosenInstrument=NULL;
 }
 
 void DrumKitComponent::playInstrument(unsigned int controllerValue, unsigned int velocity){

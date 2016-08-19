@@ -12,6 +12,7 @@
 #include <string>
 
 extern unsigned int ticksNow;
+extern void sendSerialParameter(unsigned int TriggerNumber, std::string ParameterCode, int ParameterValue);
 
 class Trigger {
 

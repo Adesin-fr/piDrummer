@@ -121,6 +121,9 @@ void AudioThread(){
 	}
 
 }
+// Send a serial String :
+void sendSerialString(std::string serialString);
+
 
 int main ( int argc, char** argv ){
 	// Global variables:
@@ -281,4 +284,24 @@ int main ( int argc, char** argv ){
     } // end main loop
 
     return 0;
+}
+
+void sendSerialString(std::string serialString){
+	if (mySerialPort !=NULL){
+		mySerialPort->sendString(serialString);
+	}
+}
+
+void sendSerialParameter(unsigned int TriggerNumber, string ParameterCode, int ParameterValue){
+	/*
+	 * Message format :
+	 * TTPPVVVV
+	 * TT = Trigger Number
+	 * PP = Parameter Code
+	 * VVVV = Parameter Value (variable length)
+	 */
+
+	if (mySerialPort !=NULL){
+		mySerialPort->sendParameter(TriggerNumber, ParameterCode, ParameterValue);
+	}
 }

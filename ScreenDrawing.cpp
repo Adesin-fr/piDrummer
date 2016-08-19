@@ -12,9 +12,7 @@ using namespace libconfig;
 
 
 ScreenDrawing::ScreenDrawing(){
-	m_screenNeedRefresh=false;
 
-	m_lastFontSizeUsed=0;
 	maxSelectedMenuItem=0;
 
 	refreshFunction=&ScreenDrawing::DrawMainScreen;
@@ -30,7 +28,6 @@ ScreenDrawing::ScreenDrawing(){
 
 
 ScreenDrawing::~ScreenDrawing(){
-
 }
 
 void ScreenDrawing::DrawSplashScreen(){
@@ -44,7 +41,7 @@ void ScreenDrawing::DrawSplashScreen(){
 	// Draw the logo
    	DrawIcon(myglobalSettings.getUserDirectory() + "/.urDrummer/res/urdrummer_logo.gif", 140, 30, false);
 
-   	//TODO : fill a progress bar as we load the instruments samples.
+   	//TODO : fill a progress bar while loading instruments samples.
 
     SDL_Flip(screen);
 
@@ -323,9 +320,27 @@ unsigned int ScreenDrawing::handleKeyPress(unsigned int keyEvent){
 			unsigned int SelectedTriggerIndex = myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-2];
 			m_SelectedTrigger = (*myglobalSettings.getTriggerList())[SelectedTriggerIndex];
 
-			// Set function to setup Trigger
+			// Set draw screen function to setup Trigger
 			refreshFunction=&ScreenDrawing::DrawGlobalSetupTriggerChoosen;
-
+		}else if (currentScreen=="TriggerSettings1"){
+			myCurrentMenuPath.push_back("TriggerSettingsVal");
+			myCurrentSelectedMenuItem.push_back(0);
+		}else if (currentScreen=="TriggerSettingsVal"){
+			if (myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-2]==2 && m_SelectedTrigger->getSignalCurve()->getCurveType()==SignalCurve::Curve_Custom){
+				// Go to Signal Curve Editing
+				myCurrentMenuPath.push_back("SignalCurveEdit");
+				myCurrentSelectedMenuItem.push_back(0);
+			}else{
+				myCurrentMenuPath.pop_back();
+				myCurrentSelectedMenuItem.pop_back();
+			}
+		}else if (currentScreen == "SignalCurveEdit"){
+			myCurrentMenuPath.push_back("SignalCurvePointEdit");
+			m_tmpIntValue=(*m_SelectedTrigger->getSignalCurve()->getAllCurvePoints())[myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-1]]->yValue;
+			myCurrentSelectedMenuItem.push_back(m_tmpIntValue);
+		}else if (currentScreen == "SignalCurvePointEdit"){
+			myCurrentMenuPath.pop_back();
+			myCurrentSelectedMenuItem.pop_back();
 		}
 
 		break;
@@ -367,6 +382,8 @@ unsigned int ScreenDrawing::handleKeyPress(unsigned int keyEvent){
 				maxSelectedMenuItem=5;
 			}else if (currentScreen=="GlobalSetup"){
 				refreshFunction=&ScreenDrawing::DrawGlobalSettingsMenu;
+			}else if (currentScreen == "TriggerSettings"){
+				refreshFunction=&ScreenDrawing::DrawTriggerSettings;
 			}
 
 		}
@@ -487,6 +504,84 @@ unsigned int ScreenDrawing::handleKeyPress(unsigned int keyEvent){
 						// Set value = NOT value
 						myglobalSettings.setPlaySampleOnSettingChange(!myglobalSettings.isPlaySampleOnSettingChange());
 						break;
+				}
+			}else if (currentScreen=="TriggerSettingsVal"){
+				switch(myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-2]){
+					case 0:	// trigger Type
+						if (m_SelectedTrigger->getTriggerType()>0){
+							m_tmpIntValue=m_SelectedTrigger->getTriggerType();
+							m_SelectedTrigger->setTriggerType(--m_tmpIntValue);
+						}
+						break;
+					case 1: // threshold
+						if (m_SelectedTrigger->getThreshold()>0){
+							m_tmpIntValue=m_SelectedTrigger->getThreshold();
+							m_SelectedTrigger->setThreshold(--m_tmpIntValue);
+						}
+						break;
+					case 2:	// Signal Curve
+						if (m_SelectedTrigger->getSignalCurve()->getCurveType()>0){
+								m_tmpIntValue=m_SelectedTrigger->getSignalCurve()->getCurveType();
+								m_SelectedTrigger->getSignalCurve()->setCurveType(--m_tmpIntValue);
+						}
+						break;
+					case 3:	// Max Value
+						if (m_SelectedTrigger->getMaxValue()>0){
+							m_tmpIntValue=m_SelectedTrigger->getMaxValue();
+							m_SelectedTrigger->setMaxValue(--m_tmpIntValue);
+						}
+						break;
+					case 4:	// Mute Group
+						if (m_SelectedTrigger->getMuteGroup()>0){
+							m_tmpIntValue=m_SelectedTrigger->getMuteGroup();
+							m_SelectedTrigger->setMuteGroup(--m_tmpIntValue);
+						}
+						break;
+					case 5:	// Xtalk Group
+						if (m_SelectedTrigger->getCrossTalkGroup()>0){
+							m_tmpIntValue=m_SelectedTrigger->getCrossTalkGroup();
+							m_SelectedTrigger->setCrossTalkGroup(--m_tmpIntValue);
+						}
+						break;
+					case 6:	// Fixed Mask Time
+						if (m_SelectedTrigger->getFixedMaskTime()>0){
+							m_tmpIntValue=m_SelectedTrigger->getFixedMaskTime();
+							m_SelectedTrigger->setFixedMaskTime(--m_tmpIntValue);
+						}
+						break;
+					case 7:	// Dynamic Threshold
+						if (m_SelectedTrigger->getDynamicTriggerPercent()>0){
+							m_tmpIntValue=m_SelectedTrigger->getDynamicTriggerPercent();
+							m_SelectedTrigger->setDynamicTriggerPercent(--m_tmpIntValue);
+						}
+						break;
+					case 8:	// Positional Sensing
+						m_SelectedTrigger->setHasController(!m_SelectedTrigger->HasController());
+						break;
+					case 9:	// Controller Resolution
+						if (m_SelectedTrigger->getControllerResolution()>0){
+							m_tmpIntValue=m_SelectedTrigger->getControllerResolution();
+							m_SelectedTrigger->setControllerResolution(--m_tmpIntValue);
+						}
+						break;
+					case 10:	// Foot splash sensitivity
+						if (m_SelectedTrigger->getFootSplashSensitivity()>1){
+							m_tmpIntValue=m_SelectedTrigger->getFootSplashSensitivity();
+							m_SelectedTrigger->setFootSplashSensitivity(--m_tmpIntValue);
+						}
+						break;
+				}
+			}else if (currentScreen=="SignalCurveEdit"){
+				// Change Point X cursor :
+				if (myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-1] > 0 ){
+					myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-1]--;
+				}
+			}else if (currentScreen=="SignalCurvePointEdit"){
+				// Change Point Y Value
+				m_tmpIntValue=(*m_SelectedTrigger->getSignalCurve()->getAllCurvePoints())[myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-2]]->yValue;
+				if (m_tmpIntValue>0){
+					m_tmpIntValue--;
+					m_SelectedTrigger->getSignalCurve()->setValueAt(myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-2], m_tmpIntValue);
 				}
 			}else{
 				if (currentSelectedItem > 0){
@@ -610,6 +705,84 @@ unsigned int ScreenDrawing::handleKeyPress(unsigned int keyEvent){
 					// Set value = NOT value
 					myglobalSettings.setPlaySampleOnSettingChange(!myglobalSettings.isPlaySampleOnSettingChange());
 					break;
+			}
+		}else if (currentScreen=="TriggerSettingsVal"){
+			switch(myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-2]){
+				case 0:	// trigger Type
+					if (m_SelectedTrigger->getTriggerType()<6){
+						m_tmpIntValue=m_SelectedTrigger->getTriggerType();
+						m_SelectedTrigger->setTriggerType(++m_tmpIntValue);
+					}
+					break;
+				case 1: // threshold
+					if (m_SelectedTrigger->getThreshold()<512){
+						m_tmpIntValue=m_SelectedTrigger->getThreshold();
+						m_SelectedTrigger->setThreshold(++m_tmpIntValue);
+					}
+					break;
+				case 2:	// Signal Curve
+					if (m_SelectedTrigger->getSignalCurve()->getCurveType()<5){
+							m_tmpIntValue=m_SelectedTrigger->getSignalCurve()->getCurveType();
+							m_SelectedTrigger->getSignalCurve()->setCurveType(++m_tmpIntValue);
+					}
+					break;
+				case 3:	// Max Value
+					if (m_SelectedTrigger->getMaxValue()<1024){
+						m_tmpIntValue=m_SelectedTrigger->getMaxValue();
+						m_SelectedTrigger->setMaxValue(++m_tmpIntValue);
+					}
+					break;
+				case 4:	// Mute Group
+					if (m_SelectedTrigger->getMuteGroup()<64){
+						m_tmpIntValue=m_SelectedTrigger->getMuteGroup();
+						m_SelectedTrigger->setMuteGroup(++m_tmpIntValue);
+					}
+					break;
+				case 5:	// Xtalk Group
+					if (m_SelectedTrigger->getCrossTalkGroup()<64){
+						m_tmpIntValue=m_SelectedTrigger->getCrossTalkGroup();
+						m_SelectedTrigger->setCrossTalkGroup(++m_tmpIntValue);
+					}
+					break;
+				case 6:	// Fixed Mask Time
+					if (m_SelectedTrigger->getFixedMaskTime()<255){
+						m_tmpIntValue=m_SelectedTrigger->getFixedMaskTime();
+						m_SelectedTrigger->setFixedMaskTime(++m_tmpIntValue);
+					}
+					break;
+				case 7:	// Dynamic Threshold
+					if (m_SelectedTrigger->getDynamicTriggerPercent()<100){
+						m_tmpIntValue=m_SelectedTrigger->getDynamicTriggerPercent();
+						m_SelectedTrigger->setDynamicTriggerPercent(++m_tmpIntValue);
+					}
+					break;
+				case 8:	// Positional Sensing
+					m_SelectedTrigger->setHasController(!m_SelectedTrigger->HasController());
+					break;
+				case 9:	// Controller Resolution
+					if (m_SelectedTrigger->getControllerResolution()<127){
+						m_tmpIntValue=m_SelectedTrigger->getControllerResolution();
+						m_SelectedTrigger->setControllerResolution(++m_tmpIntValue);
+					}
+					break;
+				case 10:	// Foot splash sensitivity
+					if (m_SelectedTrigger->getFootSplashSensitivity()<10){
+						m_tmpIntValue=m_SelectedTrigger->getFootSplashSensitivity();
+						m_SelectedTrigger->setFootSplashSensitivity(++m_tmpIntValue);
+					}
+					break;
+			}
+		}else if (currentScreen=="SignalCurveEdit"){
+			// Change Point X cursor :
+			if (myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-1] < m_SelectedTrigger->getSignalCurve()->getAllCurvePoints()->size()-1){
+				myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-1]++;
+			}
+		}else if (currentScreen=="SignalCurvePointEdit"){
+			// Change Point Y Value
+			m_tmpIntValue=(*m_SelectedTrigger->getSignalCurve()->getAllCurvePoints())[myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-2]]->yValue;
+			if (m_tmpIntValue<127){
+				m_tmpIntValue++;
+				m_SelectedTrigger->getSignalCurve()->setValueAt(myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-2], m_tmpIntValue);
 			}
 		}else {
 			if (currentSelectedItem < maxSelectedMenuItem){
@@ -1028,37 +1201,11 @@ void ScreenDrawing::DrawGlobalSettingsMenu(){
 	std::stringstream myItoA;
 	bool ValueSelected;
 
-
-
 	// Clean the screen
 	fillBackground();
 
 	DrawLabel("Global Settings" , 18, 100, 0, false);
 	line(screen, 0, 20, 319, 20, SDL_MapRGB(screen->format, 255, 255, 255));
-
-	/* TODO : Global settings to be set :
-	 * Copy Kit
-	 * Volume
-	 * Reverb	 (TO BE DONE)
-	 * Equalizer (TO BE DONE)
-	 * Triggers
-	 * 		Trigger List
-	 * 			Name
-	 * 			Type
-	 * 			Signal Curve
-	 * 			Threshold
-	 * 			Max Value
-	 * 			Mute Group
-	 * 			CrossTalk Group
-	 * 			Mask Time
-	 * 			Dynamic Trigger
-	 * 			Foot Splash Sensitivity
-	 * 			Controller Resolution
-	 * Instrument Fade-Out Time
-	 * Auto PowerOff Delay
-	 * Play sample on setting change
-	 * Inv. Rot. Sw.
-	 */
 
 	settingsList.push_back("Volume");
 //	settingsList.push_back("Master Reverb");
@@ -1126,7 +1273,7 @@ void ScreenDrawing::DrawGlobalSettingsMenu(){
 			break;
 		case 4:
 			// Main screen rotary action
-			txtValue="BPM Change";
+			txtValue="Change BPM";
 			break;
 		case 5:
 			// Play sample on setting change
@@ -1282,12 +1429,17 @@ void ScreenDrawing::setLastTriggerVelocity(unsigned int TriggerInput, unsigned i
 
 void ScreenDrawing::DrawGlobalSetupTriggerChoosen(){
 	vector<string> settingsList;
+	SDL_Color green={0,255,0};
 	unsigned int selItem=0;
 	TextLabel *txtLabel;
 	string txtValue;
 	std::stringstream myItoA;
 	bool ValueSelected;
-
+	unsigned int selPoint;
+	const unsigned int xCurvePos=105;
+	const unsigned int yCurvePos=82;
+	const unsigned int CurveWidth=155;
+	const unsigned int CurveHeight=155;
 
 
 	// Clean the screen
@@ -1328,14 +1480,21 @@ void ScreenDrawing::DrawGlobalSetupTriggerChoosen(){
 
 	line(screen, 0, 20, 319, 20, SDL_MapRGB(screen->format, 255, 255, 255));
 
+	selItem=myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-1];
+	maxSelectedMenuItem= settingsList.size()-1;
+	ValueSelected=false;
 	// Draw the list of available settings :
-	if (myCurrentMenuPath[myCurrentMenuPath.size()-1]=="TriggerSettings2"){
+	if (myCurrentMenuPath[myCurrentMenuPath.size()-1]=="TriggerSettingsVal" ){
 		selItem=myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-2];
 		ValueSelected=true;
-	}else{
-		selItem=myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-1];
-		maxSelectedMenuItem= settingsList.size()-1;
-		ValueSelected=false;
+	}else if (myCurrentMenuPath[myCurrentMenuPath.size()-1]=="SignalCurveEdit"){
+		selPoint=myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-1];
+		selItem=myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-3];
+		ValueSelected=true;
+	}else if (myCurrentMenuPath[myCurrentMenuPath.size()-1]=="SignalCurvePointEdit"){
+		selPoint=myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-2];
+		selItem = myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-4];
+		ValueSelected=true;
 	}
 
 
@@ -1344,7 +1503,7 @@ void ScreenDrawing::DrawGlobalSetupTriggerChoosen(){
 	line(screen, 100, 20, 100, 239, SDL_MapRGB(screen->format, 255, 255, 255));
 
 	// Draw the name of selected trigger on screen :
-	txtLabel=new TextLabel(settingsList[selItem],210,85);
+	txtLabel=new TextLabel(settingsList[selItem],210,20);
 	txtLabel->setMaxWidth(210);
 	txtLabel->setFontSize(30);
 	txtLabel->setTextAlignment(TextLabel::CENTER_ALIGN);
@@ -1353,7 +1512,7 @@ void ScreenDrawing::DrawGlobalSetupTriggerChoosen(){
 	// Draw the current value of setting :
 	txtLabel->setFontSize(24);
 	txtLabel->setXPos(210);
-	txtLabel->setYPos(130);
+	txtLabel->setYPos(52);
 
 	switch(selItem){
 		case 0:
@@ -1389,6 +1548,45 @@ void ScreenDrawing::DrawGlobalSetupTriggerChoosen(){
 			break;
 		case 2:
 			// Signal Curve
+			// Draw the curve :
+			drawSignalCurve(screen, m_SelectedTrigger->getSignalCurve(), xCurvePos, yCurvePos , CurveWidth, CurveHeight);
+			// Draw a box to show the curve is being edited :
+			if (myCurrentMenuPath[myCurrentMenuPath.size()-1]=="SignalCurveEdit"
+			 || myCurrentMenuPath[myCurrentMenuPath.size()-1]=="SignalCurvePointEdit"){
+				// Draw a box around the signal curve graph to show it's selected !
+				box(screen, xCurvePos, yCurvePos , CurveWidth, CurveHeight, SDL_MapRGB(screen->format, 0, 255, 0));
+				box(screen, xCurvePos-1, yCurvePos -1, CurveWidth+2, CurveHeight+2, SDL_MapRGB(screen->format, 0, 255, 0));
+
+				// Show the current selected point :
+				unsigned int nbPoints=m_SelectedTrigger->getSignalCurve()->getAllCurvePoints()->size();
+				CurvePoint *curvPt;
+				SDL_Point pt;
+				curvPt=(*m_SelectedTrigger->getSignalCurve()->getAllCurvePoints())[selPoint];
+				pt.x=xCurvePos + (selPoint*CurveWidth/(nbPoints-1))-1;
+				pt.y=yCurvePos  + CurveWidth - (curvPt->yValue*CurveHeight/127)-1 ;
+				// Draw the box around point :
+				box(screen, pt.x, pt.y, 3, 3, SDL_MapRGB(screen->format, 255, 255, 0));
+				box(screen, pt.x-1, pt.y-1, 4, 4, SDL_MapRGB(screen->format, 255, 255, 0));
+
+				// Write the point Values at right of the graph :
+				DrawLabel("In :", 24, 270, 100,  false );
+				myItoA.str("");
+				myItoA <<  curvPt->xValue;
+				txtValue=myItoA.str();
+				DrawLabel(txtValue, 24, 270, 130, green, false);
+
+				DrawLabel("Out:", 24, 270, 160, false);
+				myItoA.str("");
+				myItoA <<  curvPt->yValue;
+				txtValue=myItoA.str();
+				if (myCurrentMenuPath[myCurrentMenuPath.size()-1]=="SignalCurvePointEdit"){
+					DrawLabel(txtValue, 24, 270, 190, green, true);
+				}else{
+					DrawLabel(txtValue, 24, 270, 190, green, false);
+				}
+			}
+
+
 			switch(m_SelectedTrigger->getSignalCurve()->getCurveType()){
 				case SignalCurve::Curve_Linear:
 					txtValue="Linear";
@@ -1404,6 +1602,9 @@ void ScreenDrawing::DrawGlobalSetupTriggerChoosen(){
 					break;
 				case SignalCurve::Curve_Max:
 					txtValue="Max Value";
+					break;
+				case SignalCurve::Curve_Custom:
+					txtValue="Custom";
 					break;
 			}
 			break;

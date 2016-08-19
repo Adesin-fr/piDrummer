@@ -23,7 +23,8 @@ public:
 		Curve_Exp,
 		Curve_Log,
 		Curve_SLine,
-		Curve_Max
+		Curve_Max,
+		Curve_Custom
 	};
 
 	SignalCurve();
@@ -38,6 +39,8 @@ public:
 
 private:
 	std::vector<CurvePoint*> *m_curvePoints;
+	std::vector<CurvePoint*> *m_stdCurvePoints;
+	std::vector<CurvePoint*> *m_customCurvePoints;
 	unsigned int m_curveType;
 };
 

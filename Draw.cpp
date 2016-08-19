@@ -321,4 +321,52 @@ void disc(SDL_Surface *surface, int cx, int cy, int rayon, int color)
 }
 
 
+void drawSignalCurve(SDL_Surface *surface, SignalCurve *sigCurve, int xPos, int yPos, int width, int height){
+	unsigned int white, lineColor, gridColor,  nbPoints;
+	SDL_Point lastPoint, currentPoint;
+
+	white	  = SDL_MapRGB(surface->format, 255, 255, 255);
+	lineColor = SDL_MapRGB(surface->format, 255, 0, 0);
+	gridColor = SDL_MapRGB(surface->format, 80, 80, 80);
+
+	//  Draw a light gray grid :
+	// Vertical lines :
+	for (unsigned int x=0; x<8; x++){
+		line(surface, xPos + (x*width/8) ,yPos, xPos + (x*width/8), yPos+height, gridColor);
+	}
+	// Horizontal lines :
+	for (unsigned int y=0; y<8; y++){
+		line(surface, xPos  ,yPos + (y*height/8), xPos + width, yPos + (y*height/8), gridColor);
+	}
+
+	// Draw the box around:
+	box(surface, xPos-1, yPos-1, width+2, height+2, white);
+
+	// Draw the curve line :
+	nbPoints= sigCurve->getAllCurvePoints()->size();
+
+	if (nbPoints<1){
+		return;
+	}
+
+	// Get First point position :
+	lastPoint.x=xPos;
+	lastPoint.y=yPos + height - ((*sigCurve->getAllCurvePoints())[0]->yValue * height / 127 );
+	if (lastPoint.y > yPos + height-1){
+		lastPoint.y = yPos + height-1;
+	}
+
+	for (unsigned int i=1; i<nbPoints; i++){
+		currentPoint.x=xPos + (i * width / (nbPoints-1)) ;
+		currentPoint.y=yPos + height - ((*sigCurve->getAllCurvePoints())[i]->yValue * height / 127  );
+
+		// Draw the segment :
+		line(surface, lastPoint.x, lastPoint.y, currentPoint.x, currentPoint.y, lineColor);
+
+		lastPoint.x=currentPoint.x;
+		lastPoint.y=currentPoint.y;
+
+	}
+
+}
 

@@ -26,6 +26,7 @@ Trigger::Trigger() {
 }
 
 Trigger::~Trigger() {
+	delete m_signalCurve;
 }
 
 
@@ -35,6 +36,7 @@ unsigned int Trigger::getCrossTalkGroup() const {
 
 void Trigger::setCrossTalkGroup(unsigned int crossTalkGroup) {
 	m_crossTalkGroup = crossTalkGroup;
+	sendSerialParameter(m_InputNumber,"CT",m_crossTalkGroup);
 }
 
 unsigned int Trigger::getDynamicTriggerPercent() const {
@@ -43,6 +45,7 @@ unsigned int Trigger::getDynamicTriggerPercent() const {
 
 void Trigger::setDynamicTriggerPercent(unsigned int dynamicTriggerPercent) {
 	m_dynamicTriggerPercent = dynamicTriggerPercent;
+	sendSerialParameter(m_InputNumber,"DT",m_dynamicTriggerPercent);
 }
 
 unsigned int Trigger::getFootSplashSensitivity() const {
@@ -51,6 +54,7 @@ unsigned int Trigger::getFootSplashSensitivity() const {
 
 void Trigger::setFootSplashSensitivity(unsigned int footSplashSensitivity) {
 	m_footSplashSensitivity = footSplashSensitivity;
+	sendSerialParameter(m_InputNumber,"FS",m_footSplashSensitivity);
 }
 
 bool Trigger::HasController() const {
@@ -67,6 +71,7 @@ unsigned int Trigger::getControllerResolution() const {
 
 void Trigger::setControllerResolution(unsigned int ControllerResolution) {
 	m_ControllerResolution = ControllerResolution;
+	sendSerialParameter(m_InputNumber,"CR",m_ControllerResolution);
 }
 
 bool Trigger::isChoked() const {
@@ -93,6 +98,7 @@ unsigned int Trigger::getMuteGroup() const {
 
 void Trigger::setMuteGroup(unsigned int muteGroup) {
 	m_muteGroup = muteGroup;
+	sendSerialParameter(m_InputNumber,"MG",m_muteGroup);
 }
 
 
@@ -102,6 +108,8 @@ unsigned int Trigger::getFixedMaskTime() const {
 
 void Trigger::setFixedMaskTime(unsigned int retriggerDelay) {
 	m_FixedMaskTime = retriggerDelay;
+	sendSerialParameter(m_InputNumber,"MT",m_FixedMaskTime);
+
 }
 
 SignalCurve *Trigger::getSignalCurve() {
@@ -118,6 +126,7 @@ unsigned int Trigger::getThreshold() const {
 
 void Trigger::setThreshold(unsigned int threshold) {
 	m_threshold = threshold;
+	sendSerialParameter(m_InputNumber,"TH",m_threshold);
 }
 
 unsigned int Trigger::getTriggerType() const {
@@ -126,6 +135,7 @@ unsigned int Trigger::getTriggerType() const {
 
 void Trigger::setTriggerType(unsigned int triggerType) {
 	m_triggerType = triggerType;
+	sendSerialParameter(m_InputNumber,"TT",m_triggerType);
 }
 
 std::string Trigger::getTriggerName() {
@@ -150,6 +160,7 @@ unsigned int Trigger::getMaxValue() const {
 
 void Trigger::setMaxValue(unsigned int maxValue) {
 	m_maxValue = maxValue;
+	sendSerialParameter(m_InputNumber,"MV",m_maxValue);
 }
 
 unsigned int Trigger::getLastTimeHit() const {

@@ -22,7 +22,6 @@
 #include <asm/ioctls.h>
 #include <sys/select.h>
 
-
 #include "DrumKit.h"
 
 class SerialHandle {
@@ -33,7 +32,8 @@ public:
 
 	unsigned int handleEvents(DrumKit *currentDrumKit);
 	bool initSerial();
-	void sendParameter(int TriggerNumber, int ParameterNumber, int ParameterValue);
+	void sendParameter(unsigned int TriggerNumber, std::string ParameterCode, int ParameterValue);
+	void sendString(std::string serialString);
 
 private:
 	int m_serPort;

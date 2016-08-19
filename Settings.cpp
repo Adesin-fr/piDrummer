@@ -46,6 +46,9 @@ bool Settings::checkIfFileExists(const std::string& filePath){
 bool Settings::LoadSettings(){
 
 	Config m_cfg;
+	Trigger *trig;
+	int tmpInt;
+	string tmpString;
 
 	  try{
 	    m_cfg.readFile(m_SettingsFileName.c_str());
@@ -155,6 +158,61 @@ bool Settings::LoadSettings(){
 	 // Set the trigger List :
 	 fillTriggerList();
 
+
+
+	 if(root.exists("Triggers")){
+		 Setting &TrigList=root["Triggers"];
+		 unsigned int nbTriggers = TrigList.getLength();
+
+		 for (unsigned int i=0; i<nbTriggers && i<m_numTriggerInputs ; i++){
+			trig=(*m_TriggerList)[i];
+			Setting &TriggerSetting=TrigList[i];
+
+			TriggerSetting.lookupValue("InputNumber",tmpInt);
+			trig->setInputNumber(tmpInt);
+			TriggerSetting.lookupValue("Name",tmpString);
+			trig->setTriggerName(tmpString);
+			TriggerSetting.lookupValue("TriggerType",tmpInt);
+			trig->setTriggerType(tmpInt);
+			TriggerSetting.lookupValue("Threshold",tmpInt);
+			trig->setThreshold(tmpInt);
+			TriggerSetting.lookupValue("DynamicTriggerPercent",tmpInt);
+			trig->setDynamicTriggerPercent(tmpInt);
+			TriggerSetting.lookupValue("ControllerResolution",tmpInt);
+			trig->setControllerResolution(tmpInt);
+			TriggerSetting.lookupValue("PositionalSensing",tmpInt);
+			trig->setHasController(tmpInt);
+			TriggerSetting.lookupValue("MuteGroup",tmpInt);
+			trig->setMuteGroup(tmpInt);
+			TriggerSetting.lookupValue("CrossTalkGroup",tmpInt);
+			trig->setCrossTalkGroup(tmpInt);
+			TriggerSetting.lookupValue("FixedMaskTime",tmpInt);
+			trig->setFixedMaskTime(tmpInt);
+			TriggerSetting.lookupValue("MaxValue",tmpInt);
+			trig->setMaxValue(tmpInt);
+			TriggerSetting.lookupValue("FootSplashSensitivity",tmpInt);
+			trig->setFootSplashSensitivity(tmpInt);
+			TriggerSetting.lookupValue("SignalCurveType",tmpInt);
+			trig->getSignalCurve()->setCurveType(tmpInt);
+
+
+			if (trig->getSignalCurve()->getCurveType() == SignalCurve::Curve_Custom ){
+				// Get the Points list :
+				Setting &CurvePointList=TriggerSetting["CurvePoints"];
+				std::vector<CurvePoint*> *m_curvePoints;
+
+				m_curvePoints=trig->getSignalCurve()->getAllCurvePoints();
+
+				for (unsigned int c=0; c < m_curvePoints->size(); c++){
+					(*m_curvePoints)[c]->yValue= CurvePointList[c];
+				}
+			}
+		 }
+
+	}
+
+
+
 	  return true;
 
 }
@@ -165,10 +223,9 @@ bool Settings::LoadSettings(string settingsFile){
 }
 
 bool Settings::SaveSettings(){
-
-	//TODO : add last added stuff to globalsettings !
-	//TODO : load/save trigger list with properties...
 	Config m_cfg;
+	Trigger *trig;
+
 	 // Init the setting Object with the config from file :
 	 Setting &root = m_cfg.getRoot();
 
@@ -180,6 +237,9 @@ bool Settings::SaveSettings(){
 	root.add("ReverbDelay", Setting::TypeInt) = m_ReverbDelay;
 	root.add("PowerOnKitName", Setting::TypeString) = m_PowerOnKitName;
     root.add("SerialDevice", Setting::TypeString) = m_serialPort;
+	root.add("GlobalFadeOutTime", Setting::TypeFloat) = m_GlobalFadeOutTime;
+	root.add("PlaySampleOnSettingChange", Setting::TypeBoolean) = m_playSampleOnSettingChange;
+	root.add("RotaryKnobInversion", Setting::TypeBoolean) = m_rotaryKnobReversed;
 
 	// EQ Frequencies :
 	root.add("EQLowFrequency", Setting::TypeInt) = m_EQLowFrequency;
@@ -190,6 +250,47 @@ bool Settings::SaveSettings(){
 	root.add("EQLowGain", Setting::TypeFloat) = m_EQLowGain;
 	root.add("EQMidGain", Setting::TypeFloat) = m_EQMidGain;
 	root.add("EQHiGain", Setting::TypeFloat) = m_EQHiGain;
+
+	// Save the trigger list & settings to the file :
+	root.add("Triggers", Setting::TypeList) ;
+
+	// Add the Trigger list :
+	Setting &TrigList=root["Triggers"];
+
+	for (unsigned int i=0; i<m_TriggerList->size(); i++){
+		trig=(*m_TriggerList)[i];
+
+		Setting &SetTrigger =TrigList.add(Setting::TypeGroup);
+
+		SetTrigger.add("InputNumber", Setting::TypeInt) = (int)trig->getInputNumber();
+		SetTrigger.add("Name", Setting::TypeString) = trig->getTriggerName();
+		SetTrigger.add("TriggerType", Setting::TypeInt) = (int)trig->getTriggerType();
+		SetTrigger.add("Threshold", Setting::TypeInt) = (int)trig->getThreshold();
+		SetTrigger.add("DynamicTriggerPercent", Setting::TypeInt) = (int)trig->getDynamicTriggerPercent();
+		SetTrigger.add("ControllerResolution", Setting::TypeInt) = (int)trig->getControllerResolution();
+		SetTrigger.add("PositionalSensing", Setting::TypeInt) = (int)trig->HasController();
+		SetTrigger.add("MuteGroup", Setting::TypeInt) = (int)trig->getMuteGroup();
+		SetTrigger.add("CrossTalkGroup", Setting::TypeInt) = (int)trig->getCrossTalkGroup();
+		SetTrigger.add("FixedMaskTime", Setting::TypeInt) = (int)trig->getFixedMaskTime();
+		SetTrigger.add("MaxValue", Setting::TypeInt) = (int)trig->getMaxValue();
+		SetTrigger.add("FootSplashSensitivity", Setting::TypeInt) = (int)trig->getFootSplashSensitivity();
+		SetTrigger.add("SignalCurveType", Setting::TypeInt) = (int)trig->getSignalCurve()->getCurveType();
+
+		if (trig->getSignalCurve()->getCurveType() == SignalCurve::Curve_Custom ){
+			SetTrigger.add("CurvePoints", Setting::TypeList) ;
+
+			// Add the Points list :
+			Setting &CurvePointList=SetTrigger["CurvePoints"];
+			std::vector<CurvePoint*> *m_curvePoints;
+
+			m_curvePoints=trig->getSignalCurve()->getAllCurvePoints();
+
+			for (unsigned int c=0; c < m_curvePoints->size(); c++){
+				CurvePointList.add(Setting::TypeInt) = (int)(*m_curvePoints)[c]->yValue;
+			}
+		}
+
+	}
 
     try{
     	m_cfg.writeFile(m_SettingsFileName.c_str());
@@ -589,6 +690,7 @@ void Settings::fillTriggerList(){
 
 		triggerName.str("");
 		triggerName << "Trigger " << (i+1);
+		newTrig->setInputNumber(i);
 
 		newTrig->setTriggerName(triggerName.str());
 		m_TriggerList->push_back(newTrig);

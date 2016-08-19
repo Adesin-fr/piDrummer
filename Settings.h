@@ -27,6 +27,7 @@
 #include "soloud_echofilter.h"
 #include "DrumKit.h"
 #include "Instrument.h"
+#include "SignalCurve.h"
 
 extern SoLoud::Soloud myAudioEngine;
 // Reference the DrumKit Class :
