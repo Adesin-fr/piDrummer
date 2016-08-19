@@ -391,9 +391,23 @@ unsigned int ScreenDrawing::handleKeyPress(unsigned int keyEvent){
 	case 276:	// LEFT key
 		if (currentScreen=="MainScreen"){
 			// If we are on main screen, then we handle special action (
-			// TODO : handle special action from main screen
-			myMetronome.DecMetronomeBpm(5);
-
+			switch(myglobalSettings.getRotaryAction()){
+				case Settings::Rotary_ChangeBPM:
+					myMetronome.DecMetronomeBpm(5);
+					break;
+				case Settings::Rotary_ChangeVolume:
+					if(myglobalSettings.getVolume()>0){
+						myglobalSettings.setVolume(myglobalSettings.getVolume()-1);
+					}
+					break;
+				case Settings::Rotary_ChangeDrumKit:
+					DrumKit *prevDK;
+					prevDK=myglobalSettings.getPreviousDrumKit(myglobalSettings.getCurrentDrumKit());
+					if (prevDK!=NULL){
+						myglobalSettings.loadDrumKit(prevDK);
+					}
+					break;
+			}
 		}else if (currentScreen=="MetronomeVal"){
 				switch(myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-2]){
 					case 0:
@@ -498,7 +512,9 @@ unsigned int ScreenDrawing::handleKeyPress(unsigned int keyEvent){
 						myglobalSettings.setRotaryKnobReversed(!myglobalSettings.isRotaryKnobReversed());
 						break;
 					case 4: // Main screen rotary action
-						// TODO: Iterate thru the list of available actions
+						if (myglobalSettings.getRotaryAction()>0){
+							myglobalSettings.setRotaryAction(myglobalSettings.getRotaryAction()-1);
+						}
 						break;
 					case 5:	// Play sample on setting change
 						// Set value = NOT value
@@ -592,8 +608,23 @@ unsigned int ScreenDrawing::handleKeyPress(unsigned int keyEvent){
 	case 275:	// RIGHT key
 		if (currentScreen=="MainScreen"){
 			// If we are on main screen, then we handle special action (
-			// TODO : handle special action from main screen
-			myMetronome.IncMetronomeBpm(5);
+			switch(myglobalSettings.getRotaryAction()){
+				case Settings::Rotary_ChangeBPM:
+					myMetronome.IncMetronomeBpm(5);
+					break;
+				case Settings::Rotary_ChangeVolume:
+					if(myglobalSettings.getVolume()<32){
+						myglobalSettings.setVolume(myglobalSettings.getVolume()+1);
+					}
+					break;
+				case Settings::Rotary_ChangeDrumKit:
+					DrumKit *nextDK;
+					nextDK=myglobalSettings.getNextDrumKit(myglobalSettings.getCurrentDrumKit());
+					if (nextDK!=NULL){
+						myglobalSettings.loadDrumKit(nextDK);
+					}
+					break;
+			}
 		}else if (currentScreen=="MetronomeVal"){
 			switch(myCurrentSelectedMenuItem[myCurrentSelectedMenuItem.size()-2]){
 				case 0:
@@ -699,7 +730,9 @@ unsigned int ScreenDrawing::handleKeyPress(unsigned int keyEvent){
 					myglobalSettings.setRotaryKnobReversed(!myglobalSettings.isRotaryKnobReversed());
 					break;
 				case 4: // Main screen rotary action
-					// TODO: Iterate thru the list of available actions
+					if (myglobalSettings.getRotaryAction()<2){
+						myglobalSettings.setRotaryAction(myglobalSettings.getRotaryAction()+1);
+					}
 					break;
 				case 5:	// Play sample on setting change
 					// Set value = NOT value
@@ -1273,7 +1306,17 @@ void ScreenDrawing::DrawGlobalSettingsMenu(){
 			break;
 		case 4:
 			// Main screen rotary action
-			txtValue="Change BPM";
+			switch(myglobalSettings.getRotaryAction()){
+				case Settings::Rotary_ChangeBPM:
+					txtValue="Change BPM";
+					break;
+				case Settings::Rotary_ChangeVolume:
+					txtValue="Change Volume";
+					break;
+				case Settings::Rotary_ChangeDrumKit:
+					txtValue="Change Drum Kit";
+					break;
+			}
 			break;
 		case 5:
 			// Play sample on setting change

@@ -35,6 +35,13 @@ class DrumKit;
 
 class Settings {
 public:
+
+	enum RotaryKnobActions{
+		Rotary_ChangeVolume,
+		Rotary_ChangeBPM,
+		Rotary_ChangeDrumKit
+	};
+
 	Settings();
 
 	virtual ~Settings();
@@ -82,6 +89,8 @@ public:
 
 	bool loadDrumKit(DrumKit *drumKit);
 	DrumKit *GetDrumKitFromName(std::string drumKitName);
+	DrumKit *getNextDrumKit(DrumKit *currentDrumKit);
+	DrumKit *getPreviousDrumKit(DrumKit *currentDrumKit);
 
 	bool checkIfFileExists(const std::string& filePath);
 
@@ -102,6 +111,8 @@ public:
 	bool isRotaryKnobReversed() const;
 	void setRotaryKnobReversed(bool rotaryKnobReversed);
 	std::vector<Trigger*>* getTriggerList();
+	int getRotaryAction() const;
+	void setRotaryAction(int rotaryAction);
 
 private:
 
@@ -132,6 +143,7 @@ private:
 	std::string m_PowerOnKitName;
 	std::string m_SettingsFileName;
 	std::string m_serialPort;
+	int m_RotaryAction;
 
 	// This list contains all available instruments (loaded or not)
 	std::vector<Instrument*> *m_instrumentList;

@@ -155,6 +155,10 @@ bool Settings::LoadSettings(){
 		 root.lookupValue("EQHiGain", m_EQHiGain);
 	 }
 
+	 if( root.exists("RotaryKnobAction")){
+		 root.lookupValue("RotaryKnobAction", m_RotaryAction);
+	 }
+
 	 // Set the trigger List :
 	 fillTriggerList();
 
@@ -240,6 +244,7 @@ bool Settings::SaveSettings(){
 	root.add("GlobalFadeOutTime", Setting::TypeFloat) = m_GlobalFadeOutTime;
 	root.add("PlaySampleOnSettingChange", Setting::TypeBoolean) = m_playSampleOnSettingChange;
 	root.add("RotaryKnobInversion", Setting::TypeBoolean) = m_rotaryKnobReversed;
+	root.add("RotaryKnobAction", Setting::TypeInt) = m_RotaryAction;
 
 	// EQ Frequencies :
 	root.add("EQLowFrequency", Setting::TypeInt) = m_EQLowFrequency;
@@ -556,6 +561,46 @@ Instrument* Settings::getPreviousInstrument(Instrument *currentInstrument){
 }
 
 
+DrumKit *Settings::getNextDrumKit(DrumKit *currentDrumKit){
+	string currentDrumKitName;
+	if (currentDrumKit==NULL){
+		if (m_drumKitList->size()>0){
+			return (*m_drumKitList)[0];
+		}else{
+			return NULL;
+		}
+	}
+	currentDrumKitName=currentDrumKit->getKitName();
+	// Scroll the list from the begining, when we find our current instrument, returns the next one if exist
+	for(unsigned int i=0 ; i<m_drumKitList->size() ; i++){
+		if ((*m_drumKitList)[i]->getKitName() == currentDrumKitName){
+			if (i<m_drumKitList->size()-1){
+				return (*m_drumKitList)[i+1];
+			}
+		}
+	}
+	return NULL;
+}
+
+DrumKit *Settings::getPreviousDrumKit(DrumKit *currentDrumKit){
+	string currentDrumKitName;
+	if (currentDrumKit==NULL){
+		return (*m_drumKitList)[0];
+	}
+	currentDrumKitName=currentDrumKit->getKitName();
+	// Scroll the list from the begining, when we find our drumkit, returns the previous one if exist
+	for(unsigned int i=0 ; i<m_drumKitList->size() ; i++){
+		if ((*m_drumKitList)[i]->getKitName() == currentDrumKitName){
+			if (i>0){
+				return (*m_drumKitList)[i-1];
+			}
+		}
+	}
+	return NULL;
+
+}
+
+
 bool Settings::loadDrumKit(DrumKit *drumKit){
 
 	std::vector<DrumKitComponent*> *newDKCL, *oldDKCL;
@@ -700,4 +745,12 @@ void Settings::fillTriggerList(){
 
 std::vector<Trigger*>* Settings::getTriggerList(){
 	return m_TriggerList;
+}
+
+int Settings::getRotaryAction() const {
+	return m_RotaryAction;
+}
+
+void Settings::setRotaryAction(int rotaryAction) {
+	m_RotaryAction = rotaryAction;
 }
