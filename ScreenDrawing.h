@@ -54,6 +54,7 @@ public:
 	void DrawTriggerSettings();
 	void DrawGlobalSetupTriggerChoosen();
 	void DrawSubMenuSelect();
+	void DrawPowerOffScreen();
 
 
 	// "Utility" functions

@@ -42,7 +42,7 @@ private:
 	std::string m_serialDataLine;
 	int baudrate;
 
-	struct termios oldtio, newtio;
+	struct termios newtio;
 	struct serial_struct ser_info;
 	bool m_serPortOpened;
 };

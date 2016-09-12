@@ -25,7 +25,9 @@ class Trigger {
 			TT_CymbalEdgeOrChoke,
 			TT_CymbalBell,
 			TT_Switch,
-			TT_HiHatController
+			TT_HiHatController,
+			TT_HiHatPedalClose,
+			TT_HiHatPedalOpen
 		};
 
 		Trigger();

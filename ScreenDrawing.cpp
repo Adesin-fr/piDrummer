@@ -1582,6 +1582,12 @@ void ScreenDrawing::DrawGlobalSetupTriggerChoosen(){
 				case Trigger::TT_Switch:
 					txtValue="Switch";
 					break;
+				case Trigger::TT_HiHatPedalOpen:
+					txtValue="HiHat Pedal Opened";
+					break;
+				case Trigger::TT_HiHatPedalClose:
+					txtValue="HiHat Pedal Closed";
+					break;
 			}
 			break;
 		case 1:
@@ -1724,3 +1730,14 @@ void fillBackground(){
 
 }
 
+
+void ScreenDrawing::DrawPowerOffScreen(){
+	// Clean the screen
+	fillBackground();
+
+	SDL_Color orange={255,162,0};
+	DrawLabel("Bye !", 30, 160, 100, orange, false );
+
+    SDL_Flip(screen);
+
+}

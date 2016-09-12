@@ -150,6 +150,10 @@ int main ( int argc, char** argv ){
         return 1;
     }
 
+    // Hide cursor !
+    SDL_ShowCursor(SDL_DISABLE);
+
+
     if (!myglobalSettings.checkIfFileExists("res/arial.ttf")){
         cerr << "ERROR : Font file arial.ttf missing in .urDrummer/res folder." << endl;
     	return 1;
@@ -204,7 +208,6 @@ int main ( int argc, char** argv ){
     }
 
     // Disable mouse cursor if on target device :
-    // SDL_ShowCursor(SDL_DISABLE);
 
     done = false;
 
@@ -260,8 +263,12 @@ int main ( int argc, char** argv ){
         	// So, it will blink the led and cut power in a few seconds...
         	// TODO : send serial message to power off !
 
+        	// Display a GOODBYE screen :
+        	myScreenDrawer.DrawPowerOffScreen();
+
         	// Stop the screen drawer :
         	done=true;
+
 
         	// Clean the SDL libs :
             TTF_Quit();

@@ -40,7 +40,7 @@ bool SerialHandle::initSerial(){
 
 	if (m_SerialPort==""){
 		cerr << "Serial device not defined ! Please set it in config file. " << m_SerialPort << endl;
-		return false;
+	return false;
 	}
 
 	cerr << "Opening serial port " << m_SerialPort << endl;
@@ -52,51 +52,18 @@ bool SerialHandle::initSerial(){
 		m_serPortOpened=false;
 		return false;
 	}else{
-		cerr << "Serial port opened !" << endl;
+		cerr << "Serial port " << m_SerialPort  << "  opened !" << endl;
 	}
 
-	/* save current serial port settings */
-	tcgetattr(m_serPort, &oldtio);
-
-	/* clear struct for new port settings */
 	bzero(&newtio, sizeof(newtio));
-
-	/*
-	 * BAUDRATE : Set bps rate. You could also use cfsetispeed and cfsetospeed.
-	 * CRTSCTS  : output hardware flow control (only used if the cable has
-	 * all necessary lines. See sect. 7 of Serial-HOWTO)
-	 * CS8      : 8n1 (8bit, no parity, 1 stopbit)
-	 * CLOCAL   : local connection, no modem contol
-	 * CREAD    : enable receiving characters
-	 */
-	newtio.c_cflag = baudrate | CS8 | CLOCAL | CREAD; // CRTSCTS removed
-
-	/*
-	 * IGNPAR  : ignore bytes with parity errors
-	 * ICRNL   : map CR to NL (otherwise a CR input on the other computer
-	 * will not terminate input)
-	 * otherwise make device raw (no other input processing)
-	 */
+	newtio.c_cflag = B115200 | CRTSCTS | CS8 | CLOCAL | CREAD;
 	newtio.c_iflag = IGNPAR;
-
-	/* Raw output */
 	newtio.c_oflag = 0;
 
-	/*
-	 * ICANON  : enable canonical input
-	 * disable all echo functionality, and don't send signals to calling program
-	 */
-	newtio.c_lflag = 0; // non-canonical
 
-	/*
-	 * set up: we'll be reading 4 bytes at a time.
-	 */
-	newtio.c_cc[VTIME]    = 0;     /* inter-character timer unused */
-	newtio.c_cc[VMIN]     = 1;     /* blocking read until n character arrives */
+	newtio.c_cc[VTIME]=0;
+	newtio.c_cc[VMIN]=1;
 
-	/*
-	 * now clean the modem line and activate the settings for the port
-	 */
 	tcflush(m_serPort, TCIFLUSH);
 	tcsetattr(m_serPort, TCSANOW, &newtio);
 
@@ -109,7 +76,7 @@ unsigned int SerialHandle::handleEvents(DrumKit *currentDrumKit){
 
 	unsigned int triggerNumber, triggerVelocity, triggerPosition, triggerValue ;
 
-	char nextData[32];
+	unsigned char nextData[32];
 	int n;
 
 	fd_set input;
@@ -130,13 +97,15 @@ unsigned int SerialHandle::handleEvents(DrumKit *currentDrumKit){
 	}
 
 
+
 	while (m_serPortOpened && read(m_serPort, nextData, 1)){
 
 		m_serialDataLine+=nextData[0];
 
-
 		//Is the line over ?
 		if (m_serialDataLine[m_serialDataLine.size()-1] == 10){
+
+
 			// Yes,  handle it !
 			if (m_serialDataLine.size()<5){
 				return 0;
@@ -234,14 +203,23 @@ void SerialHandle::sendParameter(unsigned int TriggerNumber, string ParameterCod
 	// Send string to serial port.
 
 	if (m_serPortOpened==true){
+
+		cerr << "Send Serial data: " << outString << endl;
+
 		write( m_serPort, outString.c_str(), outString.size() );
 	}
+
+	cerr << "Send Serial data finished "<< endl;
 
 }
 
 void SerialHandle::sendString(string serialString){
 	if (m_serPortOpened==true){
+
+		cerr << "Send Serial data: " << serialString << endl;
 		write( m_serPort, serialString.c_str(), serialString.size() );
+		cerr << "Send Serial data finished "<< endl;
 	}
+
 
 }
