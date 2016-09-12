@@ -23,8 +23,8 @@
 #include <sys/stat.h>
 #include <sstream>
 
-#include "soloud.h"
-#include "soloud_echofilter.h"
+#include <soloud.h>
+#include <soloud_echofilter.h>
 #include "DrumKit.h"
 #include "Instrument.h"
 #include "SignalCurve.h"

@@ -13,7 +13,8 @@
 #include <limits>
 #include <iostream>
 
-#include "soloud_wav.h"
+#include <soloud.h>
+#include <soloud_wav.h>
 #include <sndfile.hh>
 
 class Layer {

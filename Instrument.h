@@ -16,7 +16,7 @@
 #include <sys/stat.h>
 
 #include "ControllerLayer.h"
-#include "soloud_wav.h"
+#include <soloud.h>
 
 class Instrument {
 	public:

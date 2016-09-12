@@ -7,6 +7,12 @@
 
 
 /*
+ * How to build soloud library
+ *  - Install GENIE (from github, link in build subfolder of soloud)
+ *  - edit genie.lua to build soloud WITH_ALSA=1 only (remove OSS)
+ *  - copy .so and .a files to /usr/lib
+ *  - copy all .h files from "includes/" folder to /usr/include/
+ *
  * Main Screen
  * Main Menu
  * 	- Kit Change
@@ -74,9 +80,9 @@
 #include <string>
 #include <thread>
 
-#include "soloud.h"
-#include "soloud_wav.h"
-#include "soloud_thread.h"
+#include <soloud.h>
+#include <soloud_wav.h>
+#include <soloud_thread.h>
 #include "Settings.h"
 #include "Instrument.h"
 #include "SerialHandle.h"
@@ -206,8 +212,6 @@ int main ( int argc, char** argv ){
     	SDL_Delay(20);
     	/// Wait...
     }
-
-    // Disable mouse cursor if on target device :
 
     done = false;
 

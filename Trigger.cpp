@@ -21,7 +21,7 @@ Trigger::Trigger() {
 	m_FixedMaskTime=10;
 	m_muteGroup=0;
 	m_lastVelocity=0;
-	m_lastTimeHit=ticksNow;
+	m_lastTimeHit=0;
 	m_maxValue=1024;
 }
 

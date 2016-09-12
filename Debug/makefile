@@ -8,21 +8,6 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
--include src/filter/subdir.mk
--include src/core/subdir.mk
--include src/c_api/subdir.mk
--include src/backend/xaudio2/subdir.mk
--include src/backend/wasapi/subdir.mk
--include src/backend/null/subdir.mk
--include src/backend/coreaudio/subdir.mk
--include src/backend/alsa/subdir.mk
--include src/audiosource/wav/subdir.mk
--include src/audiosource/vic/subdir.mk
--include src/audiosource/tedsid/subdir.mk
--include src/audiosource/speech/subdir.mk
--include src/audiosource/sfxr/subdir.mk
--include src/audiosource/monotone/subdir.mk
--include src/audiosource/modplug/subdir.mk
 -include subdir.mk
 -include objects.mk
 
