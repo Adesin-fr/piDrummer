@@ -1,5 +1,5 @@
 CC=g++
-CXXFLAGS=-W -Wall -ansi -pedantic -std=c++11 -D__GXX_EXPERIMENTAL_CXX0X__ 
+CXXFLAGS=-g3 -W -Wall -ansi -pedantic -std=c++11 -D__GXX_EXPERIMENTAL_CXX0X__ 
 LDFLAGS=
 LDLIBS=-lpthread -lasound -lsndfile -lsoloud -lSDL -lSDL_image -lSDL_ttf -lconfig++
 EXEC=urDrummer

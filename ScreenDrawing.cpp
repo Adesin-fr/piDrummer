@@ -888,19 +888,21 @@ void ScreenDrawing::DrawMainScreen(){
 			unsigned int xpos=xOffset+(i*histogramBarSize)+x;
 
 			// If Hit since less than 2 second :
-			if ((*dkCompList)[i]->getAssociatedTrigger()->getLastTimeHit() + 2000 > ticksNow ){
-				unsigned int barHeight = (*dkCompList)[i]->getAssociatedTrigger()->getLastVelocity()*maxHeight/127;
+			if ((*dkCompList)[i]->getAssociatedTrigger()!=NULL){
+				if ((*dkCompList)[i]->getAssociatedTrigger()->getLastTimeHit() + 2000 > ticksNow ){
+					unsigned int barHeight = (*dkCompList)[i]->getAssociatedTrigger()->getLastVelocity()*maxHeight/127;
 
-				if (barHeight>0){
-					if ((*dkCompList)[i]->getAssociatedTrigger() == myglobalSettings.getCurrentDrumKit()->getLastTriggerHit() ){
-						// If last hit trigger, set RED.
-						barColor=SDL_MapRGB(screen->format, 255, 0, 0);
-					}else{
-						// Else set white...
-						barColor=SDL_MapRGB(screen->format, 255, 255, 255);
+					if (barHeight>0){
+						if ((*dkCompList)[i]->getAssociatedTrigger() == myglobalSettings.getCurrentDrumKit()->getLastTriggerHit() ){
+							// If last hit trigger, set RED.
+							barColor=SDL_MapRGB(screen->format, 255, 0, 0);
+						}else{
+							// Else set white...
+							barColor=SDL_MapRGB(screen->format, 255, 255, 255);
+						}
+						// Draw a vertical line :
+						line(screen, xpos, 215-barHeight,  xpos, 215, barColor);
 					}
-					// Draw a vertical line :
-					line(screen, xpos, 215-barHeight,  xpos, 215, barColor);
 				}
 			}
 
