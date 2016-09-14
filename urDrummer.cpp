@@ -127,7 +127,7 @@ void AudioThread(){
 	}
 
 }
-// Send a serial String :
+// Send a serial String (prototype):
 void sendSerialString(std::string serialString);
 
 
@@ -262,7 +262,7 @@ int main ( int argc, char** argv ){
         	}
         }
 
-        if (HandleKeyEventRetVal==255){
+        if (HandleKeyEventRetVal==255 || done==true){
         	// Send a message to the Arduino to tell him we're going to shutdown,
         	// So, it will blink the led and cut power in a few seconds...
         	// TODO : send serial message to power off !
