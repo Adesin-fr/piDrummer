@@ -169,7 +169,6 @@ int main ( int , char** ){
     // Draw the splash screen while we continue loading stuffs...
     myScreenDrawer.DrawSplashScreen();
 
-
     // Load the Global settings from file :
     myglobalSettings.LoadSettings();
     myglobalSettings.loadInstrumentList();

@@ -32,14 +32,14 @@ ScreenDrawing::~ScreenDrawing(){
 
 void ScreenDrawing::DrawSplashScreen(){
 
-	SDL_Color orange={255,162,0,0 };
+	SDL_Color pi={217, 3, 58, 0 };
 
-	DrawLabel("pi", 30,  100, 100, false );
-	DrawLabel("Drummer", 30, 128, 100, orange, false );
+	DrawLabel("pi", 30,  100, 200, pi, false );
+	DrawLabel("Drummer", 30, 128, 200,  false );
 	DrawLabel(piDrummerVersion, 10,  290, 225, false);
 
 	// Draw the logo
-   	DrawIcon(myglobalSettings.getUserDirectory() + "/.piDrummer/res/pidrummer_logo.gif", 140, 30);
+   	DrawIcon(myglobalSettings.getUserDirectory() + "/.piDrummer/res/pidrummer_logo.gif", 85, 30);
 
    	//TODO : fill a progress bar while loading instruments samples.
 

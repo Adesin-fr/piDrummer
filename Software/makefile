@@ -20,5 +20,5 @@ piDrummer.o: $(HDR)
 clean:
 	@rm *.o
 
-mrproper:
+mrproper: clean
 	rm -rf piDrummer
