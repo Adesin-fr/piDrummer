@@ -58,7 +58,7 @@ public:
 
 
 	// "Utility" functions
-	void DrawIcon(const std::string iconPath, int posX, int posY, bool selected);
+	void DrawIcon(const std::string iconPath, int posX, int posY);
 	void DrawLabel(const std::string labelText, int fontSize, int posX, int posY);
 	void DrawLabel(const std::string labelText, int fontSize, int posX, int posY, bool selected);
 	void DrawLabel(const std::string labelText, int fontSize, int posX, int posY, SDL_Color color);

@@ -16,7 +16,7 @@
 class ScrollingLabel {
 public:
 	ScrollingLabel();
-	ScrollingLabel(SDL_Surface drawSurface, std::string text, unsigned int fontSize, bool selected);
+	ScrollingLabel(SDL_Surface *drawSurface, std::string text, unsigned int fontSize, bool selected);
 	virtual ~ScrollingLabel();
 	void setDrawSurface(SDL_Surface *drawSurface);
 	unsigned int getFontSize() const;

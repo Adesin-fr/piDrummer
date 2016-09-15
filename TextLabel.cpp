@@ -16,7 +16,7 @@ TextLabel::TextLabel() {
 	m_maxWidth=2000;
 	m_fontSize=18;
 	m_drawingSurface=screen;
-	m_textColor=(SDL_Color){255,255,255};
+	m_textColor={255,255,255, 0};
 	m_textSelected=false;
 	m_doScroll=true;
 }
@@ -29,7 +29,7 @@ TextLabel::TextLabel(std::string text, unsigned int xPos, unsigned int yPos){
 	m_maxWidth=2000;
 	m_fontSize=18;
 	m_drawingSurface=screen;
-	m_textColor=(SDL_Color){255,255,255};
+	m_textColor={255,255,255, 0};
 	m_textSelected=false;
 	m_doScroll=true;
 }

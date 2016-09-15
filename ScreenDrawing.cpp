@@ -32,14 +32,14 @@ ScreenDrawing::~ScreenDrawing(){
 
 void ScreenDrawing::DrawSplashScreen(){
 
-	SDL_Color orange={255,162,0};
+	SDL_Color orange={255,162,0,0 };
 
 	DrawLabel("pi", 30,  100, 100, false );
 	DrawLabel("Drummer", 30, 128, 100, orange, false );
 	DrawLabel(piDrummerVersion, 10,  290, 225, false);
 
 	// Draw the logo
-   	DrawIcon(myglobalSettings.getUserDirectory() + "/.piDrummer/res/pidrummer_logo.gif", 140, 30, false);
+   	DrawIcon(myglobalSettings.getUserDirectory() + "/.piDrummer/res/pidrummer_logo.gif", 140, 30);
 
    	//TODO : fill a progress bar while loading instruments samples.
 
@@ -47,7 +47,7 @@ void ScreenDrawing::DrawSplashScreen(){
 
 }
 
-void ScreenDrawing::DrawIcon(const string iconPath, int posX, int posY,  bool selected){
+void ScreenDrawing::DrawIcon(const string iconPath, int posX, int posY){
 	SDL_Surface *icon = NULL;
 	SDL_Rect  positionIcon;
 
@@ -69,12 +69,12 @@ void ScreenDrawing::DrawIcon(const string iconPath, int posX, int posY,  bool se
 }
 
 void ScreenDrawing::DrawLabel( std::string labelText, int fontSize, int posX, int posY){
-	SDL_Color white={255,255,255};
+	SDL_Color white={255,255,255, 0};
 	DrawLabel(labelText, fontSize, posX, posY,  white, false);
 }
 
 void ScreenDrawing::DrawLabel( std::string labelText, int fontSize, int posX, int posY, bool selected){
-	SDL_Color white={255,255,255};
+	SDL_Color white={255,255,255, 0};
 
 	DrawLabel(labelText, fontSize, posX, posY, white, selected);
 }
@@ -924,9 +924,9 @@ void ScreenDrawing::DrawMainMenu(){
 	fillBackground();
 
 	// First line of icons
-	DrawIcon(myglobalSettings.getUserDirectory() + "/.piDrummer/res/kitsel.gif",44, 20, false);
-	DrawIcon(myglobalSettings.getUserDirectory() + "/.piDrummer/res/metronome.gif",136, 20, false);
-	DrawIcon(myglobalSettings.getUserDirectory() + "/.piDrummer/res/audioplayer.gif",228, 20, false);
+	DrawIcon(myglobalSettings.getUserDirectory() + "/.piDrummer/res/kitsel.gif",44, 20);
+	DrawIcon(myglobalSettings.getUserDirectory() + "/.piDrummer/res/metronome.gif",136, 20);
+	DrawIcon(myglobalSettings.getUserDirectory() + "/.piDrummer/res/audioplayer.gif",228, 20);
 
 	// Labels
 	DrawLabel("Kit Sel." , 18, 34, 70, (currentSel==0?true:false));
@@ -935,9 +935,9 @@ void ScreenDrawing::DrawMainMenu(){
 
 
 	// Second line of icons
-	DrawIcon(myglobalSettings.getUserDirectory() + "/.piDrummer/res/training.gif",44, 130, false);
-	DrawIcon(myglobalSettings.getUserDirectory() + "/.piDrummer/res/kitsetup.gif",136, 130, false);
-	DrawIcon(myglobalSettings.getUserDirectory() + "/.piDrummer/res/settings.gif",228, 130, false);
+	DrawIcon(myglobalSettings.getUserDirectory() + "/.piDrummer/res/training.gif",44, 130);
+	DrawIcon(myglobalSettings.getUserDirectory() + "/.piDrummer/res/kitsetup.gif",136, 130);
+	DrawIcon(myglobalSettings.getUserDirectory() + "/.piDrummer/res/settings.gif",228, 130);
 	DrawLabel("Trainer" , 18, 34, 180, (currentSel==3?true:false));
 	DrawLabel("Kit Setup" , 18, 126, 180, (currentSel==4?true:false));
 	DrawLabel("Settings" , 18, 223, 180, (currentSel==5?true:false));
@@ -1355,7 +1355,7 @@ void ScreenDrawing::DrawGlobalSettingsMenu(){
 void ScreenDrawing::DrawList(std::vector<std::string> listText, int x, int y, int w, int h, unsigned int selectedItem){
 	SDL_Surface *ListSurface;
 	SDL_Surface *Container;
-	SDL_Color white={255,255,255};
+	SDL_Color white={255,255,255, 0};
 	SDL_Rect position;
 	SDL_Rect positionList;
 	TextLabel *txtLabel;
@@ -1474,7 +1474,7 @@ void ScreenDrawing::setLastTriggerVelocity(unsigned int TriggerInput, unsigned i
 
 void ScreenDrawing::DrawGlobalSetupTriggerChoosen(){
 	vector<string> settingsList;
-	SDL_Color green={0,255,0};
+	SDL_Color green={0,255,0, 0};
 	unsigned int selItem=0;
 	TextLabel *txtLabel;
 	string txtValue;
@@ -1737,7 +1737,7 @@ void ScreenDrawing::DrawPowerOffScreen(){
 	// Clean the screen
 	fillBackground();
 
-	SDL_Color orange={255,162,0};
+	SDL_Color orange={255,162,0, 0};
 	DrawLabel("Bye !", 30, 160, 100, orange, false );
 
     SDL_Flip(screen);

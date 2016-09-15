@@ -460,7 +460,7 @@ void Settings::loadDrumKitList(){
 			if (fileName!="." && fileName!=".."){
 				loadKit= new DrumKit();
 
-				loadKit->setNumTriggerInput(m_numTriggerInputs);
+				loadKit->setNumTriggerInput();
 
 				if (loadKit->loadDrumKitFromConfigFile(KitDir + fileName)){
 					// add the drumkit to the list

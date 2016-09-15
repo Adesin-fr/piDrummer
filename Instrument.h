@@ -45,7 +45,7 @@ class Instrument {
 		bool loaded;
 
 		// Private functions :
-		ControllerLayer* getControllerLayerFromVelocity(unsigned int &velocity);
+		ControllerLayer* getControllerLayerFromVelocity();
 };
 
 #endif /* INSTRUMENT_H_ */

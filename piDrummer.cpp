@@ -130,8 +130,9 @@ void SerialThread(){
 // Send a serial String (prototype):
 void sendSerialString(std::string serialString);
 
-
-int main ( int argc, char** argv ){
+// Main parameters are not used. Make them anonymous so the compiler won't complain.
+//int main ( int argc, char** argv ){
+int main ( int , char** ){
 	// Global variables:
 
 	HandleKeyEventRetVal=0;
@@ -188,7 +189,7 @@ int main ( int argc, char** argv ){
         cerr << "Could not load kit : " << myglobalSettings.getPowerOnKitName() << ". Generating a new one." << endl;
     	myglobalSettings.setCurrentDrumKit(new DrumKit);
     	myglobalSettings.getCurrentDrumKit()->setKitName("New Empty kit");
-    	myglobalSettings.getCurrentDrumKit()->setNumTriggerInput(myglobalSettings.getNumTriggerInputs());
+    	myglobalSettings.getCurrentDrumKit()->setNumTriggerInput();
     }
 
     // Init serial port :
@@ -200,8 +201,8 @@ int main ( int argc, char** argv ){
 
 
     // Instantiate the audio engine :
-    myAudioEngine.init(1, 0,0, myglobalSettings.getAlsaBufferSize());	    // clipping = roundoff
-										// Backend =auto
+    myAudioEngine.init(1, 7,0, myglobalSettings.getAlsaBufferSize());	    // clipping = roundoff
+										// Backend = ALSA (7)
 										// Sample rate = auto
 										// BufferSize = 256
 

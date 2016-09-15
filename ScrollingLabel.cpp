@@ -20,11 +20,11 @@ ScrollingLabel::ScrollingLabel() {
 }
 
 
-ScrollingLabel::ScrollingLabel(SDL_Surface drawSurface, std::string text, unsigned int fontSize, bool selected) {
-	m_text="";
-	m_DrawSurface=NULL;
-	m_selected=false;
-	m_fontSize=18;
+ScrollingLabel::ScrollingLabel(SDL_Surface *drawSurface, std::string text, unsigned int fontSize, bool selected) {
+	m_text=text;
+	m_DrawSurface=drawSurface;
+	m_selected=selected;
+	m_fontSize=fontSize;
 	m_scrollOffset=0;
 	xPos=0;
 	yPos=0;

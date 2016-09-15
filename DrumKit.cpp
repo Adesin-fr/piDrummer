@@ -210,7 +210,7 @@ void DrumKit::setReverbDelay(unsigned int reverbDelay) {
 	m_reverbDelay = reverbDelay;
 }
 
-void DrumKit::setNumTriggerInput(int numTriggerInput) {
+void DrumKit::setNumTriggerInput() {
 	DrumKitComponent *DKComp;
 	std::vector<Trigger*> *TriggList;
 

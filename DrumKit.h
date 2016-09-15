@@ -42,7 +42,7 @@ class DrumKit {
 		unsigned int getReverbDelay() const ;
 		void setReverbDelay(unsigned int reverbDelay);
 		int getNumTriggerInput() const;
-		void setNumTriggerInput(int numTriggerInput);
+		void setNumTriggerInput();
 
 		bool loadDrumKitFromConfigFile(std::string configFileName);
 		bool saveDrumKitToConfigFile();

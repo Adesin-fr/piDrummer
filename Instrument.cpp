@@ -28,7 +28,7 @@ Instrument::~Instrument() {
 
  SoLoud::Wav* Instrument::getSampleForVelocity(unsigned int velocity){
 	// Call to the ControllerLayer to get the Layer from the current controller Value:
-	ControllerLayer *tmpCtl = this->getControllerLayerFromVelocity(m_controllerValue);
+	ControllerLayer *tmpCtl = this->getControllerLayerFromVelocity();
 
 	if (tmpCtl==0){
 		cerr << "(instr " << m_instrumentName << ") Aucun controlleur trouvé pour la valeur de controleur  " << m_controllerValue << endl;
@@ -47,7 +47,7 @@ Instrument::~Instrument() {
 
 }
 
-ControllerLayer* Instrument::getControllerLayerFromVelocity(unsigned int &velocity){
+ControllerLayer* Instrument::getControllerLayerFromVelocity(){
 
 	ControllerLayer *tmpCtl;
 

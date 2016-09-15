@@ -49,7 +49,7 @@ bool Layer::loadSample() {
 	// Using libsndfile to load files ...
 	SF_INFO sound_info;
 	SoLoud::Wav *wavSample;
-	SNDFILE* file;
+	SNDFILE* file=0;
 	std::string m_fileName;
 
 	for (unsigned int fileIndex=0; fileIndex<m_fileNames.size(); fileIndex++){
