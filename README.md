@@ -1,6 +1,6 @@
-# urDrummer
+# piDrummer
 
-urDrummer is a DIY drum trigger device. it uses an Arduino and some basic components to get the signal from your pads (AKA triggers) and send them to an Orange PI PC.
+piDrummer is a DIY drum trigger device. it uses an Arduino and some basic components to get the signal from your pads (AKA triggers) and send them to an Orange PI PC.
 
 The Orange PI PC is used to play sounds according to the triggers you hit. 
 
@@ -10,9 +10,9 @@ The oPI PC is also driving an ILI9341 TFT screen (320x240 pixels, can be found a
 
 The goal is also to build an embedded linux, with the smallest possible kernel, allowing for very small boot time !
 
-# urDrummer (Version Française)
+# piDrummer (Version Française)
 
-urDrummer est un module de batterie électronique à fabriquer soi-même.
+piDrummer est un module de batterie électronique à fabriquer soi-même.
 
 Il utilise un module Arduino et quelques composants pour récupérer le signal depuis les PADS (aussi appelés Triggers), et envoie ces informations à une carte Orange PI PC.
 

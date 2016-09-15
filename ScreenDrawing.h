@@ -26,7 +26,7 @@
 
 extern SDL_Surface* screen;
 extern Settings myglobalSettings;
-extern const std::string urDrummerVersion;
+extern const std::string piDrummerVersion;
 extern unsigned int ticksNow;
 extern unsigned int lastTimeScreenRefresh;
 extern Metronome myMetronome;

@@ -54,6 +54,7 @@ bool Layer::loadSample() {
 
 	for (unsigned int fileIndex=0; fileIndex<m_fileNames.size(); fileIndex++){
 		m_fileName=m_fileNames[fileIndex];
+
 		wavSample=new SoLoud::Wav;
 
 			// Open file, and get file info in struct :

@@ -1,5 +1,5 @@
 /*
- * urDrummer.c
+ * piDrummer.c
  *
  *  Created on: 6 juil. 2016
  *      Author: ludovic
@@ -89,7 +89,7 @@
 #include "ScreenDrawing.h"
 
 
-const std::string urDrummerVersion="v0.1b";
+const std::string piDrummerVersion="v0.1b";
 
 using namespace std;
 unsigned int lastTimeEvent;
@@ -114,7 +114,7 @@ SDLFontStore myFontstore;
 Metronome myMetronome;
 
 // function called by thread
-void AudioThread(){
+void SerialThread(){
 
 	unsigned int keyEvent;
 
@@ -161,7 +161,7 @@ int main ( int argc, char** argv ){
 
 
     if (!myglobalSettings.checkIfFileExists("res/arial.ttf")){
-        cerr << "ERROR : Font file arial.ttf missing in .urDrummer/res folder." << endl;
+        cerr << "ERROR : Font file arial.ttf missing in .piDrummer/res folder." << endl;
     	return 1;
     }
 
@@ -216,7 +216,7 @@ int main ( int argc, char** argv ){
     done = false;
 
     // Run the screen Drawer refresh in a separate thread :
-    std::thread t1(AudioThread);
+    std::thread t1(SerialThread);
 
     while (!done){
 

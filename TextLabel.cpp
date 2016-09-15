@@ -42,7 +42,7 @@ void TextLabel::doDraw(){
 	bool scrollNeeded=false;
 	TTF_Font *myFont;
 
-	string fontPath = myglobalSettings.getUserDirectory() + "/.urDrummer/res/arial.ttf";
+	string fontPath = myglobalSettings.getUserDirectory() + "/.piDrummer/res/arial.ttf";
 
 	myFont = myFontstore.getFont(fontPath, m_fontSize);
 

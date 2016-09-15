@@ -16,8 +16,8 @@ Metronome::Metronome() {
 	m_ClickCount=0;
 	m_floatVolume=((float)m_MetronomeVolume/32);
 
-	std::string loSmp=myglobalSettings.getUserDirectory() + "/.urDrummer/res/metronomeLo.wav";
-	std::string HiSmp=myglobalSettings.getUserDirectory() + "/.urDrummer/res/metronomeHi.wav";
+	std::string loSmp=myglobalSettings.getUserDirectory() + "/.piDrummer/res/metronomeLo.wav";
+	std::string HiSmp=myglobalSettings.getUserDirectory() + "/.piDrummer/res/metronomeHi.wav";
 
 	// Load Samples :
 	m_LoSample.load(loSmp.c_str());

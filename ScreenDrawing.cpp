@@ -34,12 +34,12 @@ void ScreenDrawing::DrawSplashScreen(){
 
 	SDL_Color orange={255,162,0};
 
-	DrawLabel("ur", 30,  100, 100, false );
+	DrawLabel("pi", 30,  100, 100, false );
 	DrawLabel("Drummer", 30, 128, 100, orange, false );
-	DrawLabel(urDrummerVersion, 10,  290, 225, false);
+	DrawLabel(piDrummerVersion, 10,  290, 225, false);
 
 	// Draw the logo
-   	DrawIcon(myglobalSettings.getUserDirectory() + "/.urDrummer/res/urdrummer_logo.gif", 140, 30, false);
+   	DrawIcon(myglobalSettings.getUserDirectory() + "/.piDrummer/res/pidrummer_logo.gif", 140, 30, false);
 
    	//TODO : fill a progress bar while loading instruments samples.
 
@@ -93,7 +93,7 @@ void ScreenDrawing::DrawLabel( std::string labelText, int fontSize, int posX, in
 	SDL_Surface *BGSurf;
 	TTF_Font *myFont= NULL;
 
-	string fontPath = myglobalSettings.getUserDirectory() + "/.urDrummer/res/arial.ttf";
+	string fontPath = myglobalSettings.getUserDirectory() + "/.piDrummer/res/arial.ttf";
 
 	myFont = myFontstore.getFont(fontPath, fontSize);
 
@@ -138,7 +138,7 @@ void ScreenDrawing::DrawLabelToList(SDL_Surface *dest, std::string labelText, in
 	SDL_Surface *BGSurf;
 	TTF_Font *myFont= NULL;
 
-	string fontPath = myglobalSettings.getUserDirectory() + "/.urDrummer/res/arial.ttf";
+	string fontPath = myglobalSettings.getUserDirectory() + "/.piDrummer/res/arial.ttf";
 
 	myFont = myFontstore.getFont(fontPath, fontSize);
 
@@ -924,9 +924,9 @@ void ScreenDrawing::DrawMainMenu(){
 	fillBackground();
 
 	// First line of icons
-	DrawIcon(myglobalSettings.getUserDirectory() + "/.urDrummer/res/kitsel.gif",44, 20, false);
-	DrawIcon(myglobalSettings.getUserDirectory() + "/.urDrummer/res/metronome.gif",136, 20, false);
-	DrawIcon(myglobalSettings.getUserDirectory() + "/.urDrummer/res/audioplayer.gif",228, 20, false);
+	DrawIcon(myglobalSettings.getUserDirectory() + "/.piDrummer/res/kitsel.gif",44, 20, false);
+	DrawIcon(myglobalSettings.getUserDirectory() + "/.piDrummer/res/metronome.gif",136, 20, false);
+	DrawIcon(myglobalSettings.getUserDirectory() + "/.piDrummer/res/audioplayer.gif",228, 20, false);
 
 	// Labels
 	DrawLabel("Kit Sel." , 18, 34, 70, (currentSel==0?true:false));
@@ -935,9 +935,9 @@ void ScreenDrawing::DrawMainMenu(){
 
 
 	// Second line of icons
-	DrawIcon(myglobalSettings.getUserDirectory() + "/.urDrummer/res/training.gif",44, 130, false);
-	DrawIcon(myglobalSettings.getUserDirectory() + "/.urDrummer/res/kitsetup.gif",136, 130, false);
-	DrawIcon(myglobalSettings.getUserDirectory() + "/.urDrummer/res/settings.gif",228, 130, false);
+	DrawIcon(myglobalSettings.getUserDirectory() + "/.piDrummer/res/training.gif",44, 130, false);
+	DrawIcon(myglobalSettings.getUserDirectory() + "/.piDrummer/res/kitsetup.gif",136, 130, false);
+	DrawIcon(myglobalSettings.getUserDirectory() + "/.piDrummer/res/settings.gif",228, 130, false);
 	DrawLabel("Trainer" , 18, 34, 180, (currentSel==3?true:false));
 	DrawLabel("Kit Setup" , 18, 126, 180, (currentSel==4?true:false));
 	DrawLabel("Settings" , 18, 223, 180, (currentSel==5?true:false));

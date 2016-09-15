@@ -12,7 +12,7 @@ using namespace libconfig;
 
 Settings::Settings() {
 
-	m_SettingsFileName=getUserDirectory() + "/.urDrummer/GlobalSettings.cfg";
+	m_SettingsFileName=getUserDirectory() + "/.piDrummer/GlobalSettings.cfg";
 
 	m_AlsaBufferSize=2048; // Default value for buffer size .
 	m_Volume=32;
@@ -33,7 +33,7 @@ Settings::~Settings() {
 
 bool Settings::checkIfFileExists(const std::string& filePath){
 	 struct stat buffer;
-	 std::string compFile=getUserDirectory() + "/.urDrummer/" + filePath;
+	 std::string compFile=getUserDirectory() + "/.piDrummer/" + filePath;
 	 if (stat (compFile.c_str(), &buffer) != 0){
 		 // relative path doesnt exist, Test for absolute path :
 		 return (stat (filePath.c_str(), &buffer) == 0);
@@ -448,7 +448,7 @@ void Settings::loadDrumKitList(){
 	DIR *dir;
 	struct dirent *ent;
 
-	KitDir=getUserDirectory() + "/.urDrummer/DrumKits/";
+	KitDir=getUserDirectory() + "/.piDrummer/DrumKits/";
 
 	cerr << "Loading drumkits from folder " + KitDir << endl;
 
@@ -489,7 +489,7 @@ void Settings::loadInstrumentList(){
 	DIR *dir;
 	struct dirent *ent;
 
-	instrumentDir=getUserDirectory() + "/.urDrummer/Instruments/";
+	instrumentDir=getUserDirectory() + "/.piDrummer/Instruments/";
 
 	cerr << "Loading instruments from folder " + instrumentDir << endl;
 

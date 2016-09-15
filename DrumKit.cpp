@@ -148,7 +148,7 @@ bool DrumKit::saveDrumKitToConfigFile(){
 	Config m_cfg;
 	std::string configFileName;
 
-	configFileName = myglobalSettings.getUserDirectory() + "/.urDrummer/DrumKits/" + m_kitName + ".cfg";
+	configFileName = myglobalSettings.getUserDirectory() + "/.piDrummer/DrumKits/" + m_kitName + ".cfg";
 
 	cerr << "Saving drumKit to file  " << configFileName << endl;
 
