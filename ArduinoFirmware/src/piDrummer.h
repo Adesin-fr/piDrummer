@@ -1,32 +1,15 @@
+#ifndef PIDRUMMER_H_
+#define PIDRUMMER_H_
+
+
+#include <Arduino.h>
 #include <avr/pgmspace.h>
-
-#define NB_ANALOG_CHANNELS 2
-//#define NB_ANALOG_CHANNELS 32
-
-#define MUXER_AD0 10
-#define MUXER_AD1 11
-#define MUXER_AD2 12
-// TODO : put old values !
-// #define encoderPinA 2
-// #define encoderPinB 3
-#define encoderPinA 2
-#define encoderPinB 3
-#define EnterPushButton 4
-#define EscapePushButton 5
-
-#define POWER_BUTTON_PIN 6
-#define POWER_LED_PIN 7
-#define POWER_MOSFET_PIN 8
-
-#define MSGTYPE_TRIGGER_VALUE 1
-#define MSGTYPE_CONTROL_VALUE 2
-#define MSGTYPE_AFTERTOUCH_VALUE 3
-#define MSGTYPE_KEYPRESS_VALUE 4
+#include "piDrummerPins.h"
 
 
 // Setting ADC frequency reading :
 // To disable, just comment the following line :
-// Only one of 4 lines must be un-commented ! 
+// Only one of 4 lines must be un-commented !
 // If more than 1 is uncommented, only last one will be used.
 // BEWARE that setting a higher frequency than 1MHZ can cause ADC reading errors.
 //
@@ -36,12 +19,12 @@
 // #define ADC_2MHZ 1
 // #define ADC_4MHZ 1
 
-// Prototypes : 
+// Prototypes :
 void serialOut(byte MessageType, byte InputNumber, byte MessageValue, byte Modifier);
 
 
 struct Trigger {
-	long lastRead;
+	unsigned long lastRead;
 	byte thresHold;
 	byte debounce;
 	byte DynamicThreshold;
@@ -74,9 +57,9 @@ extern byte midiVelocity;
 
 long readChannel(byte ChanNumber){
 	long val=0;
-	/* 
+	/*
 	 *  Each Analog Input have a CD4051 tied
-	 *  When we need to switch the channel input, we do it for all CD4015, 
+	 *  When we need to switch the channel input, we do it for all CD4015,
 	 *  and then we read the correct input .
 	 *  Since we got 8 input channels * 8 CD4051 = 64 total input triggers !
 	 */
@@ -113,7 +96,7 @@ long readChannel(byte ChanNumber){
 
 
 void doAnalogReadings(){
-	
+
 	for (int i=0; i<NB_ANALOG_CHANNELS; i++){
 //	for (int i=0; i<1; i++){
 		if (i == HiHatPedalChannel){
@@ -125,7 +108,7 @@ void doAnalogReadings(){
 			HiHatValue = map ( HiHatValue , 0, 32, 0, 127);
 			if (prevHiHatValue != HiHatValue){
 				prevHiHatValue = HiHatValue;
-				// Send MIDI CC 
+				// Send MIDI CC
 //				serialOut(MSGTYPE_CONTROL_VALUE, i, HiHatValue);
 			}
 		}else{
@@ -146,11 +129,11 @@ void doAnalogReadings(){
 							if (anaRead > trigArray[i].maxValue){
 								trigArray[i].maxValue= anaRead ;
 							}
-							
-							// Set the dynamic threshold 
+
+							// Set the dynamic threshold
 							trigArray[i].thresHold=trigArray[i].previousReadValue*trigArray[i].DynamicThreshold/100;
 							trigArray[i].thresHoldNeedReset=true;
-	
+
 
 							// TODO : Should we send RAW values and parse them on oPi side ?
 
@@ -161,12 +144,12 @@ void doAnalogReadings(){
 							if (midiVelocity>127){
 								midiVelocity=127;
 							}
-							
+
 							serialOut(MSGTYPE_TRIGGER_VALUE, i, midiVelocity, 127);
 /*
 							Serial.print("New Thr : ");
 							Serial.print(trigArray[i].thresHold);
-							
+
 							Serial.print(" Vel : ");
 							Serial.print(midiVelocity);
 
@@ -175,7 +158,7 @@ void doAnalogReadings(){
 
 							Serial.print(" Pv : ");
 							Serial.print(trigArray[i].previousReadValue);
-							
+
 							Serial.print(" Pk time : ");
 							// Calculate peak delay time : difference between last zero value and now.
 							long pk = (micros() - trigArray[i].lastZeroTime)/100;
@@ -199,12 +182,12 @@ void doAnalogReadings(){
 					trigArray[i].previousReadValue =0;
 				}
 		}
-		
+
 	}
 }
 
 void ResetThresholdValues(){
-			// Set the dynamic threshold 
+			// Set the dynamic threshold
 	for (int i=1; i<=NB_ANALOG_CHANNELS; i++){
 		if (trigArray[i].thresHoldNeedReset==true && millis() > trigArray[i].lastRead){
 			trigArray[i].thresHold=trigArray[i].SetupThresHold;
@@ -265,3 +248,5 @@ void setADCSampleRate(){
 	#endif
 
 }
+
+#endif /* PIDRUMMER_H_ */

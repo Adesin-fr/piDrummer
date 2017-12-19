@@ -1,9 +1,16 @@
+#ifndef ENCODER_H_
+#define ENCODER_H_
+
+#include <Arduino.h>
+#include "piDrummerPins.h"
+#include "piDrummer.h"
+
 extern unsigned int encoder0Pos;
 extern int oldEncoderPos;
 
-long LastEncoderSendTime;
-long LastEncoderPushTime;
-long LastEscapePushTime;
+unsigned long LastEncoderSendTime;
+unsigned long LastEncoderPushTime;
+unsigned long LastEscapePushTime;
 
 long encoder0PinALast;
 
@@ -11,21 +18,21 @@ long encoder0PinALast;
 void doEncoderA(){
 
   // look for a low-to-high on channel A
-  if (digitalRead(encoderPinA) == HIGH) { 
+  if (digitalRead(encoderPinA) == HIGH) {
     // check channel B to see which way encoder is turning
-    if (digitalRead(encoderPinB) == LOW) {  
+    if (digitalRead(encoderPinB) == LOW) {
       encoder0Pos = encoder0Pos + 1;         // CW
-    } 
+    }
     else {
       encoder0Pos = encoder0Pos - 1;         // CCW
     }
   }
-  else   // must be a high-to-low edge on channel A                                       
-  { 
-    // check channel B to see which way encoder is turning  
-    if (digitalRead(encoderPinB) == HIGH) {   
+  else   // must be a high-to-low edge on channel A
+  {
+    // check channel B to see which way encoder is turning
+    if (digitalRead(encoderPinB) == HIGH) {
       encoder0Pos = encoder0Pos + 1;          // CW
-    } 
+    }
     else {
       encoder0Pos = encoder0Pos - 1;          // CCW
     }
@@ -35,21 +42,21 @@ void doEncoderA(){
 void doEncoderB(){
 
   // look for a low-to-high on channel B
-  if (digitalRead(encoderPinB) == HIGH) {   
+  if (digitalRead(encoderPinB) == HIGH) {
    // check channel A to see which way encoder is turning
-    if (digitalRead(encoderPinA) == HIGH) {  
+    if (digitalRead(encoderPinA) == HIGH) {
       encoder0Pos = encoder0Pos + 1;         // CW
-    } 
+    }
     else {
       encoder0Pos = encoder0Pos - 1;         // CCW
     }
   }
   // Look for a high-to-low on channel B
-  else { 
-    // check channel B to see which way encoder is turning  
-    if (digitalRead(encoderPinA) == LOW) {   
+  else {
+    // check channel B to see which way encoder is turning
+    if (digitalRead(encoderPinA) == LOW) {
       encoder0Pos = encoder0Pos + 1;          // CW
-    } 
+    }
     else {
       encoder0Pos = encoder0Pos - 1;          // CCW
     }
@@ -68,18 +75,18 @@ void HandleEncoderChange(){
 	     } else {
 	       encoder0Pos--;
 	     }
-	   } 
+	   }
 	   encoder0PinALast = n;
 
 
 	if (encoder0Pos != oldEncoderPos && LastEncoderSendTime + 200 < millis()){
 		LastEncoderSendTime=millis();
 		byte lValue;
-		// Get delta : 
+		// Get delta :
 		int delta= encoder0Pos-oldEncoderPos;
 
 		// Reset old value to current one !
-		oldEncoderPos=encoder0Pos; 
+		oldEncoderPos=encoder0Pos;
 
 		// if previous value != current one, we moved, send key presses events
 		if (delta>0){
@@ -88,13 +95,13 @@ void HandleEncoderChange(){
 		}else if (delta<0){
 			delta=-delta;
 			lValue=21;	// LEFT KEY value is 276 : 255 is MSB and 21 is LSB
-			// Send N LEFT key events				
+			// Send N LEFT key events
 		}
-		
+
 		for (int i=0; i<delta; i++){
 			serialOut(MSGTYPE_KEYPRESS_VALUE, 1, lValue, 0 );
 		}
-		
+
 	}
 
 
@@ -115,3 +122,5 @@ void HandleEncoderChange(){
 	// Play/pause button : value = 112
 
 }
+
+#endif	/* ENCODER_H_ */
