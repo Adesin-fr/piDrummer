@@ -205,8 +205,6 @@ int main ( int , char** ){
 										// Sample rate = auto
 										// BufferSize = 256
 
-
-
     // We're ready, disable splash screen after 3 seconds !
     while (SDL_GetTicks() <  lastTimeEvent + 1000 ){
     	SDL_Delay(20);

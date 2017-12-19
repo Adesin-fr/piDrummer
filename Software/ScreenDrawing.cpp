@@ -832,6 +832,11 @@ unsigned int ScreenDrawing::handleKeyPress(unsigned int keyEvent){
 void ScreenDrawing::DrawMainScreen(){
 	string kitName;
 	string Vol;
+	unsigned int nbTriggers;
+	unsigned int histogramBarSize;
+	unsigned int xOffset;
+	unsigned int maxHeight;
+	unsigned int boxW;
 
 	// Clean the screen
 	fillBackground();
@@ -865,16 +870,21 @@ void ScreenDrawing::DrawMainScreen(){
 
 	// Last trigger velocity for each input :
 	std::vector<DrumKitComponent*> *dkCompList=myglobalSettings.getCurrentDrumKit()->getDkComponentList();
-	unsigned int nbTriggers=dkCompList->size();
-	unsigned int histogramBarSize=(310/nbTriggers);
+	nbTriggers=dkCompList->size();
+	if (nbTriggers>0){
+		histogramBarSize=(310/nbTriggers);
+	}else{
+		histogramBarSize=0;
+	}
 
-	unsigned int xOffset= (320 - (histogramBarSize*nbTriggers))/2;
+
+	xOffset= (320 - (histogramBarSize*nbTriggers))/2;
 
 	// Bar height = 100 max.
-	unsigned int maxHeight=127;
+	maxHeight=127;
 
 	// Draw a box around histogram
-	unsigned int boxW= (histogramBarSize*nbTriggers) + 4;
+	boxW= (histogramBarSize*nbTriggers) + 4;
 	box(screen, xOffset-2, 213 - maxHeight, boxW, maxHeight+4 , SDL_MapRGB(screen->format, 255, 255, 255));
 	// Draw a light grey line in middle of histogram :
 	line(screen, xOffset-1, (213-(maxHeight/2)), xOffset + boxW-2, (213-(maxHeight/2)),  SDL_MapRGB(screen->format, 120,120,120) );
@@ -908,8 +918,6 @@ void ScreenDrawing::DrawMainScreen(){
 
 		}
 	}
-
-
 
 
     SDL_Flip(screen);
