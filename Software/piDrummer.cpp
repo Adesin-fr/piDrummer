@@ -2,16 +2,13 @@
  * piDrummer.c
  *
  *  Created on: 6 juil. 2016
- *      Author: ludovic
+ *      Author: Ludovic Lemarinel
  */
 
 
 /*
- * How to build soloud library
- *  - Install GENIE (from github, link in build subfolder of soloud)
- *  - edit genie.lua to build soloud WITH_ALSA=1 only (remove OSS)
- *  - copy .so and .a files to /usr/lib
- *  - copy all .h files from "includes/" folder to /usr/include/
+ * Install  Missing libraries :
+ * sudo apt install libasound2-dev libsndfile1-dev libconfig++-dev libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev
  *
  * Main Screen
  * Main Menu
