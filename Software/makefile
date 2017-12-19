@@ -1,5 +1,5 @@
 CC=g++
-CXXFLAGS=-g3 -W -Wall -ansi -pedantic -std=c++11 -D__GXX_EXPERIMENTAL_CXX0X__ -DWITH_ALSA
+CXXFLAGS=-g3 -W -Wall -ansi -pedantic -std=c++11 -D__GXX_EXPERIMENTAL_CXX0X__ -DWITH_ALSA -pthread
 LDFLAGS=-DWITH_ALSA
 LDLIBS=-lpthread -lasound -lsndfile -lSDL -lSDL_image -lSDL_ttf -lconfig++
 EXEC=piDrummer

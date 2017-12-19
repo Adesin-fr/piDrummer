@@ -2,7 +2,7 @@
  * piDrummer.c
  *
  *  Created on: 6 juil. 2016
- *      Author: Ludovic Lemarinel
+ *	  Author: Ludovic Lemarinel
  */
 
 
@@ -116,12 +116,14 @@ void SerialThread(){
 	unsigned int keyEvent;
 
 	while(!done){
-    	// Check for serial port if bytes are available and handle them:
-    	keyEvent=mySerialPort->handleEvents(myglobalSettings.getCurrentDrumKit());
-    	if (keyEvent!=0){
-    		HandleKeyEventRetVal=myScreenDrawer.handleKeyPress(keyEvent);
-    	}
+		// Check for serial port if bytes are available and handle them:
+		keyEvent=mySerialPort->handleEvents(myglobalSettings.getCurrentDrumKit());
+		if (keyEvent!=0){
+			HandleKeyEventRetVal=myScreenDrawer.handleKeyPress(keyEvent);
+		}
 	}
+
+	cerr <<  "SerialThread stopping."  << endl;
 
 }
 // Send a serial String (prototype):
@@ -146,150 +148,155 @@ int main ( int , char** ){
 		return 1;
 	}
 
-    // create a new window
-    screen = SDL_SetVideoMode(320, 240, 24, SDL_HWSURFACE|SDL_DOUBLEBUF);
-    if ( !screen )
-    {
-        cerr << "Unable to set video: " << SDL_GetError() << endl;
-        return 1;
-    }
+	// create a new window
+	screen = SDL_SetVideoMode(320, 240, 24, SDL_HWSURFACE|SDL_DOUBLEBUF);
+	if ( !screen )
+	{
+		cerr << "Unable to set video: " << SDL_GetError() << endl;
+		return 1;
+	}
 
-    // Hide cursor !
-    SDL_ShowCursor(SDL_DISABLE);
-
-
-    if (!myglobalSettings.checkIfFileExists("res/arial.ttf")){
-        cerr << "ERROR : Font file arial.ttf missing in .piDrummer/res folder." << endl;
-    	return 1;
-    }
-
-    // Draw the splash screen while we continue loading stuffs...
-    myScreenDrawer.DrawSplashScreen();
-
-    // Load the Global settings from file :
-    myglobalSettings.LoadSettings();
-    myglobalSettings.loadInstrumentList();
-    myglobalSettings.loadDrumKitList();
-
-    // We have loaded our default settings, if we have a last loaded drumKit, we should use it :
-    string PowerOnKitName=myglobalSettings.getPowerOnKitName();
-    DrumKit *PowerOnKit=myglobalSettings.GetDrumKitFromName(PowerOnKitName);
-    if (PowerOnKit==NULL){
-    	// Get the first drumKit of the list if the list is not empty :
-    	if (myglobalSettings.getDrumKitList()->size()>0){
-        	PowerOnKit=(*myglobalSettings.getDrumKitList())[0];
-    	}
-    }
-    if (!myglobalSettings.loadDrumKit(PowerOnKit)){
-    	// We could'nt load the default drum kit, so init an empty one :
-        cerr << "Could not load kit : " << myglobalSettings.getPowerOnKitName() << ". Generating a new one." << endl;
-    	myglobalSettings.setCurrentDrumKit(new DrumKit);
-    	myglobalSettings.getCurrentDrumKit()->setKitName("New Empty kit");
-    	myglobalSettings.getCurrentDrumKit()->setNumTriggerInput();
-    }
-
-    // Init serial port :
-    mySerialPort = new SerialHandle(myglobalSettings.getSerialPort(), 115200);
-    mySerialPort->initSerial();
+	// Hide cursor !
+	SDL_ShowCursor(SDL_DISABLE);
 
 
-    lastTimeEvent = SDL_GetTicks();
+	if (!myglobalSettings.checkIfFileExists("res/arial.ttf")){
+		cerr << "ERROR : Font file arial.ttf missing in .piDrummer/res folder." << endl;
+		return 1;
+	}
+
+	// Draw the splash screen while we continue loading stuffs...
+	myScreenDrawer.DrawSplashScreen();
+
+	// Load the Global settings from file :
+	myglobalSettings.LoadSettings();
+	myglobalSettings.loadInstrumentList();
+	myglobalSettings.loadDrumKitList();
+
+	// We have loaded our default settings, if we have a last loaded drumKit, we should use it :
+	string PowerOnKitName=myglobalSettings.getPowerOnKitName();
+	DrumKit *PowerOnKit=myglobalSettings.GetDrumKitFromName(PowerOnKitName);
+	if (PowerOnKit==NULL){
+		// Get the first drumKit of the list if the list is not empty :
+		if (myglobalSettings.getDrumKitList()->size()>0){
+			PowerOnKit=(*myglobalSettings.getDrumKitList())[0];
+		}
+	}
+	if (!myglobalSettings.loadDrumKit(PowerOnKit)){
+		// We could'nt load the default drum kit, so init an empty one :
+		cerr << "Could not load kit : " << myglobalSettings.getPowerOnKitName() << ". Generating a new one." << endl;
+		myglobalSettings.setCurrentDrumKit(new DrumKit);
+		myglobalSettings.getCurrentDrumKit()->setKitName("New Empty kit");
+		myglobalSettings.getCurrentDrumKit()->setNumTriggerInput();
+	}
+
+	// Init serial port :
+	mySerialPort = new SerialHandle(myglobalSettings.getSerialPort(), 115200);
+	mySerialPort->initSerial();
 
 
-    // Instantiate the audio engine :
-    myAudioEngine.init(1, 7,0, myglobalSettings.getAlsaBufferSize());	    // clipping = roundoff
+	lastTimeEvent = SDL_GetTicks();
+
+
+	// Instantiate the audio engine :
+	myAudioEngine.init(1, 7,0, myglobalSettings.getAlsaBufferSize());		// clipping = roundoff
 										// Backend = ALSA (7)
 										// Sample rate = auto
 										// BufferSize = 256
 
-    // We're ready, disable splash screen after 3 seconds !
-    while (SDL_GetTicks() <  lastTimeEvent + 1000 ){
-    	SDL_Delay(20);
-    	/// Wait...
-    }
+	// We're ready, disable splash screen after 3 seconds !
+	while (SDL_GetTicks() <  lastTimeEvent + 1000 ){
+		SDL_Delay(20);
+		/// Wait...
+	}
 
-    done = false;
+	done = false;
 
-    // Run the screen Drawer refresh in a separate thread :
-    std::thread t1(SerialThread);
+	// Run the SerialThread method in a different thread.
+	std::thread t1(SerialThread);
 
-    while (!done){
 
-    	// Play metronome:
-    	myMetronome.doClick();
+	// Run the screen Drawer refresh in a separate thread :
+	while (!done){
 
-    	// Do all "graphic" events, including touch events
-        SDL_Event event;
-        while (SDL_PollEvent(&event)){
-            // check for messages
-            switch (event.type){
-                // exit if the window is closed
-            case SDL_QUIT:
-                done = true;
-                break;
+		// Play metronome:
+		myMetronome.doClick();
 
-                // check for keypresses
-            case SDL_KEYDOWN:
-            	lastTimeEvent=SDL_GetTicks();
+		// Do all "graphic" events, including touch events
+		SDL_Event event;
+		while (SDL_PollEvent(&event)){
+			// check for messages
+			switch (event.type){
+				// exit if the window is closed
+			case SDL_QUIT:
+				done = true;
+				break;
 
-            	HandleKeyEventRetVal=myScreenDrawer.handleKeyPress(event.key.keysym.sym);
+				// check for keypresses
+			case SDL_KEYDOWN:
+				lastTimeEvent=SDL_GetTicks();
+
+				HandleKeyEventRetVal=myScreenDrawer.handleKeyPress(event.key.keysym.sym);
 
 				break;
-            } // end switch
-        } // end of message processing
+			} // end switch
+		} // end of message processing
 
-        ticksNow=SDL_GetTicks();
+		ticksNow=SDL_GetTicks();
 
-        if (ticksNow > lastTimeScreenRefresh+30){
-        	// Increment the "label scroller offset"
-        	labelScrollOffset++;
-        	lastTimeScreenRefresh=ticksNow;
+		if (ticksNow > lastTimeScreenRefresh+30){
+			// Increment the "label scroller offset"
+			labelScrollOffset++;
+			lastTimeScreenRefresh=ticksNow;
 
-        	// Call the function to draw the screen :
-        	myScreenDrawer.RefreshScreen();
-        }
+			// Call the function to draw the screen :
+			myScreenDrawer.RefreshScreen();
+		}
 
-        // Do we need to poweroff because of delay ?
-        if (myglobalSettings.getAutoPowerOffDelay() > 0){
-        	if (ticksNow > (lastTimeEvent+myglobalSettings.getAutoPowerOffDelay()*1000)){
-        		cerr << "The power-off delay is over !" << endl;
-        		HandleKeyEventRetVal=255;
-        	}
-        }
+		// Do we need to poweroff because of delay ?
+		if (myglobalSettings.getAutoPowerOffDelay() > 0){
+			if (ticksNow > (lastTimeEvent+myglobalSettings.getAutoPowerOffDelay()*1000)){
+				cerr << "The power-off delay is over !" << endl;
+				HandleKeyEventRetVal=255;
+			}
+		}
 
-        if (HandleKeyEventRetVal==255 || done==true){
-        	// Send a message to the Arduino to tell him we're going to shutdown,
-        	// So, it will blink the led and cut power in a few seconds...
-        	// TODO : send serial message to power off !
+		if (HandleKeyEventRetVal==255 || done==true){
+			// Send a message to the Arduino to tell him we're going to shutdown,
+			// So, it will blink the led and cut power in a few seconds...
+			// TODO : send serial message to power off !
 
-        	// Display a GOODBYE screen :
-        	myScreenDrawer.DrawPowerOffScreen();
+			// Display a GOODBYE screen :
+			myScreenDrawer.DrawPowerOffScreen();
 
-        	// Stop the screen drawer :
-        	done=true;
-
-
-        	// Clean the SDL libs :
-            TTF_Quit();
-            SDL_Quit();
-
-            //Set the current drumkit as the "power on" kit :
-            myglobalSettings.setPowerOnKitName( myglobalSettings.getCurrentDrumKit()->getKitName() );
-
-            // Saving settings
-            cerr << "Saving global settings..." << endl;
-            myglobalSettings.SaveSettings();
-
-            cout << "Exited cleanly" << endl;
-            return 255;
-        }
-
-        SDL_Delay(30);
+			// Stop the screen drawer :
+			done=true;
 
 
-    } // end main loop
+			// Clean the SDL libs :
+			TTF_Quit();
+			SDL_Quit();
 
-    return 0;
+			//Set the current drumkit as the "power on" kit :
+			myglobalSettings.setPowerOnKitName( myglobalSettings.getCurrentDrumKit()->getKitName() );
+
+			// Saving settings
+			cerr << "Saving global settings..." << endl;
+			myglobalSettings.SaveSettings();
+
+			cout << "Exited cleanly" << endl;
+			// Wait for the SerialThread to exit.
+			SDL_Delay(500);
+
+			return 255;
+		}
+
+		SDL_Delay(30);
+
+
+	} // end main loop
+
+	return 0;
 }
 
 void sendSerialString(std::string serialString){
