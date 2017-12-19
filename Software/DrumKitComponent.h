@@ -10,8 +10,8 @@
 
 #include "Instrument.h"
 #include "Trigger.h"
-#include <soloud.h>
-#include <soloud_wav.h>
+#include "soloud/soloud.h"
+#include "soloud/soloud_wav.h"
 
 extern SoLoud::Soloud myAudioEngine;
 

@@ -80,9 +80,9 @@
 #include <string>
 #include <thread>
 
-#include <soloud.h>
-#include <soloud_wav.h>
-#include <soloud_thread.h>
+#include "soloud/soloud.h"
+#include "soloud/soloud_wav.h"
+#include "soloud/soloud_thread.h"
 #include "Settings.h"
 #include "Instrument.h"
 #include "SerialHandle.h"
