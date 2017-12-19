@@ -1,9 +1,9 @@
 CC=g++
-CXXFLAGS=-g3 -W -Wall -ansi -pedantic -std=c++11 -D__GXX_EXPERIMENTAL_CXX0X__ 
-LDFLAGS=
-LDLIBS=-lpthread -lasound -lsndfile -lsoloud -lSDL -lSDL_image -lSDL_ttf -lconfig++
+CXXFLAGS=-g3 -W -Wall -ansi -pedantic -std=c++11 -D__GXX_EXPERIMENTAL_CXX0X__ -DWITH_ALSA -pthread
+LDFLAGS=-DWITH_ALSA
+LDLIBS=-lpthread -lasound -lsndfile -lSDL -lSDL_image -lSDL_ttf -lconfig++
 EXEC=piDrummer
-SRC= $(wildcard *.cpp)
+SRC= $(wildcard *.cpp) soloud/stb_vorbis.c $(wildcard soloud/*.cpp)
 HDR= $(wildcard *.h)
 OBJ= $(SRC:.cpp=.o)
 
@@ -18,7 +18,7 @@ piDrummer.o: $(HDR)
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 clean:
-	@rm *.o
+	@rm *.o soloud/*.o
 
 mrproper: clean
 	rm -rf piDrummer

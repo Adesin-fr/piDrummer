@@ -14,8 +14,8 @@
 #include <iostream>
 #include <sstream>
 
-#include <soloud.h>
-#include <soloud_wav.h>
+#include "soloud/soloud.h"
+#include "soloud/soloud_wav.h"
 #include "Trigger.h"
 #include "DrumKitComponent.h"
 #include "SignalCurve.h"
