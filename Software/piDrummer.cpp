@@ -8,7 +8,7 @@
 
 /*
  * Install  Missing libraries :
- * sudo apt install libasound2-dev libsndfile1-dev libconfig++-dev libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev
+ * sudo apt install libasound2-dev libsndfile1-dev libconfig++-dev libsdl-image1.2-dev libsdl-ttf2.0-dev
  *
  * Main Screen
  * Main Menu
