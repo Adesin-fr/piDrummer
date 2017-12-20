@@ -1,11 +1,12 @@
+#include <Arduino.h>
 #include <EEPROM.h>
-#include "uDrum.h"
+#include "piDrummer.h"
 #include "encoder.h"
 
 /*
- * POWER Button behavior : 
+ * POWER Button behavior :
  * 		When we power the arduino, we are on standby mode. > MOSFET is OFF, POWER LED is OFF
- *		If we push the power button : 
+ *		If we push the power button :
  *			turn ON the MOSFET
  *			blink the LED until the OrangePI sends "ready status" and get parameters
  *		If we push the button before ready status : do nothing
@@ -16,7 +17,7 @@
  *		If receive a POWEROFF event from OrangePI :
  *			do POWEROFF sequence.
  *
- * TODO : 
+ * TODO :
  * - Handle serial inputs to set parameters for each trigger.
 	"CT",m_crossTalkGroup);
 	"DT",m_dynamicTriggerPercent);
@@ -27,17 +28,17 @@
 	"TH",m_threshold);
 	"TT",m_triggerType);
 	"MV",m_maxValue);
- *	
- * - Cymbal 3 zones w/ Chocke :  ? 
+ *
+ * - Cymbal 3 zones w/ Chocke :  ?
  * 		> Voir fichier cy-15r.gif pour cablage & principe
- * 			3 entrées : 
+ * 			3 entrées :
  * 			> 1 piezo = velocité
  * 			> 1 switch bell / 1 switch underside (choke) en parallele
  * 				> Maintient appuyé sur switch = choke
  * 			> 1 switch edge
- * 			
+ *
  * 		> Frappe courte sur switch bell/edge = envoi note bell/edge
- * 			
+ *
  * - Pour les entrées SWITCH : activer resistance PULL-UP : digitalWrite(A0, HIGH);
  * - Parametre par entree : type PAD / SWITCH
  * - FAIRE UN TEST AVEC TOUTES LES PULLUP ?
@@ -59,9 +60,9 @@ bool isPowerON=false;
 bool isOPiReady=false;
 bool PowerLedState=false;
 bool PowerOffAsked=false;
-long lastPowerButtonPress=0;
-long lastPowerLedBlinkTime=0;
-long PowerOffAskTime=0;
+unsigned long lastPowerButtonPress=0;
+unsigned long lastPowerLedBlinkTime=0;
+unsigned long PowerOffAskTime=0;
 unsigned int encoder0Pos = 0;
 int oldEncoderPos = 0;
 
@@ -71,20 +72,16 @@ void setup() {
 	// Faster ADC readings :
 	setADCSampleRate();
 
- 	
+
 	pinMode(MUXER_AD0, OUTPUT)   ; // Muxer address select PINs
 	pinMode(MUXER_AD1, OUTPUT)   ; // Muxer address select PINs
 	pinMode(MUXER_AD2, OUTPUT)   ; // Muxer address select PINs
-	pinMode(encoderPinA, INPUT);
-	pinMode(encoderPinB, INPUT);
-	pinMode(EnterPushButton, INPUT);
+	pinMode(encoderPinA, INPUT_PULLUP);
+	pinMode(encoderPinB, INPUT_PULLUP);
+	pinMode(EnterPushButton, INPUT_PULLUP);
+	pinMode(EscapePushButton, INPUT_PULLUP);
+	pinMode(POWER_BUTTON_PIN, INPUT_PULLUP);
 
-	// Pull-ups on encoder pins :
-	digitalWrite(EnterPushButton, HIGH);
-	digitalWrite(EscapePushButton, HIGH);
-	digitalWrite(encoderPinA, HIGH);
-	digitalWrite(encoderPinB, HIGH);
-	
 
 		/*
 		// Perform auto-threshold
@@ -115,18 +112,18 @@ void setup() {
 			}
 		}
 		*/
-	
+
 
 
 		for (int i=0; i<NB_ANALOG_CHANNELS; i++){
-			
+
 			trigArray[i].thresHold = 25;
 			trigArray[i].debounce=20;
 			trigArray[i].DynamicThreshold=20;
 			trigArray[i].maxValue=1023;
 		}
 
-	
+
 }
 
 
@@ -155,6 +152,7 @@ void loop() {
 
 	// Handle POWER button  :
 	if (lastPowerButtonPress+100 < millis() && digitalRead(POWER_BUTTON_PIN)==LOW){
+		Serial.println("Pow !");
 		lastPowerButtonPress = millis();
 		// Button was pressed : do something !
 		if (isPowerON==false){
@@ -178,7 +176,7 @@ void loop() {
 		}
 	}
 
-	// Should we blink the led ? 
+	// Should we blink the led ?
 	if (isPowerON && !isOPiReady && lastPowerLedBlinkTime+1000 < millis()){
 			PowerLedState=!PowerLedState;
 			digitalWrite(POWER_LED_PIN, PowerLedState);
@@ -188,8 +186,8 @@ void loop() {
 	if (PowerOffAskTime+10000 < millis() && PowerOffAsked==true){
 		PowerOffAsked=false;
 		isPowerON=false;
-		// Switch off power supply now : 
+		// Switch off power supply now :
 		digitalWrite(POWER_MOSFET_PIN, LOW);
 	}
-	
+
 }
